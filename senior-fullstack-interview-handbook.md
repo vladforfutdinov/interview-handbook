@@ -1,6 +1,6 @@
 # Senior Fullstack Engineer Interview Handbook
 
-<p class="handbook-version" data-version="v1.1.8">Версия <code>v1.1.8</code></p>
+<p class="handbook-version" data-version="v1.1.9">Версия <code>v1.1.9</code></p>
 
 Практический конспект для формата **tech roulette** и последующего system-design интервью. Он ориентирован на роль, где важны Next.js, React, TypeScript, простые REST-эндпоинты и SQL-запросы, производительность, тестируемый код и самостоятельное ведение фичи от UI до базы данных.
 
@@ -195,6 +195,13 @@
 **Для чего используется** — Практический пример: использую для измеренно дорогой фильтрации либо для свойства, передаваемого мемоизированному дочернему компоненту, указывая все зависимости.
 
 **Как используется / работает** — использую для измеренно дорогой фильтрации либо для свойства, передаваемого мемоизированному дочернему компоненту, указывая все зависимости.
+
+```tsx
+const visibleUsers = useMemo(
+  () => users.filter((user) => user.name.includes(query)),
+  [users, query],
+);
+```
 **Минусы и ограничения** — это подсказка оптимизации, а не гарантия; лишнее применение ухудшает читаемость и иногда медленнее вычисления.
 
 
@@ -237,6 +244,13 @@
 **Для чего используется** — Практический пример: запускаю эффект после фиксации изменений, возвращаю функцию очистки и перечисляю все реактивные зависимости.
 
 **Как используется / работает** — запускаю эффект после фиксации изменений, возвращаю функцию очистки и перечисляю все реактивные зависимости.
+
+```tsx
+useEffect(() => {
+  const subscription = chat.subscribe(roomId, setMessages);
+  return () => subscription.unsubscribe();
+}, [roomId]);
+```
 **Минусы и ограничения** — не нужен для вычисления производного состояния; неверные зависимости вызывают циклы, устаревшие данные и утечки.
 
 
@@ -265,6 +279,14 @@
 **Для чего используется** — Практический пример: оставляю состояние поля ввода срочным, а фильтрацию или навигацию запускаю внутри startTransition.
 
 **Как используется / работает** — оставляю состояние поля ввода срочным, а фильтрацию или навигацию запускаю внутри startTransition.
+
+```tsx
+const [isPending, startTransition] = useTransition();
+onChange={(event) => {
+  setQuery(event.target.value);
+  startTransition(() => setFilter(event.target.value));
+}}
+```
 **Минусы и ограничения** — это не отложенный вызов и не отмена сети; нельзя применять для значения, контролирующего поле ввода.
 
 
@@ -386,6 +408,14 @@
 **Для чего используется** — Практический пример: ключ запроса включает все входные параметры; после мутации инвалидирую или обновляю затронутый ключ, а staleTime выбираю по требованию к свежести.
 
 **Как используется / работает** — ключ запроса включает все входные параметры; после мутации инвалидирую или обновляю затронутый ключ, а staleTime выбираю по требованию к свежести.
+
+```tsx
+const query = useQuery({
+  queryKey: ["projects", workspaceId],
+  queryFn: () => api.projects.list(workspaceId),
+  staleTime: 30_000,
+});
+```
 **Минусы и ограничения** — это не менеджер глобального состояния интерфейса; плохие ключи, бесконтрольные повторные попытки или откат оптимистичной мутации дают устаревший либо неверный интерфейс.
 
 **Purpose** — it manages server state: caching, loading and error, retries, refetching, invalidation, and optimistic mutations.
@@ -557,6 +587,13 @@
 **Для чего используется** — Практический пример: export-ирую GET/POST и валидирую input, auth, authorisation, response shape и status codes.
 
 **Как используется / работает** — export-ирую GET/POST и валидирую input, auth, authorisation, response shape и status codes.
+
+```ts
+export async function GET() {
+  const projects = await listProjects(await requireUser());
+  return Response.json({ projects });
+}
+```
 **Минусы и ограничения** — не превращаю их в слой бизнес-логики; shared domain code должен быть отдельно тестируемым.
 
 
@@ -613,6 +650,14 @@
 **Для чего используется** — Практический пример: action валидирует input и права на сервере, выполняет mutation, затем revalidate-ит affected data.
 
 **Как используется / работает** — action валидирует input и права на сервере, выполняет mutation, затем revalidate-ит affected data.
+
+```ts
+"use server";
+export async function renameProject(formData: FormData) {
+  await rename(await requireUser(), String(formData.get("id")), String(formData.get("name")));
+  revalidatePath("/projects");
+}
+```
 **Минусы и ограничения** — это не замена публичному API; endpoint-level security, errors и progressive enhancement должны быть продуманы.
 
 
@@ -755,6 +800,12 @@
 **Для чего используется** — Практический пример: создаю controller на запрос и вызываю abort в cleanup effect или при новом search query.
 
 **Как используется / работает** — создаю controller на запрос и вызываю abort в cleanup effect или при новом search query.
+
+```ts
+const controller = new AbortController();
+fetch(`/api/search?q=${query}`, { signal: controller.signal });
+return () => controller.abort();
+```
 **Минусы и ограничения** — отмена должна поддерживаться API; всё равно нужно игнорировать race-ответы и корректно отличать AbortError.
 
 
@@ -867,6 +918,14 @@
 **Для чего используется** — Практический пример: debounce search request или autosave с cleanup предыдущего таймера.
 
 **Как используется / работает** — debounce search request или autosave с cleanup предыдущего таймера.
+
+```ts
+let timer: ReturnType<typeof setTimeout>;
+const searchLater = (query: string) => {
+  clearTimeout(timer);
+  timer = setTimeout(() => search(query), 250);
+};
+```
 **Минусы и ограничения** — добавляет намеренную задержку; не подходит, если нужна регулярная реакция во время drag/scroll.
 
 
@@ -1093,6 +1152,11 @@
 **Для чего используется** — Практический пример: status: loading | error | success определяет доступные поля в switch.
 
 **Как используется / работает** — status: loading | error | success определяет доступные поля в switch.
+
+```ts
+type Result = { status: "loading" } | { status: "error"; message: string } | { status: "success"; data: User };
+if (result.status === "success") console.log(result.data.name);
+```
 **Минусы и ограничения** — tag нужно поддерживать во всех producers; open-ended server values требуют runtime fallback.
 
 
@@ -1607,6 +1671,13 @@
 **Для чего используется** — Практический пример: cursor кодирует последний sort key и unique tie-breaker, например createdAt плюс id.
 
 **Как используется / работает** — cursor кодирует последний sort key и unique tie-breaker, например createdAt плюс id.
+
+```sql
+SELECT * FROM projects
+WHERE (created_at, id) < ($1, $2)
+ORDER BY created_at DESC, id DESC
+LIMIT 25;
+```
 **Минусы и ограничения** — нельзя легко прыгнуть на page 42 и нужно защищать/валидировать cursor.
 
 
@@ -1743,6 +1814,11 @@
 **Для чего используется** — Практический пример: сервер разрешает конкретные origins, methods и headers; credentials требуют точный origin, не wildcard.
 
 **Как используется / работает** — сервер разрешает конкретные origins, methods и headers; credentials требуют точный origin, не wildcard.
+
+```http
+Access-Control-Allow-Origin: https://app.example.com
+Access-Control-Allow-Credentials: true
+```
 **Минусы и ограничения** — CORS не защищает server от прямого клиента и не заменяет authentication/authorization.
 
 
@@ -1953,6 +2029,13 @@
 **Для чего используется** — Практический пример: оборачиваю изменение баланса, membership или status transition в short DB transaction.
 
 **Как используется / работает** — оборачиваю изменение баланса, membership или status transition в short DB transaction.
+
+```sql
+BEGIN;
+UPDATE accounts SET balance = balance - 10 WHERE id = $1;
+UPDATE accounts SET balance = balance + 10 WHERE id = $2;
+COMMIT;
+```
 **Минусы и ограничения** — нельзя держать transaction во время сетевого вызова или user input; long transactions создают contention.
 
 
@@ -1995,6 +2078,12 @@
 **Для чего используется** — Практический пример: row хранит version/updatedAt; UPDATE включает old version в WHERE и проверяет affected rows.
 
 **Как используется / работает** — row хранит version/updatedAt; UPDATE включает old version в WHERE и проверяет affected rows.
+
+```sql
+UPDATE documents
+SET body = $1, version = version + 1
+WHERE id = $2 AND version = $3;
+```
 **Минусы и ограничения** — conflict должен быть понятен пользователю; при частых collisions pessimistic lock может быть лучше.
 
 
@@ -2095,6 +2184,12 @@
 **Для чего используется** — Практический пример: тестирую observable behavior с детерминированными inputs, особенно boundary и unhappy paths.
 
 **Как используется / работает** — тестирую observable behavior с детерминированными inputs, особенно boundary и unhappy paths.
+
+```ts
+test("rejects an expired token", () => {
+  expect(validateToken(expiredToken)).toEqual({ ok: false, reason: "expired" });
+});
+```
 **Минусы и ограничения** — unit tests не доказывают интеграцию, schema correctness или настоящий browser flow.
 
 
@@ -2235,6 +2330,16 @@
 **Для чего используется** — Практический пример: multi-stage build оставляет runtime image маленьким, pin-ю base image и запускаю как non-root.
 
 **Как используется / работает** — multi-stage build оставляет runtime image маленьким, pin-ю base image и запускаю как non-root.
+
+```dockerfile
+FROM node:22-alpine AS build
+WORKDIR /app
+COPY . .
+RUN npm ci && npm run build
+FROM node:22-alpine
+COPY --from=build /app/dist ./dist
+CMD ["node", "dist/server.js"]
+```
 **Минусы и ограничения** — container не заменяет config/security/observability; large image ухудшает cold start и supply-chain риск.
 
 
@@ -2474,6 +2579,11 @@
 **Для чего используется** — Практический пример: устанавливаю authenticated connection, задаю message schema/version, heartbeat, reconnect/backoff и server-side fan-out через pub/sub при нескольких instances.
 
 **Как используется / работает** — устанавливаю authenticated connection, задаю message schema/version, heartbeat, reconnect/backoff и server-side fan-out через pub/sub при нескольких instances.
+
+```ts
+const socket = new WebSocket("wss://api.example.com/live");
+socket.addEventListener("message", ({ data }) => updateProject(JSON.parse(data)));
+```
 **Минусы и ограничения** — connection lifecycle, scaling и authorization сложнее HTTP; не использую WebSocket, если редкий update проще доставить polling или SSE.
 
 **Purpose** — it maintains a bidirectional persistent connection between client and server for presence, collaboration, live status, or low-latency interaction.
@@ -2711,6 +2821,12 @@
 **Для чего используется** — Практический пример: query → retrieve → rerank/filter → assemble cited context → generate answer with source links.
 
 **Как используется / работает** — query → retrieve → rerank/filter → assemble cited context → generate answer with source links.
+
+```ts
+const matches = await vectorSearch.embedAndFind(question, { tenantId, limit: 8 });
+const context = matches.map(({ text, sourceUrl }) => ({ text, sourceUrl }));
+const answer = await llm.generate({ question, context });
+```
 **Минусы и ограничения** — плохой retrieval не спасёт сильная модель; RAG снижает, но не устраняет hallucinations.
 **Мини-пример** — для вопроса о policy сначала достаю актуальные policy chunks, а не прошу модель «вспомнить».
 
