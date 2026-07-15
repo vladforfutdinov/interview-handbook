@@ -62,6 +62,15 @@
     <script>
       const handbookVersion = "v1.1.0 · 15 июля 2026";
       const scrollPositionKey = `handbook-scroll:${location.pathname}`;
+      const savedScrollPosition = (() => {
+        try {
+          return Number(sessionStorage.getItem(scrollPositionKey));
+        } catch {
+          return 0;
+        }
+      })();
+
+      if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
       function saveScrollPosition() {
         try {
@@ -73,17 +82,21 @@
 
       function restoreScrollPosition() {
         if (location.hash) return;
-        try {
-          const savedPosition = Number(sessionStorage.getItem(scrollPositionKey));
-          if (!Number.isFinite(savedPosition) || savedPosition <= 0) return;
-          requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, savedPosition)));
-        } catch {
-          // Storage may be disabled; the browser's default scroll restoration remains available.
-        }
+        if (!Number.isFinite(savedScrollPosition) || savedScrollPosition <= 0) return;
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            window.scrollTo(0, savedScrollPosition);
+            setTimeout(() => window.scrollTo(0, savedScrollPosition), 100);
+          });
+        });
       }
 
       window.addEventListener("scroll", saveScrollPosition, { passive: true });
       window.addEventListener("pagehide", saveScrollPosition);
+      window.addEventListener("beforeunload", saveScrollPosition);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") saveScrollPosition();
+      });
 
       function slugify(value) {
         return value
