@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Senior Fullstack Engineer interview handbook." />
     <title>Senior Fullstack Interview Handbook</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/atom-one-dark.min.css" />
     <style>
       :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; background: #f7f8fc; }
       * { box-sizing: border-box; }
@@ -67,6 +68,7 @@
     <button id="to-top" type="button" aria-label="Наверх" title="Наверх">↑</button>
     <main id="content"><p id="status">Loading handbook…</p></main>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/lib/common.min.js"></script>
     <script>
       const scrollPositionKey = `handbook-scroll:${location.pathname}`;
       const navigationType = performance.getEntriesByType("navigation")[0]?.type;
@@ -225,6 +227,7 @@
           document.getElementById("content").innerHTML = marked.parse(markdown, { gfm: true });
           removeInlineToc();
           makeTablesScrollable();
+          if (window.hljs) document.querySelectorAll("#content pre code").forEach((block) => hljs.highlightElement(block));
           showVersion(markdown);
           buildToc();
           restoreScrollPosition();
