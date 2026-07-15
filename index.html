@@ -62,6 +62,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
       const scrollPositionKey = `handbook-scroll:${location.pathname}`;
+      const navigationType = performance.getEntriesByType("navigation")[0]?.type;
       const savedScrollPosition = (() => {
         try {
           return Number(sessionStorage.getItem(scrollPositionKey));
@@ -81,7 +82,7 @@
       }
 
       function restoreScrollPosition() {
-        if (location.hash) return;
+        if (location.hash && navigationType !== "reload") return;
         if (!Number.isFinite(savedScrollPosition) || savedScrollPosition <= 0) return;
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
@@ -92,7 +93,7 @@
       }
 
       if ("onscrollend" in window) {
-        window.addEventListener("scrollend", saveScrollPosition, { passive: true });
+        document.addEventListener("scrollend", saveScrollPosition, { passive: true });
       } else {
         let scrollEndTimer;
         window.addEventListener("scroll", () => {
