@@ -27,7 +27,7 @@
       pre code { white-space: pre-wrap; overflow-wrap: anywhere; background: transparent; padding: 0; }
       blockquote { margin: 1rem 0; padding: .2rem 1rem; border-left: 4px solid #84adff; color: #475467; }
       .table-scroll { overflow-x: auto; margin: 1.25rem 0; border: 1px solid #e4e7ec; border-radius: 8px; }
-      .table-scroll table { width: max-content; min-width: 100%; margin: 0; border-collapse: collapse; }
+      .table-scroll table { width: min-content; min-width: 100%; margin: 0; border-collapse: collapse; }
       .table-scroll th, .table-scroll td { padding: .65rem .8rem; border: 1px solid #e4e7ec; text-align: left; vertical-align: top; }
       .table-scroll th { background: #f9fafb; }
       #status { color: #667085; }
@@ -44,11 +44,11 @@
       @media (max-width: 1100px) {
         #toc { display: none; top: auto; right: .75rem; bottom: 4.25rem; width: min(320px, calc(100vw - 1.5rem)); max-height: 55vh; }
         #toc.toc-open { display: block; }
-
         #mobile-actions { display: flex; position: fixed; left: .75rem; right: .75rem; bottom: .75rem; z-index: 1; align-items: center; justify-content: center; }
-        #mobile-actions button { display: block; padding: .65rem .9rem; border: 0; border-radius: 999px; box-shadow: 0 8px 20px rgb(16 24 40 / 22%); font: inherit; font-weight: 650; }
+        #mobile-actions button { display: block; padding: .65rem .9rem; border: 0; border-radius: calc(10rem); box-shadow: 0 8px 20px rgb(16 24 40 / 22%); font: inherit; font-weight: 650; }
         #toc-toggle { background: #175cd3; color: white; }
-        #refresh { position: absolute; left: .75rem; z-index: 1; border: 2px solid #735452; background: white; color: #b42318; }
+        #refresh, #to-top { --size: calc(1.5em * 2); padding: 0; width: var(--size); height: var(--size); }
+        #refresh { position: absolute; left: .75rem; z-index: 1; background: #c33; color: white; }
         #to-top { position: absolute; right: .75rem; z-index: 1; background: white; color: #175cd3; }
       }
     </style>
@@ -67,7 +67,7 @@
     </aside>
     <div id="mobile-actions" hidden>
       <button id="toc-toggle" type="button" aria-controls="toc" aria-expanded="false">Содержание</button>
-      <button id="refresh" type="button" aria-label="Доступна новая версия" title="Обновить handbook" hidden>↻</button>
+      <button id="refresh" type="button" aria-label="Доступна новая версия" title="Обновить handbook">↻</button>
       <button id="to-top" type="button" aria-label="Наверх" title="Наверх" hidden>↑</button>
       </div>
     <main id="content"><p id="status">Loading handbook…</p></main>
