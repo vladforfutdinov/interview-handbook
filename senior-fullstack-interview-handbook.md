@@ -998,6 +998,11 @@ const searchLater = (query: string) => {
 **Для чего используется** — Практический пример: избегаю его на границах; вместо этого оставляю unknown и сужаю тип validation-ом.
 
 **Как используется / работает** — избегаю его на границах; вместо этого оставляю unknown и сужаю тип validation-ом.
+
+```ts
+// Плохо: value.name компилируется, даже если value — null.
+const value: any = JSON.parse(body);
+```
 **Минусы и ограничения** — any заражает выражения и лишает compiler его главной ценности.
 
 
@@ -1012,6 +1017,13 @@ const searchLater = (query: string) => {
 **Для чего используется** — Практический пример: перед доступом к полям делаю type guard, schema validation или typeof check.
 
 **Как используется / работает** — перед доступом к полям делаю type guard, schema validation или typeof check.
+
+```ts
+const value: unknown = JSON.parse(body);
+if (typeof value === "object" && value !== null && "name" in value) {
+  console.log(value.name);
+}
+```
 **Минусы и ограничения** — требует явного narrowing, поэтому неудобнее any, но эта цена предотвращает runtime bugs.
 
 
@@ -1026,6 +1038,16 @@ const searchLater = (query: string) => {
 **Для чего используется** — Практический пример: использую exhaustive switch с assertNever для закрытых discriminated unions.
 
 **Как используется / работает** — использую exhaustive switch с assertNever для закрытых discriminated unions.
+
+```ts
+function assertNever(value: never): never { throw new Error(`Unexpected: ${value}`); }
+switch (result.status) {
+  case "loading": break;
+  case "error": break;
+  case "success": break;
+  default: assertNever(result);
+}
+```
 **Минусы и ограничения** — неверно объявленный never маскирует ошибку модели; union должен быть действительно закрытым.
 
 
@@ -1040,6 +1062,12 @@ const searchLater = (query: string) => {
 **Для чего используется** — Практический пример: применяю typeof, in, instanceof, discriminant или пользовательский predicate.
 
 **Как используется / работает** — применяю typeof, in, instanceof, discriminant или пользовательский predicate.
+
+```ts
+function format(value: string | Date) {
+  return value instanceof Date ? value.toISOString() : value.trim();
+}
+```
 **Минусы и ограничения** — проверка должна отражать реальные runtime данные; type assertion не является validation.
 
 
@@ -1054,6 +1082,13 @@ const searchLater = (query: string) => {
 **Для чего используется** — Практический пример: пишу маленький predicate вида value is User и тестирую invalid input на API boundary.
 
 **Как используется / работает** — пишу маленький predicate вида value is User и тестирую invalid input на API boundary.
+
+```ts
+type User = { id: string; name: string };
+function isUser(value: unknown): value is User {
+  return typeof value === "object" && value !== null && "id" in value && "name" in value;
+}
+```
 **Минусы и ограничения** — guard может ложно обещать форму объекта; сложные схемы лучше валидировать библиотекой.
 
 
@@ -1068,6 +1103,13 @@ const searchLater = (query: string) => {
 **Для чего используется** — Практический пример: параметризую reusable collection, API helper или component и ограничиваю T через extends при необходимости.
 
 **Как используется / работает** — параметризую reusable collection, API helper или component и ограничиваю T через extends при необходимости.
+
+```ts
+function first<T>(items: readonly T[]): T | undefined {
+  return items[0];
+}
+const project = first([{ id: "p1", name: "Handbook" }]); // тип объекта сохранён
+```
 **Минусы и ограничения** — чрезмерно абстрактные generics хуже читаются; не нужны для одноразового кода.
 
 
@@ -1082,6 +1124,13 @@ const searchLater = (query: string) => {
 **Для чего используется** — Практический пример: использую K extends keyof T для generic getter, mapper или type-safe table column.
 
 **Как используется / работает** — использую K extends keyof T для generic getter, mapper или type-safe table column.
+
+```ts
+function get<T, K extends keyof T>(object: T, key: K): T[K] {
+  return object[key];
+}
+get({ id: "p1", name: "Handbook" }, "name");
+```
 **Минусы и ограничения** — runtime-ключ всё ещё нужно проверять, если он пришёл извне.
 
 
@@ -1096,6 +1145,11 @@ const searchLater = (query: string) => {
 **Для чего используется** — Практический пример: объявляю const config as const и получаю typeof config для связанной функции.
 
 **Как используется / работает** — объявляю const config as const и получаю typeof config для связанной функции.
+
+```ts
+const config = { retries: 3, region: "eu" } as const;
+type Config = typeof config;
+```
 **Минусы и ограничения** — слишком большой inferred literal type иногда нужно намеренно расширить для удобного API.
 
 
@@ -1110,6 +1164,11 @@ const searchLater = (query: string) => {
 **Для чего используется** — Практический пример: применяю для readonly, optional или typed form-state на основе domain model.
 
 **Как используется / работает** — применяю для readonly, optional или typed form-state на основе domain model.
+
+```ts
+type User = { id: string; name: string; email: string };
+type EditableUser = { [K in "name" | "email"]?: User[K] };
+```
 **Минусы и ограничения** — сложные mapped types ухудшают сообщения ошибок; сначала проверяю готовые utility types.
 
 
@@ -1124,6 +1183,11 @@ const searchLater = (query: string) => {
 **Для чего используется** — Практический пример: полезен в reusable library API, например чтобы извлечь return type или awaitable result.
 
 **Как используется / работает** — полезен в reusable library API, например чтобы извлечь return type или awaitable result.
+
+```ts
+type ApiResult<T> = T extends Promise<infer Value> ? Value : T;
+type Project = ApiResult<Promise<{ id: string }>>;
+```
 **Минусы и ограничения** — distributive behavior на unions неинтуитивен; не использую ради «умной» типовой головоломки.
 
 
@@ -1138,6 +1202,11 @@ const searchLater = (query: string) => {
 **Для чего используется** — Практический пример: применяю для ElementType массива, return type функции или payload event-а.
 
 **Как используется / работает** — применяю для ElementType массива, return type функции или payload event-а.
+
+```ts
+type ElementOf<T> = T extends readonly (infer Item)[] ? Item : never;
+type User = ElementOf<readonly [{ id: string }]>;
+```
 **Минусы и ограничения** — чаще нужен авторам библиотек, чем application-коду; сложность должна окупаться повторным использованием.
 
 
@@ -1171,6 +1240,11 @@ if (result.status === "success") console.log(result.data.name);
 **Для чего используется** — Практический пример: выбираю единый style команды; для public object contract часто interface, для union — type.
 
 **Как используется / работает** — выбираю единый style команды; для public object contract часто interface, для union — type.
+
+```ts
+interface Project { id: string; name: string }
+type LoadState = "idle" | "loading" | "error";
+```
 **Минусы и ограничения** — это не архитектурное решение; declaration merging interface может быть неожиданным.
 
 
@@ -1185,6 +1259,12 @@ if (result.status === "success") console.log(result.data.name);
 **Для чего используется** — Практический пример: Pick создаёт read DTO, Omit исключает server-generated поля, Record описывает map.
 
 **Как используется / работает** — Pick создаёт read DTO, Omit исключает server-generated поля, Record описывает map.
+
+```ts
+type User = { id: string; name: string; passwordHash: string };
+type PublicUser = Omit<User, "passwordHash">;
+const labels: Record<"draft" | "published", string> = { draft: "Черновик", published: "Опубликовано" };
+```
 **Минусы и ограничения** — не делаю DTO автоматически из domain type, если правила валидации и ownership отличаются.
 
 
@@ -1199,6 +1279,13 @@ if (result.status === "success") console.log(result.data.name);
 **Для чего используется** — Практический пример: ставлю readonly для входных моделей и public collections, где consumer не владеет данными.
 
 **Как используется / работает** — ставлю readonly для входных моделей и public collections, где consumer не владеет данными.
+
+```ts
+function renderTags(tags: readonly string[]) {
+  // tags.push("new"); // ошибка компиляции
+  return tags.join(", ");
+}
+```
 **Минусы и ограничения** — это compile-time защита, не deep runtime immutability.
 
 
@@ -1213,6 +1300,11 @@ if (result.status === "success") console.log(result.data.name);
 **Для чего используется** — Практический пример: применяю к static config, action names или tuple, из которых затем вывожу union.
 
 **Как используется / работает** — применяю к static config, action names или tuple, из которых затем вывожу union.
+
+```ts
+const statuses = ["draft", "published"] as const;
+type Status = (typeof statuses)[number];
+```
 **Минусы и ограничения** — может сделать тип слишком узким для mutation; это не runtime freeze.
 
 
@@ -1227,6 +1319,11 @@ if (result.status === "success") console.log(result.data.name);
 **Для чего используется** — Практический пример: использую для config map, где нужны и проверка всех ключей, и literal values.
 
 **Как используется / работает** — использую для config map, где нужны и проверка всех ключей, и literal values.
+
+```ts
+type Route = "/" | "/projects";
+const labels = { "/": "Главная", "/projects": "Проекты" } satisfies Record<Route, string>;
+```
 **Минусы и ограничения** — не валидирует JSON в runtime и не заменяет schema validation.
 
 
@@ -1241,6 +1338,11 @@ if (result.status === "success") console.log(result.data.name);
 **Для чего используется** — Практический пример: для web-кода обычно предпочитаю as const object плюс union, чтобы контролировать runtime output.
 
 **Как используется / работает** — для web-кода обычно предпочитаю as const object плюс union, чтобы контролировать runtime output.
+
+```ts
+const Role = { Admin: "admin", Member: "member" } as const;
+type Role = (typeof Role)[keyof typeof Role];
+```
 **Минусы и ограничения** — numeric enum создаёт неочевидный reverse mapping; const enum имеет build-tool caveats.
 
 
@@ -1255,6 +1357,13 @@ if (result.status === "success") console.log(result.data.name);
 **Для чего используется** — Практический пример: добавляю declaration для untyped dependency или global integration, сохраняя его максимально узким.
 
 **Как используется / работает** — добавляю declaration для untyped dependency или global integration, сохраняя его максимально узким.
+
+```ts
+// analytics.d.ts
+declare module "legacy-analytics" {
+  export function track(event: string, properties?: Record<string, unknown>): void;
+}
+```
 **Минусы и ограничения** — declaration может расходиться с runtime API; сначала ищу официальные types или обновляю dependency.
 
 
