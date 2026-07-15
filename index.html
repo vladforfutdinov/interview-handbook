@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Senior Fullstack Engineer interview handbook" />
+    <meta name="description" content="Senior Fullstack Engineer interview handbook." />
     <title>Senior Fullstack Interview Handbook</title>
     <style>
       :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; background: #f7f8fc; }
@@ -24,6 +24,13 @@
       pre code { background: transparent; padding: 0; }
       blockquote { margin: 1rem 0; padding: .2rem 1rem; border-left: 4px solid #84adff; color: #475467; }
       #status { color: #667085; }
+      #toc { position: fixed; top: 1.25rem; right: 1.25rem; width: 240px; max-height: calc(100vh - 2.5rem); overflow: auto; padding: 1rem; border: 1px solid #e4e7ec; border-radius: 12px; background: rgb(255 255 255 / 94%); box-shadow: 0 10px 24px rgb(16 24 40 / 10%); backdrop-filter: blur(10px); }
+      #toc h2 { margin: 0 0 .65rem; padding: 0; border: 0; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: #667085; }
+      #toc ol { display: grid; gap: .25rem; margin: 0; padding: 0; list-style: none; }
+      #toc a { display: block; padding: .28rem .4rem; border-radius: 5px; color: #475467; font-size: .85rem; line-height: 1.3; text-decoration: none; }
+      #toc a:hover, #toc a[aria-current="true"] { color: #175cd3; background: #eff4ff; }
+      #toc .toc-h3 { padding-left: 1rem; font-size: .8rem; }
+      @media (max-width: 1240px) { #toc { display: none; } }
     </style>
   </head>
   <body>
@@ -33,9 +40,55 @@
         <p>Senior Fullstack Engineer — bilingual technical interview preparation.</p>
       </div>
     </header>
+    <aside id="toc" aria-label="Table of contents" hidden>
+      <h2>On this page</h2>
+      <ol></ol>
+    </aside>
     <main id="content"><p id="status">Loading handbook…</p></main>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
+      function slugify(value) {
+        return value
+          .toLowerCase()
+          .normalize("NFKD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^\p{L}\p{N}]+/gu, "-")
+          .replace(/^-|-$/g, "") || "section";
+      }
+
+      function buildToc() {
+        const toc = document.getElementById("toc");
+        const list = toc.querySelector("ol");
+        const headings = [...document.querySelectorAll("#content h2, #content h3")];
+        const usedIds = new Map();
+
+        headings.forEach((heading) => {
+          const base = slugify(heading.textContent);
+          const count = usedIds.get(base) || 0;
+          usedIds.set(base, count + 1);
+          heading.id = count ? `${base}-${count + 1}` : base;
+
+          const item = document.createElement("li");
+          const link = document.createElement("a");
+          link.href = `#${heading.id}`;
+          link.textContent = heading.textContent;
+          if (heading.tagName === "H3") link.className = "toc-h3";
+          item.append(link);
+          list.append(item);
+        });
+
+        if (!headings.length) return;
+        toc.hidden = false;
+        const links = new Map([...list.querySelectorAll("a")].map((link) => [link.hash.slice(1), link]));
+        const observer = new IntersectionObserver((entries) => {
+          const current = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (!current) return;
+          links.forEach((link) => link.removeAttribute("aria-current"));
+          links.get(current.target.id)?.setAttribute("aria-current", "true");
+        }, { rootMargin: "-18% 0px -70%" });
+        headings.forEach((heading) => observer.observe(heading));
+      }
+
       fetch("./senior-fullstack-interview-handbook.md")
         .then((response) => {
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -43,6 +96,7 @@
         })
         .then((markdown) => {
           document.getElementById("content").innerHTML = marked.parse(markdown, { gfm: true });
+          buildToc();
         })
         .catch((error) => {
           document.getElementById("status").textContent = `Unable to load handbook: ${error.message}`;
