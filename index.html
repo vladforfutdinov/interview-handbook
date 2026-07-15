@@ -30,6 +30,7 @@
       .table-scroll table { width: min-content; min-width: 100%; margin: 0; border-collapse: collapse; }
       .table-scroll th, .table-scroll td { padding: .65rem .8rem; border: 1px solid #e4e7ec; text-align: left; vertical-align: top; }
       .table-scroll th { background: #f9fafb; }
+      .mermaid { overflow-x: auto; margin: 1.25rem 0; padding: 1rem; border: 1px solid #e4e7ec; border-radius: 8px; background: #fff; text-align: center; }
       #status { color: #667085; }
       #toc { position: fixed; top: 1.25rem; right: 1.25rem; width: 240px; max-height: calc(100vh - 2.5rem); overflow: auto; padding: 1rem; border: 1px solid #e4e7ec; border-radius: 12px; background: rgb(255 255 255 / 94%); box-shadow: 0 10px 24px rgb(16 24 40 / 10%); backdrop-filter: blur(10px); }
       #toc h2 { margin: 0 0 .65rem; padding: 0; border: 0; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: #667085; }
@@ -73,7 +74,9 @@
     <main id="content"><p id="status">Loading handbook…</p></main>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
     <script>
+      if (window.mermaid) mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral" });
       const scrollPositionKey = `handbook-scroll:${location.pathname}`;
       const navigationType = performance.getEntriesByType("navigation")[0]?.type;
       let loadedHandbookVersion;
@@ -208,6 +211,19 @@
         });
       }
 
+      async function renderMermaidDiagrams() {
+        if (!window.mermaid) return;
+        const diagrams = [];
+        document.querySelectorAll("#content pre code.language-mermaid").forEach((block) => {
+          const diagram = document.createElement("div");
+          diagram.className = "mermaid";
+          diagram.textContent = block.textContent;
+          block.closest("pre").replaceWith(diagram);
+          diagrams.push(diagram);
+        });
+        if (diagrams.length) await mermaid.run({ nodes: diagrams });
+      }
+
       function showVersion(markdown) {
         const version = markdown.match(/data-version="([^"]+)"/)?.[1];
         if (!version) return;
@@ -242,11 +258,12 @@
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           return response.text();
         })
-        .then((markdown) => {
+        .then(async (markdown) => {
           saveScrollPosition();
           document.getElementById("content").innerHTML = marked.parse(markdown, { gfm: true });
           removeInlineToc();
           makeTablesScrollable();
+          await renderMermaidDiagrams();
           if (window.hljs) {
             const aliases = { ts: "typescript", tsx: "typescript", yml: "yaml", dockerfile: "dockerfile", sh: "bash" };
             document.querySelectorAll("#content pre code").forEach((block) => {

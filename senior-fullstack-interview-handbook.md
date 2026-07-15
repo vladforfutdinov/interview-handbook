@@ -1,6 +1,6 @@
 # Senior Fullstack Engineer Interview Handbook
 
-<p class="handbook-version" data-version="v1.2.4">Версия <code>v1.2.4</code></p>
+<p class="handbook-version" data-version="v1.2.5">Версия <code>v1.2.5</code></p>
 
 Практический конспект для формата **tech roulette** и последующего system-design интервью. Он ориентирован на роль, где важны Next.js, React, TypeScript, простые REST-эндпоинты и SQL-запросы, производительность, тестируемый код и самостоятельное ведение фичи от UI до базы данных.
 
@@ -189,7 +189,13 @@
 
 **Минусы и ограничения** — не ловит ошибки обработчиков событий, асинхронного кода и SSR; их нужно обрабатывать отдельно.
 
----
+```tsx
+import { ErrorBoundary } from "react-error-boundary";
+
+<ErrorBoundary fallback={<EditorUnavailable />}>
+  <VideoEditor projectId={projectId} />
+</ErrorBoundary>
+```
 **Purpose** — it isolates a rendering failure to a UI region and keeps the rest of the app usable.
 
 **How it works / is used** — place a boundary around a route or risky widget, log the error, and offer retry.
@@ -474,6 +480,7 @@ const ThemeContext = createContext<"light" | "dark">("light");
 
 **Downsides and limits** — do not confuse it with UI state; incorrect keys or invalidation create stale UI.
 
+---
 ### Redux
 
 **Что это** — централизованное хранилище клиентского состояния с обновлениями через действия и редьюсеры.
@@ -491,6 +498,7 @@ const ThemeContext = createContext<"light" | "dark">("light");
 
 **Downsides and limits** — it is often excessive for local UI state or server cache; too much global state hides ownership and makes change harder.
 
+---
 ### Zustand
 
 **Что это** — минималистичное внешнее хранилище состояния с подписками через селекторы.
@@ -508,6 +516,7 @@ const ThemeContext = createContext<"light" | "dark">("light");
 
 **Downsides and limits** — simplicity does not replace model design; without conventions a store easily becomes implicit global mutable state.
 
+---
 ### TanStack Query / React Query
 
 **Что это** — библиотека управления серверными запросами, кэшем и мутациями в React.
@@ -860,7 +869,12 @@ export async function renameProject(formData: FormData) {
 
 **Минусы и ограничения** — дополнительный network round trip может ухудшить важный сценарий; нужен fallback и измерение.
 
----
+```tsx
+const VideoTimeline = dynamic(() => import("./VideoTimeline"), {
+  loading: () => <TimelineSkeleton />,
+  ssr: false,
+});
+```
 **Purpose** — it moves rarely needed code out of the initial bundle to speed page startup.
 
 **How it works / is used** — dynamically load a heavy editor, chart, or browser-only library behind an interaction or route boundary.
@@ -878,7 +892,16 @@ export async function renameProject(formData: FormData) {
 
 **Минусы и ограничения** — неверные sizes могут отдать слишком большой файл; динамическая оптимизация имеет cache и инфраструктурную цену.
 
----
+```tsx
+<Image
+  src={project.thumbnailUrl}
+  alt={project.title}
+  width={1280}
+  height={720}
+  sizes="(max-width: 768px) 100vw, 640px"
+  priority
+/>
+```
 **Purpose** — it reduces image bytes and layout shifts, especially in a media product.
 
 **How it works / is used** — provide real dimensions, responsive sizes, a modern format, and priority only for the LCP image.
@@ -1019,7 +1042,12 @@ console.log("B"); // A, B, microtask, task
 
 **Минусы и ограничения** — последовательные await без зависимости создают waterfall; Promise.all падает на первой ошибке.
 
----
+```ts
+const [project, comments] = await Promise.all([
+  getProject(projectId),
+  getComments(projectId),
+]);
+```
 **Purpose** — it makes sequential Promise code read like synchronous code.
 
 **How it works / is used** — await pauses only its async function; start independent work in parallel with Promise.all.
@@ -1078,7 +1106,11 @@ return () => controller.abort();
 
 **Минусы и ограничения** — переданный отдельно method теряет receiver; arrow нельзя использовать как constructor.
 
----
+```ts
+const player = { title: "Demo", print() { console.log(this.title); } };
+setTimeout(player.print, 0); // undefined: receiver потерян
+setTimeout(player.print.bind(player), 0); // Demo
+```
 **Purpose** — it provides the receiver of a normal function call.
 
 **How it works / is used** — its value is determined by call site: obj.method(), call/apply/bind, or a constructor; an arrow captures outer this.
@@ -1211,7 +1243,13 @@ const searchLater = (query: string) => {
 
 **Минусы и ограничения** — последнее событие может потеряться без trailing call; для сетевого поиска чаще лучше debounce.
 
----
+```ts
+const reportScroll = throttle(() => {
+  analytics.track("scrolled", { y: window.scrollY });
+}, 500);
+
+window.addEventListener("scroll", reportScroll, { passive: true });
+```
 **Purpose** — it limits execution frequency during a continuous event stream.
 
 **How it works / is used** — throttle scroll or resize analytics, or use requestAnimationFrame for visual updates.
@@ -2048,7 +2086,26 @@ worker.onmessage = ({ data }) => setResults(data);
 
 **Минусы и ограничения** — variable heights, scroll restore и accessibility сложнее; не нужно для короткого списка.
 
----
+```tsx
+const parentRef = useRef<HTMLDivElement>(null);
+const rows = useVirtualizer({
+  count: projects.length,
+  getScrollElement: () => parentRef.current,
+  estimateSize: () => 40,
+  overscan: 5,
+});
+
+return <div ref={parentRef} style={{ height: 480, overflow: "auto" }}>
+  <div style={{ height: rows.getTotalSize(), position: "relative" }}>
+    {rows.getVirtualItems().map((row) => (
+      <div key={row.key} style={{ position: "absolute", transform: `translateY(${row.start}px)`, width: "100%" }}>
+        <ProjectRow project={projects[row.index]} />
+      </div>
+    ))}
+  </div>
+</div>;
+```
+
 **Purpose** — it renders only the visible slice of a large list, reducing DOM and render cost.
 
 **How it works / is used** — use windowing with overscan for thousands of rows while preserving keyboard navigation and ARIA semantics.
@@ -2073,6 +2130,7 @@ worker.onmessage = ({ data }) => setResults(data);
 
 **Downsides and limits** — stale or offline data affects UX and correctness; do not cache personal secrets unsafely.
 
+---
 ### localStorage
 
 **Что это** — синхронное key-value хранилище браузера по origin, переживающее закрытие вкладки и сессии.
@@ -2083,13 +2141,18 @@ worker.onmessage = ({ data }) => setResults(data);
 
 **Минусы и ограничения** — доступен любому JavaScript на origin и уязвим при XSS; synchronous API блокирует main thread и не годится для больших/секретных данных.
 
----
+```ts
+const stored = localStorage.getItem("editor-preferences");
+const preferences = stored ? JSON.parse(stored) : { snapToGrid: true };
+localStorage.setItem("editor-preferences", JSON.stringify(preferences));
+```
 **Purpose** — it persists small non-sensitive origin data across browser sessions, such as a theme preference or draft key.
 
 **How it works / is used** — access it only in browser context, version the stored shape, and handle parse and quota errors.
 
 **Downsides and limits** — any JavaScript on the origin can read it, making it exposed to XSS; its synchronous API blocks the main thread and it is unsuitable for large or secret data.
 
+---
 ### sessionStorage
 
 **Что это** — key-value хранилище браузера, живущее в пределах одной вкладки и её сессии.
@@ -2163,6 +2226,7 @@ worker.onmessage = ({ data }) => setResults(data);
 
 **Downsides and limits** — REST does not mean forcing every workflow into CRUD; complex flows may need explicit commands.
 
+---
 ### GraphQL
 
 **Что это** — язык запросов и typed schema, позволяющие клиенту запросить ровно нужные поля за один запрос.
@@ -2198,6 +2262,7 @@ worker.onmessage = ({ data }) => setResults(data);
 
 **Downsides and limits** — HTTP defines GET, PUT, and DELETE as idempotent, while POST and PATCH are not guaranteed to be; server implementation must honor that contract.
 
+---
 ### ETag and conditional requests
 
 **Что это** — HTTP-механизм версии representation (ETag) и условных запросов If-None-Match/If-Match.
@@ -2394,6 +2459,7 @@ if (!principal) return new Response("Unauthorized", { status: 401 });
 
 **Downsides and limits** — a JWT can be a signed JWS, encrypted JWE, or nested token; the common signed JWS does not hide its payload, is hard to revoke, and easily becomes too long-lived.
 
+---
 ### Access token
 
 **Что это** — короткоживущий credential, доказывающий API, что caller authenticated, и несущий его claims/scopes.
@@ -2411,6 +2477,7 @@ if (!principal) return new Response("Unauthorized", { status: 401 });
 
 **Downsides and limits** — token theft grants access until expiry; client-side storage must fit the threat model, and a token does not replace resource-level authorization.
 
+---
 ### Refresh token
 
 **Что это** — долгоживущий credential для выпуска нового access token без повторного full login.
@@ -2486,6 +2553,7 @@ Access-Control-Allow-Credentials: true
 
 **Downsides and limits** — CORS does not protect a server from direct clients and cannot replace authentication or authorization.
 
+---
 ### CORS preflight
 
 **Что это** — предварительный OPTIONS-запрос браузера, проверяющий, разрешает ли server cross-origin request с non-simple method или headers.
@@ -2581,7 +2649,11 @@ return new Response(null, { status: 202 });
 
 **Минусы и ограничения** — MIME от клиента нельзя доверять; прямой upload требует строгих bucket permissions и lifecycle rules.
 
----
+```ts
+const { uploadUrl, fileKey } = await api.createUpload({ name: file.name, size: file.size });
+await fetch(uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
+await api.completeUpload({ fileKey });
+```
 **Purpose** — it accepts user media or documents safely and at scale.
 
 **How it works / is used** — issue a short-lived signed upload URL, validate size and type server-side, scan, and process asynchronously.
@@ -2695,7 +2767,12 @@ ON projects (workspace_id, created_at DESC);
 
 **Минусы и ограничения** — index (a,b) не равноценно помогает запросу только по b; не угадываю порядок без EXPLAIN.
 
----
+```sql
+CREATE INDEX projects_workspace_updated_idx
+  ON projects (workspace_id, updated_at DESC);
+
+-- Ускоряет: WHERE workspace_id = $1 ORDER BY updated_at DESC
+```
 **Purpose** — it covers a query filtering or sorting by several columns.
 
 **How it works / is used** — choose column order from equality predicates, then range or sort, and verify the real query plan.
@@ -2870,7 +2947,12 @@ WHERE id = $2 AND version = $3;
 
 **Минусы и ограничения** — создаёт waits/deadlocks и плохо подходит для долгих user-driven flows.
 
----
+```sql
+BEGIN;
+SELECT id, seats_left FROM workshops WHERE id = $1 FOR UPDATE;
+UPDATE workshops SET seats_left = seats_left - 1 WHERE id = $1 AND seats_left > 0;
+COMMIT;
+```
 **Purpose** — it reserves a row in a transaction when concurrent change is unacceptable.
 
 **How it works / is used** — take SELECT FOR UPDATE briefly before a write and release it at commit or rollback.
@@ -3081,7 +3163,12 @@ test("POST /projects persists a project", async () => {
 
 **Минусы и ограничения** — не заменяет end-to-end behavior и требует ownership/versioning contract-а.
 
----
+```ts
+expect(response).toMatchObject({
+  status: 200,
+  body: { id: expect.any(String), title: expect.any(String) },
+});
+```
 **Purpose** — it verifies that producer and consumer agree on an API or message contract.
 
 **How it works / is used** — define request and response schema and run compatibility checks in CI, especially across independently deployed services.
@@ -3221,7 +3308,12 @@ CMD ["node", "dist/server.js"]
 
 **Минусы и ограничения** — stale flags создают combinatorial complexity; security-sensitive access нельзя оставлять только на frontend flag.
 
----
+```ts
+if (flags.isEnabled("new-timeline", { tenantId, userId })) {
+  return <NewTimeline />;
+}
+return <LegacyTimeline />;
+```
 **Purpose** — it decouples deployment from release, enabling gradual feature exposure and safe rollback.
 
 **How it works / is used** — a flag has owner, audience, expiry, and metric; roll out by tenant, user, or percentage.
@@ -3239,7 +3331,14 @@ CMD ["node", "dist/server.js"]
 
 **Минусы и ограничения** — удваивает infrastructure на время и требует backward-compatible DB schema.
 
----
+```mermaid
+flowchart LR
+  U[Пользователь] --> LB[Балансировщик]
+  LB --> B[Blue: текущая версия]
+  G[Green: новая версия] --> H[Проверки работоспособности]
+  H --> LB
+```
+
 **Purpose** — it switches traffic between two equivalent versions for fast rollback.
 
 **How it works / is used** — the new environment passes smoke and health checks, then the load balancer moves traffic.
@@ -3257,7 +3356,16 @@ CMD ["node", "dist/server.js"]
 
 **Минусы и ограничения** — нужен хороший observability и статистически достаточно traffic; проблемы data migration могут затронуть всех.
 
----
+```mermaid
+flowchart LR
+  U[Трафик] --> LB[Балансировщик]
+  LB -->|95%| S[Стабильная версия]
+  LB -->|5%| C[Canary]
+  C --> M[Метрики и алерты]
+  M -->|успех| R[Увеличить долю]
+  M -->|ошибка| RB[Откатить]
+```
+
 **Purpose** — it limits blast radius by exposing a new version to a small share of users first.
 
 **How it works / is used** — gradually increase traffic when error, latency, and business metrics remain healthy.
@@ -3439,7 +3547,15 @@ CMD ["node", "dist/server.js"]
 
 **Минусы и ограничения** — усложняет consistency и operations; для обычного CRUD часто достаточно обычной read model.
 
----
+```mermaid
+flowchart LR
+  C[Команда: изменить проект] --> W[Write model]
+  W --> DB[(Основная БД)]
+  DB --> P[Проекция]
+  P --> R[(Read model)]
+  Q[Запрос: список проектов] --> R
+```
+
 **Purpose** — it separates command and query models or paths when their requirements differ greatly.
 
 **How it works / is used** — the write model protects invariants while a read projection is optimized for a specific screen or query.
@@ -3482,6 +3598,7 @@ CMD ["node", "dist/server.js"]
 
 **Downsides and limits** — tracing and ordering are harder, and an event must not be treated as synchronous RPC with another name.
 
+---
 ### WebSocket
 
 **Что это** — протокол двустороннего persistent connection между client и server поверх одного TCP-соединения.
@@ -3503,6 +3620,7 @@ socket.addEventListener("message", ({ data }) => updateProject(JSON.parse(data))
 
 **Downsides and limits** — connection lifecycle, scaling, and authorization are more complex than HTTP; do not use WebSocket when infrequent updates are simpler with polling or SSE.
 
+---
 ### SSE — Server-Sent Events
 
 **Что это** — односторонний server-to-client stream событий по обычному HTTP (EventSource).
@@ -3557,7 +3675,11 @@ queue.consume("render-video", async ({ jobId }) => await renderVideo(jobId));
 
 **Минусы и ограничения** — dedup store тоже требует retention и concurrency safety; не полагаюсь только на message broker.
 
----
+```sql
+INSERT INTO processed_events (event_id) VALUES ($1)
+ON CONFLICT DO NOTHING;
+-- Побочный эффект выполняю только если вставлена новая строка.
+```
 **Purpose** — it safely processes a duplicate message or webhook without repeating a side effect.
 
 **How it works / is used** — store processed event IDs or make a write naturally unique or conditional inside a transaction.
@@ -3575,7 +3697,12 @@ queue.consume("render-video", async ({ jobId }) => await renderVideo(jobId));
 
 **Минусы и ограничения** — добавляет polling/relay/cleanup, а consumer всё равно должен быть idempotent.
 
----
+```sql
+BEGIN;
+INSERT INTO videos (id, status) VALUES ($1, 'queued');
+INSERT INTO outbox (topic, payload) VALUES ('video.queued', json_build_object('id', $1));
+COMMIT;
+```
 **Purpose** — it prevents losing an event between a database commit and broker publish.
 
 **How it works / is used** — write the business change and outbox row in one transaction; a relay publishes the row and marks it delivered.
@@ -3618,7 +3745,11 @@ if (!project) {
 
 **Минусы и ограничения** — lock может истечь во время работы; это не магия exactly-once и требует failure model.
 
----
+```ts
+const lock = await redis.set(`render:${videoId}`, workerId, { NX: true, PX: 30_000 });
+if (!lock) return;
+try { await renderVideo(videoId); } finally { await redis.del(`render:${videoId}`); }
+```
 **Purpose** — it coordinates single execution of a scheduled or critical job across instances.
 
 **How it works / is used** — use a lease with TTL and owner token, while making downstream writes safe under duplicate execution.
@@ -3931,7 +4062,12 @@ if (call.name === "get_project") return getProjectForUser(userId, call.arguments
 
 **Минусы и ограничения** — одного delimiter недостаточно; treat external documents, web pages и user text как hostile inputs.
 
----
+```ts
+const tool = tools[call.name];
+if (!tool || !canUseTool(user, tool) || !tool.schema.safeParse(call.arguments).success) {
+  throw new Error("Rejected tool call");
+}
+```
 **Purpose** — it is an attack or failure where untrusted content tries to override instructions or obtain data or tool actions.
 
 **How it works / is used** — label untrusted content as data, limit tool permissions, validate operations, and never expose secrets to the model.
@@ -3949,7 +4085,12 @@ if (call.name === "get_project") return getProjectForUser(userId, call.arguments
 
 **Минусы и ограничения** — маленький «красивый» eval set легко overfit-ится; production feedback всё равно нужен.
 
----
+```ts
+for (const example of evalSet) {
+  const answer = await generate(example.input);
+  expect(score(answer, example.expected)).toBeGreaterThanOrEqual(0.9);
+}
+```
 **Purpose** — it measures whether an LLM feature actually solves its task before and after a prompt or model change.
 
 **How it works / is used** — collect representative examples, rubric or expected facts, automated checks, and human calibration; track quality, latency, and cost.
@@ -4075,7 +4216,12 @@ if (call.name === "get_project") return getProjectForUser(userId, call.arguments
 
 **Минусы и ограничения** — плохо подходит для high-conflict/irreversible actions; error/reconciliation UX должен быть явным.
 
----
+```ts
+const previous = queryClient.getQueryData(["projects"]);
+queryClient.setQueryData(["projects"], addProjectOptimistically(input));
+try { await api.createProject(input); }
+catch { queryClient.setQueryData(["projects"], previous); }
+```
 **Purpose** — it provides immediate feedback by showing expected mutation results before the network response.
 
 **How it works / is used** — update local cache predictably, retain previous state, and roll back on error; the server remains source of truth.
@@ -4104,36 +4250,42 @@ if (call.name === "get_project") return getProjectForUser(userId, call.arguments
 
 Перед интервью проговорите вслух по 10–15 минут каждый сценарий: requirements → API/data model → happy path → failure/retry → scale/observability → trade-offs.
 
+---
 ### 1. Создать AI-видео из текста
 
 **По-русски:** начинаю с POST /projects/:id/renders с idempotency key. В одной transaction создаю render job и outbox event; worker берёт job из queue, получает разрешённые input assets, вызывает generation/render stages и сохраняет итог в object storage. В БД храню state machine (queued → running → completed/failed/cancelled), а UI получает status через polling или SSE. Retries только для transient failure, cancel — идемпотентный и проверяется между stages. Сначала это modular monolith с worker-ами; отдельно масштабирую CPU/GPU rendering только при измеренной очереди/нагрузке.
 
 **In English:** I would start with POST /projects/:id/renders and an idempotency key. One transaction creates a render job and outbox event; a worker consumes it, accesses authorized input assets, runs generation and rendering stages, and saves the result to object storage. The database keeps a state machine (queued → running → completed/failed/cancelled), while the UI receives status through polling or SSE. Retry only transient failures, make cancellation idempotent, and check it between stages. I would begin with a modular monolith plus workers and separately scale CPU/GPU rendering only when queue pressure proves the need.
 
+---
 ### 2. Совместное редактирование учебного сценария
 
 **По-русски:** сначала уточняю, нужна ли настоящая одновременная правка текста. Для autosave без real-time collaboration достаточно revision number и optimistic locking: client отправляет base revision, server возвращает 409 Conflict при устаревшей версии. Presence и live cursors идут через WebSocket как ephemeral data. Если требуется одновременное редактирование одного rich-text поля без конфликтов, выбираю CRDT или OT, храню snapshots и append-only operations, а permissions проверяю на каждом connection и write.
 
 **In English:** I would first clarify whether true simultaneous text editing is required. For autosave without real-time collaboration, a revision number and optimistic locking are enough: the client sends its base revision and the server returns 409 Conflict for a stale version. Presence and live cursors travel over WebSocket as ephemeral data. If users must edit the same rich-text field concurrently without conflicts, I would choose CRDT or OT, store snapshots plus append-only operations, and check permissions on every connection and write.
 
+---
 ### 3. Загрузка 5 GB видео
 
 **По-русски:** browser не проксирует 5 GB через application server. API authorise-ит upload и выдаёт short-lived signed multipart URL; browser загружает части напрямую в storage, умеет resume и показывает локальный progress. После complete server проверяет ownership/size/type, ставит scan/transcode job в очередь и только затем помечает asset usable. Нужны quota, expiry незавершённых uploads, content validation по байтам, malware scan и lifecycle policy.
 
 **In English:** The browser should not proxy 5 GB through the application server. The API authorizes the upload and issues short-lived signed multipart URLs; the browser uploads parts directly to storage, supports resume, and shows local progress. After complete, the server verifies ownership, size, and type, queues scanning and transcoding, and marks the asset usable only afterward. Include quota, expiry for incomplete uploads, byte-level content validation, malware scanning, and lifecycle policy.
 
+---
 ### 4. Поиск по проектам и сценариям
 
 **По-русски:** начинаю с Postgres full-text search и structured filters, а не с отдельного search cluster. API принимает query/filters/cursor и возвращает results с deterministic sort (rank, updated_at, id); authorization/tenant filter применяются до выдачи. UI debounce-ит query, отменяет устаревший request и показывает cursor pagination. Vector retrieval добавляю, только если keyword/full-text search не покрывает semantic intent; его results всё равно проходят metadata и permission filters.
 
 **In English:** I would start with Postgres full-text search and structured filters rather than a separate search cluster. The API accepts query, filters, and cursor, then returns results with deterministic sort (rank, updated_at, id); authorization and tenant filters apply before returning results. The UI debounces query input, cancels stale requests, and uses cursor pagination. I would add vector retrieval only if keyword and full-text search fail to cover semantic intent; its results still pass metadata and permission filters.
 
+---
 ### 5. Analytics для learning content
 
 **По-русски:** сначала определяю события и метрики: например, lesson_started, scene_completed, assessment_submitted, а не расплывчатые «engagement». Client отправляет versioned, минимальный по PII event с event id и timestamp; ingestion API валидирует schema и кладёт event в durable queue/storage. Асинхронный pipeline дедуплицирует, обрабатывает late events и строит aggregates для dashboard. Хранение и retention согласую с privacy/legal requirements, а metric definitions документирую рядом с dashboard.
 
 **In English:** I would first define events and metrics, for example lesson_started, scene_completed, and assessment_submitted, rather than vague “engagement.” The client sends a versioned, PII-minimized event with event ID and timestamp; the ingestion API validates schema and stores it in a durable queue or storage. An asynchronous pipeline deduplicates, handles late events, and builds dashboard aggregates. Retention follows privacy and legal requirements, and metric definitions live beside the dashboard.
 
+---
 ### 6. Notification system
 
 **По-русски:** domain mutation записывает notification intent и outbox event в одной transaction. Worker применяет user preferences, dedupe key и channel policy, затем создаёт delivery record и отправляет email/in-app notification через provider. Provider webhooks обновляют delivery state идемпотентно; transient errors получают exponential backoff и dead-letter visibility. Unsubscribe и quiet hours применяются до отправки. In-app inbox хранится в БД, а SSE/WebSocket — только ускоряет его обновление в UI, не является source of truth.
