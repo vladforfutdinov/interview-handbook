@@ -85,6 +85,8 @@
       const scrollPositionKey = `handbook-scroll:${location.pathname}`;
       const navigationType = performance.getEntriesByType("navigation")[0]?.type;
       let loadedHandbookVersion;
+      let tocObserver;
+      let tocHandlersBound = false;
       const savedScrollPosition = (() => {
         try {
           return Number(sessionStorage.getItem(scrollPositionKey));
@@ -161,6 +163,9 @@
         const headings = [...document.querySelectorAll("#content h2, #content h3")];
         const usedIds = new Map();
 
+        list.replaceChildren();
+        tocObserver?.disconnect();
+
         headings.forEach((heading) => {
           const base = slugify(heading.textContent);
           const count = usedIds.get(base) || 0;
@@ -179,24 +184,27 @@
         if (!headings.length) return;
         toc.hidden = false;
         mobileActions.hidden = false;
-        toggle.addEventListener("click", () => {
-          const isOpen = toc.classList.toggle("toc-open");
-          toggle.setAttribute("aria-expanded", String(isOpen));
-        });
-        toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-        document.addEventListener("click", (event) => {
-          if (!toc.classList.contains("toc-open")) return;
-          if (toc.contains(event.target) || toggle.contains(event.target)) return;
-          toc.classList.remove("toc-open");
-          toggle.setAttribute("aria-expanded", "false");
-        });
+        if (!tocHandlersBound) {
+          toggle.addEventListener("click", () => {
+            const isOpen = toc.classList.toggle("toc-open");
+            toggle.setAttribute("aria-expanded", String(isOpen));
+          });
+          toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+          document.addEventListener("click", (event) => {
+            if (!toc.classList.contains("toc-open")) return;
+            if (toc.contains(event.target) || toggle.contains(event.target)) return;
+            toc.classList.remove("toc-open");
+            toggle.setAttribute("aria-expanded", "false");
+          });
+          list.addEventListener("click", () => {
+            toc.classList.remove("toc-open");
+            toggle.setAttribute("aria-expanded", "false");
+          });
+          tocHandlersBound = true;
+        }
         const links = new Map([...list.querySelectorAll("a")].map((link) => [link.hash.slice(1), link]));
         let activeHeadingId;
-        list.addEventListener("click", () => {
-          toc.classList.remove("toc-open");
-          toggle.setAttribute("aria-expanded", "false");
-        });
-        const observer = new IntersectionObserver((entries) => {
+        tocObserver = new IntersectionObserver((entries) => {
           const current = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
           if (!current) return;
           if (current.target.id === activeHeadingId) return;
@@ -206,7 +214,7 @@
           activeLink?.setAttribute("aria-current", "true");
           activeLink?.scrollIntoView({ block: "nearest" });
         }, { rootMargin: "-18% 0px -70%" });
-        headings.forEach((heading) => observer.observe(heading));
+        headings.forEach((heading) => tocObserver.observe(heading));
       }
 
       function removeInlineToc() {
@@ -272,6 +280,63 @@
         }
       }
 
+      async function renderHandbook(markdown, { preservePosition = false } = {}) {
+        const previousPosition = preservePosition ? window.scrollY : 0;
+        document.getElementById("content").innerHTML = marked.parse(markdown, { gfm: true });
+        removeInlineToc();
+        makeTablesScrollable();
+        await renderMermaidDiagrams();
+        if (window.hljs) {
+          const aliases = { ts: "typescript", tsx: "typescript", yml: "yaml", dockerfile: "dockerfile", sh: "bash" };
+          document.querySelectorAll("#content pre code").forEach((block) => {
+            const language = [...block.classList].find((name) => name.startsWith("language-"))?.slice(9);
+            if (language && aliases[language]) {
+              block.classList.remove(`language-${language}`);
+              block.classList.add(`language-${aliases[language]}`);
+            }
+            try {
+              hljs.highlightElement(block);
+            } catch {
+              // A malformed or unknown language marker should leave readable plain code.
+            }
+          });
+        }
+        showVersion(markdown);
+        buildToc();
+        if (preservePosition) {
+          requestAnimationFrame(() => {
+            window.scrollTo(0, previousPosition);
+            updateReadingProgress();
+          });
+        } else {
+          restoreScrollPosition();
+          updateReadingProgress();
+        }
+      }
+
+      async function refreshHandbook() {
+        const button = document.getElementById("refresh");
+        button.disabled = true;
+        try {
+          const response = await fetch(`./senior-fullstack-interview-handbook.md?update=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          await renderHandbook(await response.text(), { preservePosition: true });
+          button.hidden = true;
+        } finally {
+          button.disabled = false;
+        }
+      }
+
+      document.getElementById("refresh").addEventListener("click", () => {
+        refreshHandbook().catch(() => {
+          // Keep the update button visible so the reader can retry.
+        });
+      });
+      setInterval(checkForUpdate, 60_000);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") checkForUpdate();
+      });
+
       fetch("./senior-fullstack-interview-handbook.md")
         .then((response) => {
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -279,35 +344,8 @@
         })
         .then(async (markdown) => {
           saveScrollPosition();
-          document.getElementById("content").innerHTML = marked.parse(markdown, { gfm: true });
-          removeInlineToc();
-          makeTablesScrollable();
-          await renderMermaidDiagrams();
-          if (window.hljs) {
-            const aliases = { ts: "typescript", tsx: "typescript", yml: "yaml", dockerfile: "dockerfile", sh: "bash" };
-            document.querySelectorAll("#content pre code").forEach((block) => {
-              const language = [...block.classList].find((name) => name.startsWith("language-"))?.slice(9);
-              if (language && aliases[language]) {
-                block.classList.remove(`language-${language}`);
-                block.classList.add(`language-${aliases[language]}`);
-              }
-              try {
-                hljs.highlightElement(block);
-              } catch {
-                // A malformed or unknown language marker should leave readable plain code.
-              }
-            });
-          }
-          showVersion(markdown);
-          buildToc();
-          document.getElementById("refresh").addEventListener("click", () => location.reload());
+          await renderHandbook(markdown);
           checkForUpdate();
-          setInterval(checkForUpdate, 60_000);
-          document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible") checkForUpdate();
-          });
-          restoreScrollPosition();
-          updateReadingProgress();
         })
         .catch((error) => {
           document.getElementById("status").textContent = `Unable to load handbook: ${error.message}`;
