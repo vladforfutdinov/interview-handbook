@@ -23,6 +23,10 @@
       pre { overflow-x: auto; background: #101828; color: #f8fafc; padding: 1rem; border-radius: 8px; }
       pre code { background: transparent; padding: 0; }
       blockquote { margin: 1rem 0; padding: .2rem 1rem; border-left: 4px solid #84adff; color: #475467; }
+      .table-scroll { overflow-x: auto; margin: 1.25rem 0; border: 1px solid #e4e7ec; border-radius: 8px; }
+      .table-scroll table { width: max-content; min-width: 100%; margin: 0; border-collapse: collapse; }
+      .table-scroll th, .table-scroll td { padding: .65rem .8rem; border: 1px solid #e4e7ec; text-align: left; vertical-align: top; }
+      .table-scroll th { background: #f9fafb; }
       #status { color: #667085; }
       #toc { position: fixed; top: 1.25rem; right: 1.25rem; width: 240px; max-height: calc(100vh - 2.5rem); overflow: auto; padding: 1rem; border: 1px solid #e4e7ec; border-radius: 12px; background: rgb(255 255 255 / 94%); box-shadow: 0 10px 24px rgb(16 24 40 / 10%); backdrop-filter: blur(10px); }
       #toc h2 { margin: 0 0 .65rem; padding: 0; border: 0; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: #667085; }
@@ -89,6 +93,27 @@
         headings.forEach((heading) => observer.observe(heading));
       }
 
+      function removeInlineToc() {
+        const heading = [...document.querySelectorAll("#content h2")]
+          .find((element) => element.textContent.trim() === "Содержание");
+        if (!heading) return;
+        let node = heading;
+        while (node && (node === heading || node.tagName !== "H2")) {
+          const next = node.nextElementSibling;
+          node.remove();
+          node = next;
+        }
+      }
+
+      function makeTablesScrollable() {
+        document.querySelectorAll("#content table").forEach((table) => {
+          const wrapper = document.createElement("div");
+          wrapper.className = "table-scroll";
+          table.before(wrapper);
+          wrapper.append(table);
+        });
+      }
+
       fetch("./senior-fullstack-interview-handbook.md")
         .then((response) => {
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -96,6 +121,8 @@
         })
         .then((markdown) => {
           document.getElementById("content").innerHTML = marked.parse(markdown, { gfm: true });
+          removeInlineToc();
+          makeTablesScrollable();
           buildToc();
         })
         .catch((error) => {
