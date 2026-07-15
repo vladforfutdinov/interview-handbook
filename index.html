@@ -31,6 +31,7 @@
       .table-scroll th, .table-scroll td { padding: .65rem .8rem; border: 1px solid #e4e7ec; text-align: left; vertical-align: top; }
       .table-scroll th { background: #f9fafb; }
       .mermaid { overflow-x: auto; margin: 1.25rem 0; padding: 1rem; border: 1px solid #e4e7ec; border-radius: 8px; background: #fff; text-align: center; }
+      #reading-progress { position: fixed; bottom: 4.5rem; left: .75rem; z-index: 1; min-width: 3.25rem; padding: .35rem .55rem; border: 1px solid #d0d5dd; border-radius: 999px; background: rgb(255 255 255 / 94%); box-shadow: 0 4px 12px rgb(16 24 40 / 12%); color: #475467; font-variant-numeric: tabular-nums; text-align: center; }
       #status { color: #667085; }
       #toc { position: fixed; top: 1.25rem; right: 1.25rem; width: 240px; max-height: calc(100vh - 2.5rem); overflow: auto; padding: 1rem; border: 1px solid #e4e7ec; border-radius: 12px; background: rgb(255 255 255 / 94%); box-shadow: 0 10px 24px rgb(16 24 40 / 10%); backdrop-filter: blur(10px); }
       #toc h2 { margin: 0 0 .65rem; padding: 0; border: 0; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: #667085; }
@@ -70,7 +71,8 @@
       <button id="toc-toggle" type="button" aria-controls="toc" aria-expanded="false">Содержание</button>
       <button id="refresh" type="button" aria-label="Доступна новая версия" title="Обновить handbook" hidden>↻</button>
       <button id="to-top" type="button" aria-label="Наверх" title="Наверх" hidden>↑</button>
-      </div>
+    </div>
+    <output id="reading-progress" aria-label="Прочитано">0%</output>
     <main id="content"><p id="status">Loading handbook…</p></main>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script>
@@ -98,13 +100,25 @@
         }
       }
 
+      function updateReadingProgress() {
+        const progress = document.getElementById("reading-progress");
+        const maximumScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const percentage = maximumScroll <= 0 ? 100 : Math.round(Math.min(1, window.scrollY / maximumScroll) * 100);
+        progress.value = percentage;
+        progress.textContent = `${percentage}%`;
+      }
+
       function restoreScrollPosition() {
         if (location.hash && navigationType !== "reload") return;
         if (!Number.isFinite(savedScrollPosition) || savedScrollPosition <= 0) return;
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             window.scrollTo(0, savedScrollPosition);
-            setTimeout(() => window.scrollTo(0, savedScrollPosition), 100);
+            updateReadingProgress();
+            setTimeout(() => {
+              window.scrollTo(0, savedScrollPosition);
+              updateReadingProgress();
+            }, 100);
           });
         });
       }
@@ -120,6 +134,8 @@
       }
       window.addEventListener("pagehide", saveScrollPosition);
       window.addEventListener("beforeunload", saveScrollPosition);
+      window.addEventListener("scroll", updateReadingProgress, { passive: true });
+      window.addEventListener("resize", updateReadingProgress);
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "hidden") saveScrollPosition();
       });
@@ -282,11 +298,13 @@
           showVersion(markdown);
           buildToc();
           document.getElementById("refresh").addEventListener("click", () => location.reload());
+          checkForUpdate();
           setInterval(checkForUpdate, 60_000);
           document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "visible") checkForUpdate();
           });
           restoreScrollPosition();
+          updateReadingProgress();
         })
         .catch((error) => {
           document.getElementById("status").textContent = `Unable to load handbook: ${error.message}`;
