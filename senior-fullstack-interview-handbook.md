@@ -115,7 +115,11 @@
 
 **Мини-пример** — для списка задач ключом должен быть идентификатор задачи, а не её текущий индекс.
 
----
+```tsx
+// Bad: key={index} — reordering moves state to the wrong row.
+{tasks.map((task) => <TaskRow key={task.id} task={task} />)}
+```
+
 **Purpose** — React compares the next element tree with the previous one to update only the required DOM.
 
 **How it works / is used** — give list items stable keys; React matches nodes by element type and key.
@@ -135,7 +139,14 @@
 
 **Минусы и ограничения** — виртуальный DOM не гарантирует скорость и не отменяет стоимость JavaScript, перерасчёта раскладки и больших деревьев.
 
----
+```mermaid
+flowchart TD
+  S[setState] --> T[New element tree]
+  T --> D[Diff against previous tree]
+  D --> M[Batched DOM mutations]
+  M --> B[Real DOM]
+```
+
 **Purpose** — it is an in-memory declarative UI model that lets React plan DOM updates.
 
 **How it works / is used** — components return elements; React builds a tree, calculates a diff, then commits DOM mutations in a batch.
@@ -153,7 +164,14 @@
 
 **Минусы и ограничения** — рендеринг должен быть чистым и идемпотентным; нельзя рассчитывать, что он выполнится один раз.
 
----
+```mermaid
+flowchart TD
+  A[Heavy list render started] --> B{User input arrived?}
+  B -->|yes| C[Interrupt and handle input]
+  C --> D[Restart render with current state]
+  B -->|no| E[Commit to DOM]
+```
+
 **Purpose** — it keeps the UI responsive by allowing less urgent rendering to yield to user input.
 
 **How it works / is used** — React may start, interrupt, and retry rendering; useTransition marks an update as non-urgent.
@@ -171,7 +189,14 @@
 
 **Минусы и ограничения** — граница, поставленная слишком высоко, скрывает весь экран; не каждый способ получения данных интегрирован с Suspense.
 
----
+```tsx
+const Chart = lazy(() => import("./Chart"));
+
+<Suspense fallback={<ChartSkeleton />}>
+  <Chart projectId={projectId} />
+</Suspense>
+```
+
 **Purpose** — it displays a controlled fallback while a lazy component or a compatible data source is pending.
 
 **How it works / is used** — wrap an independent screen region in Suspense with a local skeleton or loader.
@@ -285,7 +310,7 @@ return <MemoizedProjectList onSelect={onSelect} />;
 
 ```tsx
 const inputRef = useRef<HTMLInputElement>(null);
-<button onClick={() => inputRef.current?.focus()}>Найти</button>
+<button onClick={() => inputRef.current?.focus()}>Search</button>
 <input ref={inputRef} />
 ```
 
@@ -330,7 +355,14 @@ useEffect(() => {
 
 **Минусы и ограничения** — блокирует отрисовку и не подходит для обычных запросов; в SSR требует аккуратности.
 
----
+```tsx
+useLayoutEffect(() => {
+  const rect = tooltipRef.current!.getBoundingClientRect();
+  // Adjust position before paint — the user never sees the jump.
+  setShiftLeft(rect.right > window.innerWidth);
+}, [open]);
+```
+
 **Purpose** — it reads layout and synchronously adjusts the DOM before paint to avoid visible flicker.
 
 **How it works / is used** — use it sparingly for measuring a tooltip or restoring scroll position.
@@ -419,7 +451,14 @@ const ThemeContext = createContext<"light" | "dark">("light");
 
 **Минусы и ограничения** — управляемые поля могут рендерить слишком часто; смешивать два источника истины опасно.
 
----
+```tsx
+// Controlled: React state is the source of truth.
+<input value={email} onChange={(event) => setEmail(event.target.value)} />
+
+// Uncontrolled: the value lives in the DOM, read via ref.
+<input ref={emailRef} defaultValue={initialEmail} />
+```
+
 **Purpose** — a controlled input makes React own the value, while an uncontrolled input leaves it in the DOM.
 
 **How it works / is used** — choose controlled for validation and dependent UI; use uncontrolled with refs for simple forms or integrations.
@@ -437,7 +476,16 @@ const ThemeContext = createContext<"light" | "dark">("light");
 
 **Минусы и ограничения** — подъём слишком высоко раздувает свойства и область ререндеров; иногда лучше композиция или контекст.
 
----
+```tsx
+function Editor() {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  return <>
+    <SceneList selectedId={selectedId} onSelect={setSelectedId} />
+    <Preview sceneId={selectedId} />
+  </>;
+}
+```
+
 **Purpose** — it gives several components one source of truth for consistent behavior.
 
 **How it works / is used** — move state to the nearest common parent and pass values and handlers down.
@@ -455,7 +503,20 @@ const ThemeContext = createContext<"light" | "dark">("light");
 
 **Минусы и ограничения** — локальные копии могут рассинхронизироваться, если данные всё-таки должны быть общими.
 
----
+```tsx
+// Bad: filter at the root — every keystroke rerenders the whole page.
+function Page() {
+  const [filter, setFilter] = useState("");
+  return <><Header /><ProjectList filter={filter} onFilter={setFilter} /></>;
+}
+
+// Better: state lives inside its only consumer.
+function ProjectList() {
+  const [filter, setFilter] = useState("");
+  // ...
+}
+```
+
 **Purpose** — it reduces coupling and unnecessary renders by keeping state close to its only consumers.
 
 **How it works / is used** — start with local state and lift or globalize it only when it is genuinely shared.
@@ -473,7 +534,14 @@ const ThemeContext = createContext<"light" | "dark">("light");
 
 **Минусы и ограничения** — нельзя путать с состоянием интерфейса; неверные ключи или инвалидация дают устаревший интерфейс.
 
----
+```tsx
+// Server state: a cache with a key, staleness, and refetching.
+const { data: projects } = useQuery({ queryKey: ["projects"], queryFn: fetchProjects });
+
+// UI state: local, no cache or invalidation.
+const [selectedId, setSelectedId] = useState<string | null>(null);
+```
+
 **Purpose** — it manages remote, cacheable, and potentially stale API data.
 
 **How it works / is used** — use TanStack Query or SWR for cache keys, loading/error states, invalidation, and mutations.
@@ -491,7 +559,18 @@ const ThemeContext = createContext<"light" | "dark">("light");
 
 **Минусы и ограничения** — для локального состояния интерфейса и серверного кэша это часто избыточно; слишком много глобального состояния скрывает владение данными и усложняет изменение.
 
----
+```ts
+const projectsSlice = createSlice({
+  name: "projects",
+  initialState: { selectedId: null as string | null },
+  reducers: {
+    projectSelected(state, action: PayloadAction<string>) {
+      state.selectedId = action.payload; // Immer: "mutation" is safe here
+    },
+  },
+});
+```
+
 **Purpose** — it centralizes complex client state and makes transitions predictable through explicit actions and reducers.
 
 **How it works / is used** — keep only genuinely shared client state, describe events as actions, and update state with pure reducers; RTK reduces boilerplate.
@@ -509,7 +588,15 @@ const ThemeContext = createContext<"light" | "dark">("light");
 
 **Минусы и ограничения** — простота не заменяет проектирование модели; без правил хранилище легко становится неявным глобальным изменяемым состоянием.
 
----
+```ts
+const usePlayerStore = create<{ playing: boolean; toggle: () => void }>((set) => ({
+  playing: false,
+  toggle: () => set((state) => ({ playing: !state.playing })),
+}));
+
+const playing = usePlayerStore((state) => state.playing); // subscribe to a slice only
+```
+
 **Purpose** — it provides a small external store for shared client state with less ceremony than Redux.
 
 **How it works / is used** — create focused stores and selectors so a component subscribes only to the state slice it needs.
@@ -554,7 +641,18 @@ const query = useQuery({
 
 **Минусы и ограничения** — нужны ясные границы клиентской и серверной частей; миграция со старого Pages Router требует привыкания.
 
----
+```txt
+app/
+  layout.tsx        shared shell
+  page.tsx          route /
+  projects/
+    page.tsx        /projects
+    [id]/
+      page.tsx      /projects/42
+      loading.tsx   segment Suspense fallback
+      error.tsx     segment error boundary
+```
+
 **Purpose** — it is Next.js’s file-based model for layouts, Server Components, streaming, and server-side fetching.
 
 **How it works / is used** — a route segment contains page, layout, loading, and error files; components are server-side by default.
@@ -572,7 +670,18 @@ const query = useQuery({
 
 **Минусы и ограничения** — не получает новую RSC-модель; поддержка устаревшего кода может усложнить единый подход.
 
----
+```tsx
+// pages/projects/[id].tsx — data is fetched by a page-level function, not the component.
+export async function getServerSideProps({ params }: GetServerSidePropsContext) {
+  const project = await getProject(String(params?.id));
+  return { props: { project } };
+}
+
+export default function ProjectPage({ project }: { project: Project }) {
+  return <ProjectView project={project} />;
+}
+```
+
 **Purpose** — it is the earlier Next.js router built around getServerSideProps and getStaticProps.
 
 **How it works / is used** — page files form routes and special data-fetching functions supply their data.
@@ -590,7 +699,13 @@ const query = useQuery({
 
 **Минусы и ограничения** — нельзя использовать состояние, эффекты, API браузера или обработчики событий; нельзя передавать произвольные объекты.
 
----
+```tsx
+export default async function ProjectsPage() {
+  const projects = await db.project.findMany(); // runs on the server only
+  return <ProjectList projects={projects} />;
+}
+```
+
 **Purpose** — it executes a UI component on the server and keeps its JavaScript out of the browser bundle.
 
 **How it works / is used** — read the database or backend API in an async server component and pass serializable props down.
@@ -608,7 +723,15 @@ const query = useQuery({
 
 **Минусы и ограничения** — всё импортируемое попадает в клиентский бандл; слишком высокая граница раздувает его.
 
----
+```tsx
+"use client";
+
+export function LikeButton() {
+  const [liked, setLiked] = useState(false);
+  return <button onClick={() => setLiked(!liked)}>{liked ? "♥" : "♡"}</button>;
+}
+```
+
 **Purpose** — it enables interactivity: state, events, effects, and browser APIs.
 
 **How it works / is used** — add the use client directive only at the leaf of the interactive subtree.
@@ -668,7 +791,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
 **Минусы и ограничения** — данные могут устареть до следующего build; не подходит для персонального или очень свежего контента.
 
----
+```tsx
+export async function generateStaticParams() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ slug: post.slug })); // pages are generated at build time
+}
+```
+
 **Purpose** — it prebuilds HTML for public pages that change infrequently.
 
 **How it works / is used** — the page is generated at build time and served as a static CDN asset.
@@ -690,7 +819,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
 ```ts
 export const revalidate = 60;
-// Next.js повторно создаст страницу не чаще одного раза в минуту.
+// Next.js regenerates the page at most once per minute.
 ```
 
 **Purpose** — it combines static speed with periodic page-cache refresh.
@@ -712,7 +841,14 @@ export const revalidate = 60;
 
 **Минусы и ограничения** — большой client bundle задерживает интерактивность; серверный и клиентский output должны совпадать.
 
----
+```mermaid
+flowchart TD
+  S[Server HTML] --> P[Fast first paint]
+  P --> J[JS bundle download]
+  J --> H[React matches markup and attaches handlers]
+  H --> I[Interactive page]
+```
+
 **Purpose** — it attaches client React to already rendered server HTML and makes it interactive.
 
 **How it works / is used** — the browser loads JavaScript, React matches markup, and attaches event handlers.
@@ -730,7 +866,15 @@ export const revalidate = 60;
 
 **Минусы и ограничения** — suppressHydrationWarning скрывает симптом, но редко исправляет источник рассинхронизации.
 
----
+```tsx
+// Bad: server and client render different times.
+<span>{new Date().toLocaleTimeString()}</span>
+
+// Good: the nondeterministic value appears after mount.
+const [now, setNow] = useState<string | null>(null);
+useEffect(() => setNow(new Date().toLocaleTimeString()), []);
+```
+
 **Purpose** — it is not a feature but a failure where server HTML differs from the first client render.
 
 **How it works / is used** — remove nondeterminism: move Date.now, Math.random, locale, window, and browser-only data into client effects.
@@ -748,7 +892,15 @@ export const revalidate = 60;
 
 **Минусы и ограничения** — state в layout живёт дольше ожидаемого; глобальный layout не должен тащить тяжёлые client dependencies.
 
----
+```tsx
+export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
+  return <>
+    <SidebarNav />
+    <main>{children}</main>
+  </>;
+}
+```
+
 **Purpose** — it preserves shared chrome, navigation, and providers across child routes.
 
 **How it works / is used** — put persistent shell in a layout and route-specific content in a page.
@@ -817,7 +969,17 @@ export const config = { matcher: ["/projects/:path*"] };
 
 **Минусы и ограничения** — плохая граница создаёт прыжки layout или «водопад»; критический above-the-fold контент нельзя скрывать бездумно.
 
----
+```tsx
+export default function ProjectPage() {
+  return <>
+    <ProjectHeader />
+    <Suspense fallback={<CommentsSkeleton />}>
+      <SlowComments /> {/* this part streams in later without blocking the header */}
+    </Suspense>
+  </>;
+}
+```
+
 **Purpose** — it sends ready parts of a page earlier instead of waiting for the slowest request.
 
 **How it works / is used** — separate independent areas with Suspense boundaries and show meaningful skeletons.
@@ -933,7 +1095,15 @@ const VideoTimeline = dynamic(() => import("./VideoTimeline"), {
 
 **Минусы и ограничения** — Node APIs, native modules и долгие DB-вызовы могут быть недоступны или невыгодны; в Next.js 16 Proxy по умолчанию использует Node runtime, поэтому Edge нужно обсуждать с учётом конкретной версии/deployment.
 
----
+```ts
+export const runtime = "edge"; // Web APIs only, no Node modules
+
+export async function GET(request: Request) {
+  const country = request.headers.get("x-vercel-ip-country") ?? "US";
+  return Response.json({ country });
+}
+```
+
 **Purpose** — it runs short logic closer to users to reduce network latency.
 
 **How it works / is used** — use it for lightweight redirects, personalization hints, or auth checks compatible with Web APIs.
@@ -1002,7 +1172,14 @@ console.log("B"); // A, B, microtask, task
 
 **Минусы и ограничения** — бесконечная цепочка microtasks starvation-ит rendering и другие tasks.
 
----
+```js
+setTimeout(() => console.log("task"));
+Promise.resolve()
+  .then(() => console.log("microtask 1"))
+  .then(() => console.log("microtask 2"));
+// microtask 1, microtask 2, task — the microtask queue drains fully before the task
+```
+
 **Purpose** — it runs a short continuation of current work before the next task or render.
 
 **How it works / is used** — Promise callbacks and queueMicrotask enter the microtask queue after the stack completes.
@@ -1038,7 +1215,13 @@ console.log("B"); // A, B, microtask, task
 
 **Минусы и ограничения** — Promise не отменяется сам; забытый catch превращается в unhandled rejection.
 
----
+```js
+loadProject(id)
+  .then((project) => render(project))
+  .catch((error) => showError(error)) // catches reject and throw from earlier in the chain
+  .finally(() => setLoading(false));
+```
+
 **Purpose** — it represents an asynchronous result: pending, fulfilled, or rejected.
 
 **How it works / is used** — attach then/catch/finally or await it and handle errors at the appropriate boundary.
@@ -1102,7 +1285,14 @@ return () => controller.abort();
 
 **Минусы и ограничения** — reliance на hoisting ухудшает читаемость; var создаёт неожиданные scope bugs.
 
----
+```js
+console.log(a); // undefined: var is hoisted and initialized to undefined
+var a = 1;
+
+console.log(b); // ReferenceError: let is in the temporal dead zone
+let b = 2;
+```
+
 **Purpose** — it describes bindings being created before a scope executes, not code literally moving upward.
 
 **How it works / is used** — function declarations are available early, var starts as undefined, and let/const have a temporal dead zone.
@@ -1122,8 +1312,11 @@ return () => controller.abort();
 
 ```ts
 const player = { title: "Demo", print() { console.log(this.title); } };
-setTimeout(player.print, 0); // undefined: receiver потерян
-setTimeout(player.print.bind(player), 0); // Demo
+
+const print = player.print; // detached from its receiver
+print(); // strict mode: TypeError (this is undefined); sloppy mode: this is globalThis
+
+setTimeout(player.print.bind(player), 0); // "Demo" — receiver fixed by bind
 ```
 **Purpose** — it provides the receiver of a normal function call.
 
@@ -1142,7 +1335,14 @@ setTimeout(player.print.bind(player), 0); // Demo
 
 **Минусы и ограничения** — глубокие или изменяемые prototypes усложняют reasoning; class — лишь синтаксис над этой моделью.
 
----
+```js
+const base = { greet() { return "hi"; } };
+const child = Object.create(base);
+
+child.greet(); // "hi" — not on child, found on the prototype
+Object.getPrototypeOf(child) === base; // true
+```
+
 **Purpose** — it implements inheritance and property lookup in JavaScript.
 
 **How it works / is used** — when a property is absent on an object, the engine searches upward through prototypes until null.
@@ -1160,7 +1360,12 @@ setTimeout(player.print.bind(player), 0); // Demo
 
 **Минусы и ограничения** — == содержит много неочевидных правил; === всё равно сравнивает объекты по ссылке, не по содержимому.
 
----
+```js
+0 == "";       // true — implicit type coercion
+0 === "";      // false
+value == null; // deliberate idiom: true for both null and undefined
+```
+
 **Purpose** — it compares values either without coercion or with implicit coercion.
 
 **How it works / is used** — use === almost always; use == only when coercion is intentional and tightly scoped, such as a nullish check.
@@ -1178,7 +1383,14 @@ setTimeout(player.print.bind(player), 0); // Demo
 
 **Минусы и ограничения** — nested data остаётся общей и может быть случайно изменена.
 
----
+```js
+const original = { title: "Demo", meta: { views: 10 } };
+const copy = { ...original };
+
+copy.meta.views = 99;
+original.meta.views; // 99 — the nested object is still shared
+```
+
 **Purpose** — it creates a new top-level container for an immutable update.
 
 **How it works / is used** — spread, Object.assign, or Array.slice copy references to nested objects.
@@ -1196,7 +1408,13 @@ setTimeout(player.print.bind(player), 0); // Demo
 
 **Минусы и ограничения** — это дорого по CPU/памяти; JSON stringify ломает Date, Map, undefined и циклические ссылки.
 
----
+```js
+const copy = structuredClone(original); // Date, Map, cyclic references — ok
+
+copy.meta.views = 99;
+original.meta.views; // 10 — the structure is fully independent
+```
+
 **Purpose** — it creates an independent copy of a nested structure when that is genuinely necessary.
 
 **How it works / is used** — structuredClone supports many native types; for domain data prefer targeted immutable updates.
@@ -1214,7 +1432,15 @@ setTimeout(player.print.bind(player), 0); // Demo
 
 **Минусы и ограничения** — полное копирование больших структур дорого; mutable refs уместны вне UI state.
 
----
+```js
+const next = {
+  ...state,
+  scenes: state.scenes.map((scene) =>
+    scene.id === id ? { ...scene, title } : scene,
+  ),
+};
+```
+
 **Purpose** — it makes change predictable and enables reference comparison, undo, and easier debugging.
 
 **How it works / is used** — return new objects for changed branches and do not mutate state or props.
@@ -1281,7 +1507,23 @@ window.addEventListener("scroll", reportScroll, { passive: true });
 
 **Минусы и ограничения** — control flow становится менее привычным; generator нельзя безопасно повторно использовать после исчерпания.
 
----
+```js
+function* ids() {
+  let id = 1;
+  while (true) yield id++; // values are computed lazily, on demand
+}
+const seq = ids();
+seq.next().value; // 1
+seq.next().value; // 2
+
+// Iterator: Symbol.iterator makes the object work with for...of and spread.
+const playlist = {
+  tracks: ["intro", "demo", "outro"],
+  *[Symbol.iterator]() { yield* this.tracks; },
+};
+for (const track of playlist) console.log(track);
+```
+
 **Purpose** — it represents a lazy sequence of values without allocating the whole array.
 
 **How it works / is used** — a generator yields items on demand; an iterable implements Symbol.iterator and works with for...of.
@@ -1299,7 +1541,18 @@ window.addEventListener("scroll", reportScroll, { passive: true });
 
 **Минусы и ограничения** — циклические зависимости дают частично инициализированные bindings; dynamic import меняет timing загрузки.
 
----
+```js
+// math.js
+export const add = (a, b) => a + b;                        // named export
+export default function multiply(a, b) { return a * b; }  // default export
+
+// app.js — static import: the bundler sees the graph, tree shaking works.
+import multiply, { add } from "./math.js";
+
+// Dynamic import: a separate chunk, loaded at call time.
+const { renderChart } = await import("./chart.js");
+```
+
 **Purpose** — it isolates scope and declares application dependencies explicitly.
 
 **How it works / is used** — ESM uses static import/export, allowing a bundler to analyze the graph and tree-shake.
@@ -1317,7 +1570,17 @@ window.addEventListener("scroll", reportScroll, { passive: true });
 
 **Минусы и ограничения** — рост памяти не всегда leak: cache может быть ожидаемым, поэтому сначала измеряю retainers.
 
----
+```ts
+useEffect(() => {
+  const id = setInterval(poll, 5000);
+  window.addEventListener("resize", onResize);
+  return () => { // without cleanup the timer and listener outlive unmount
+    clearInterval(id);
+    window.removeEventListener("resize", onResize);
+  };
+}, []);
+```
+
 **Purpose** — it is a diagnostic term: memory remains reachable after the data is no longer needed.
 
 **How it works / is used** — clean up subscriptions, timers, observers, and requests on unmount; inspect heap snapshots.
@@ -1338,7 +1601,7 @@ window.addEventListener("scroll", reportScroll, { passive: true });
 **Минусы и ограничения** — any заражает выражения и лишает compiler его главной ценности.
 
 ```ts
-// Плохо: value.name компилируется, даже если value — null.
+// Bad: value.name compiles even when value is null.
 const value: any = JSON.parse(body);
 ```
 
@@ -1461,7 +1724,7 @@ function isUser(value: unknown): value is User {
 function first<T>(items: readonly T[]): T | undefined {
   return items[0];
 }
-const project = first([{ id: "p1", name: "Handbook" }]); // тип объекта сохранён
+const project = first([{ id: "p1", name: "Handbook" }]); // object type is preserved
 ```
 
 **Purpose** — it expresses a relationship between input and output without losing the concrete type.
@@ -1640,7 +1903,7 @@ type LoadState = "idle" | "loading" | "error";
 ```ts
 type User = { id: string; name: string; passwordHash: string };
 type PublicUser = Omit<User, "passwordHash">;
-const labels: Record<"draft" | "published", string> = { draft: "Черновик", published: "Опубликовано" };
+const labels: Record<"draft" | "published", string> = { draft: "Draft", published: "Published" };
 ```
 
 **Purpose** — built-in Partial, Pick, Omit, Record, Required, and Readonly reduce repeated type-level code.
@@ -1662,7 +1925,7 @@ const labels: Record<"draft" | "published", string> = { draft: "Черновик
 
 ```ts
 function renderTags(tags: readonly string[]) {
-  // tags.push("new"); // ошибка компиляции
+  // tags.push("new"); // compile error
   return tags.join(", ");
 }
 ```
@@ -1708,7 +1971,7 @@ type Status = (typeof statuses)[number];
 
 ```ts
 type Route = "/" | "/projects";
-const labels = { "/": "Главная", "/projects": "Проекты" } satisfies Record<Route, string>;
+const labels = { "/": "Home", "/projects": "Projects" } satisfies Record<Route, string>;
 ```
 
 **Purpose** — it checks conformance to a contract while preserving the expression’s precise inferred type.
@@ -1776,7 +2039,17 @@ declare module "legacy-analytics" {
 
 **Минусы и ограничения** — оптимизировать нужно bottleneck, а не все ресурсы подряд.
 
----
+```mermaid
+flowchart TD
+  H[HTML] --> D[DOM]
+  C[CSS] --> O[CSSOM]
+  D --> R[Render tree]
+  O --> R
+  R --> L[Layout]
+  L --> P[Paint]
+  P --> K[Compositing]
+```
+
 **Purpose** — it explains the path from HTML, CSS, and JavaScript to pixels and helps locate slow first render.
 
 **How it works / is used** — the browser builds DOM and CSSOM, then layout, paint, and compositing; measure a waterfall and performance trace.
@@ -1794,7 +2067,15 @@ declare module "legacy-analytics" {
 
 **Минусы и ограничения** — layout иногда неизбежен; ранняя микрооптимизация хуже понятного CSS.
 
----
+```js
+// Bad: reads and writes interleave — layout on every iteration.
+items.forEach((el) => { el.style.height = el.offsetHeight + 10 + "px"; });
+
+// Better: all reads first, then all writes.
+const heights = items.map((el) => el.offsetHeight);
+items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
+```
+
 **Purpose** — layout computes element geometry after size, text, or CSS-rule changes.
 
 **How it works / is used** — batch DOM reads before writes and avoid layout thrashing in loops or scroll handlers.
@@ -1985,7 +2266,7 @@ const observer = new ResizeObserver(([entry]) => {
 });
 
 observer.observe(chartContainer);
-// При удалении компонента: observer.disconnect().
+// On component removal: observer.disconnect().
 ```
 
 **Purpose** — it reacts to size changes of a specific element rather than the whole window.
@@ -2028,7 +2309,15 @@ worker.onmessage = ({ data }) => setResults(data);
 
 **Минусы и ограничения** — telemetry требует privacy review и sampling; averages скрывают страдания медленных пользователей.
 
----
+```ts
+import { onCLS, onINP, onLCP } from "web-vitals";
+
+const report = (metric: Metric) =>
+  navigator.sendBeacon("/vitals", JSON.stringify({ ...metric, route }));
+
+onLCP(report); onCLS(report); onINP(report);
+```
+
 **Purpose** — it collects performance from real devices, networks, and user journeys after release.
 
 **How it works / is used** — send sampled, anonymized metrics with route and device context to observability and compare percentiles.
@@ -2046,7 +2335,13 @@ worker.onmessage = ({ data }) => setResults(data);
 
 **Минусы и ограничения** — слишком много small chunks создаёт waterfall; boundary должен отражать user journey.
 
----
+```ts
+exportButton.addEventListener("click", async () => {
+  const { openExportDialog } = await import("./export-dialog"); // separate chunk
+  openExportDialog();
+});
+```
+
 **Purpose** — it splits JavaScript into chunks loaded by route or on demand.
 
 **How it works / is used** — use route-level splitting by default and feature-level splitting when measured initial-bundle benefit exceeds extra requests.
@@ -2064,7 +2359,11 @@ worker.onmessage = ({ data }) => setResults(data);
 
 **Минусы и ограничения** — CommonJS, side effects и barrel imports могут помешать elimination.
 
----
+```ts
+import { debounce } from "es-toolkit"; // named ESM import — unused code is dropped
+import lodash from "lodash";           // antipattern: the whole package lands in the bundle
+```
+
 **Purpose** — it removes unreachable ESM code from a production bundle.
 
 **How it works / is used** — prefer named ESM imports and side-effect-free modules, and analyze the bundle when adding a heavy dependency.
@@ -2137,7 +2436,14 @@ return <div ref={parentRef} style={{ height: 480, overflow: "auto" }}>
 
 **Минусы и ограничения** — stale/offline data меняет UX и корректность; не кеширую персональные secrets небезопасно.
 
----
+```http
+# Hashed asset: cache for a year, never revalidate.
+Cache-Control: public, max-age=31536000, immutable
+
+# HTML document: always revalidate with the server.
+Cache-Control: no-cache
+```
+
 **Purpose** — it reuses data and assets to reduce latency and bandwidth.
 
 **How it works / is used** — distinguish HTTP cache, service-worker cache, and in-memory query cache; define ownership and invalidation.
@@ -2203,10 +2509,10 @@ const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 
 ```tsx
 <button type="button" aria-expanded={isOpen} aria-controls="filters">
-  Фильтры
+  Filters
 </button>
-<section id="filters" hidden={!isOpen} aria-label="Фильтры проектов">
-  <label>Статус <select value={status} onChange={onStatusChange}><option>Все</option></select></label>
+<section id="filters" hidden={!isOpen} aria-label="Project filters">
+  <label>Status <select value={status} onChange={onStatusChange}><option>All</option></select></label>
 </section>
 ```
 **Purpose** — it makes UI usable with keyboard, screen reader, zoom, and different user abilities.
@@ -2246,7 +2552,14 @@ const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 
 **Минусы и ограничения** — REST не означает CRUD любой ценой; сложные workflow иногда лучше выразить явной командой.
 
----
+```http
+GET    /api/projects        # list
+POST   /api/projects        # create
+GET    /api/projects/42     # single resource
+PATCH  /api/projects/42     # partial update
+DELETE /api/projects/42     # delete
+```
+
 **Purpose** — it defines a clear HTTP contract around resources, actions, and standard status codes.
 
 **How it works / is used** — model nouns and operations, version only when necessary, and document request, response, and error shapes.
@@ -2264,7 +2577,16 @@ const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 
 **Минусы и ограничения** — не устраняет backend complexity; caching, observability, schema evolution и authorization сложнее, чем в простом REST endpoint.
 
----
+```graphql
+query ProjectCard($id: ID!) {
+  project(id: $id) {
+    title
+    owner { name }
+    comments(first: 5) { text }
+  }
+}
+```
+
 **Purpose** — it gives the client a typed graph schema and lets it request exactly needed fields, useful for complex composed screens.
 
 **How it works / is used** — design schema around the domain, limit query depth and cost, authorize every resolver, and batch data access against N+1.
@@ -2282,7 +2604,14 @@ const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 
 **Минусы и ограничения** — HTTP семантика считает GET, PUT и DELETE идемпотентными, а POST/PATCH — не гарантированно; server implementation обязана соблюдать этот contract.
 
----
+```http
+GET    /api/projects/42   # read: cacheable, idempotent
+PUT    /api/projects/42   # full replacement of the representation: idempotent
+PATCH  /api/projects/42   # partial update: not guaranteed idempotent
+DELETE /api/projects/42   # idempotent: retry does not change the outcome
+POST   /api/projects      # processing/creation: retry may create a duplicate
+```
+
 **Purpose** — it conveys standardized operation semantics: GET reads, POST processes a resource representation, PUT creates or replaces a representation at a known URI, PATCH partially modifies, and DELETE removes.
 
 **How it works / is used** — choose a method by contract and provide matching cache and idempotency expectations.
@@ -2324,7 +2653,14 @@ HTTP/1.1 304 Not Modified
 
 **Минусы и ограничения** — key имеет TTL и scope; нельзя применять его вместо правильной concurrency/transaction design.
 
----
+```http
+POST /api/payments
+Idempotency-Key: 7d1e2a4b-9f31-4c8e-b2aa-1f0d6c9e5a77
+
+HTTP/1.1 200 OK
+# A retry with the same key returns the stored result, not a second charge.
+```
+
 **Purpose** — it makes a retried request safe by making it equivalent to one successful execution.
 
 **How it works / is used** — for critical POST requests, accept an idempotency key, store the result by key, and return it on retry.
@@ -2402,7 +2738,12 @@ LIMIT 25;
 
 **Минусы и ограничения** — глубокий offset медленный и concurrent inserts вызывают duplicates/holes.
 
----
+```sql
+SELECT * FROM projects
+ORDER BY created_at DESC, id DESC
+LIMIT 25 OFFSET 50; -- page 3; a deep OFFSET scans every skipped row
+```
+
 **Purpose** — it simply implements page and limit for small, relatively stable tables.
 
 **How it works / is used** — SQL uses ORDER BY, LIMIT, and OFFSET, while UI shows numbered pages.
@@ -2466,7 +2807,11 @@ if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
 
 **Минусы и ограничения** — cookies автоматически идут на запрос, поэтому нужны CSRF protections и корректный domain scope.
 
----
+```http
+HTTP/1.1 200 OK
+Set-Cookie: session=opaque-id-7f3a; Secure; HttpOnly; SameSite=Lax; Max-Age=1209600; Path=/
+```
+
 **Purpose** — it stores server-side login state through an opaque cookie identifier.
 
 **How it works / is used** — set Secure, HttpOnly, SameSite, and reasonable expiry; the server stores or signs session state.
@@ -2484,7 +2829,12 @@ if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
 
 **Минусы и ограничения** — JWT может быть подписанным JWS, зашифрованным JWE или nested; наиболее частый signed JWS не скрывает payload, трудно отзывается и легко становится слишком долгоживущим.
 
----
+```txt
+header.payload.signature
+eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI0MiIsImF1ZCI6ImFwaSIsImV4cCI6MTc1MjU4NDAwMH0.MEUCIQ…
+payload is signed but not encrypted: base64url is readable by anyone
+```
+
 **Purpose** — it carries self-contained claims between parties, often without a server-side lookup on every request.
 
 **How it works / is used** — allow only the expected profile: for the common JWS, validate signature, issuer, audience, expiry, and minimal claims; never put secrets in a readable payload.
@@ -2520,7 +2870,18 @@ if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
 
 **Минусы и ограничения** — это высокоценный credential: утечка опаснее access token; нельзя выдавать его browser JavaScript без явной модели угроз.
 
----
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant API as API
+  participant A as Auth server
+  C->>API: request with access token
+  API-->>C: 401 — token expired
+  C->>A: refresh token
+  A-->>C: new access + rotated refresh
+  C->>API: retry with new access token
+```
+
 **Purpose** — it lets a system issue a new access token without a full login after a short-lived access token expires.
 
 **How it works / is used** — store it more protectively and longer, rotate it on use, detect reuse, and allow server-side revocation of its session family.
@@ -2538,7 +2899,14 @@ if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
 
 **Минусы и ограничения** — CORS не является CSRF защитой; token storage и cross-site flows требуют точной модели угроз.
 
----
+```http
+# The cookie is not sent from another site + the server verifies the header token.
+Set-Cookie: session=opaque-id; Secure; HttpOnly; SameSite=Lax
+
+POST /api/projects/42/delete
+X-CSRF-Token: f3a91c0d…
+```
+
 **Purpose** — it is an attack where another site makes a browser send an authenticated cookie request.
 
 **How it works / is used** — use SameSite cookies, a CSRF token, or origin and referrer validation for state-changing requests.
@@ -2556,7 +2924,14 @@ if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
 
 **Минусы и ограничения** — ручная regex-sanitization ненадёжна; rich-text feature требует audited sanitizer.
 
----
+```js
+// Dangerous: the user string executes as HTML.
+element.innerHTML = comment.text;
+
+// Safe: text stays text.
+element.textContent = comment.text;
+```
+
 **Purpose** — it is the risk of executing untrusted script in the application’s origin.
 
 **How it works / is used** — escape output by default, sanitize allowed HTML, use CSP, and avoid unsafe DOM sinks.
@@ -2623,7 +2998,13 @@ Access-Control-Allow-Headers: Content-Type
 
 **Минусы и ограничения** — policy требует maintenance и может сломать third-party integrations; она defence-in-depth, не замена output escaping.
 
----
+```http
+Content-Security-Policy: default-src 'self';
+  script-src 'self' 'nonce-r4nd0m';
+  img-src 'self' https://cdn.example.com;
+  frame-ancestors 'none'
+```
+
 **Purpose** — it restricts script, style, image, and frame sources to reduce XSS impact.
 
 **How it works / is used** — start in report-only mode, use nonces or hashes for scripts, and tighten directives gradually.
@@ -2750,7 +3131,21 @@ await api.completeUpload({ fileKey });
 
 **Минусы и ограничения** — чрезмерная нормализация усложняет hot reads; осознанная денормализация допустима с ownership и repair plan.
 
----
+```sql
+-- Before: a repeating group in one column.
+-- orders(id, customer_name, products = 'camera, tripod')
+
+-- After: each fact is stored once.
+CREATE TABLE orders (
+  id          bigint PRIMARY KEY,
+  customer_id bigint REFERENCES customers (id)
+);
+CREATE TABLE order_items (
+  order_id   bigint REFERENCES orders (id),
+  product_id bigint REFERENCES products (id)
+);
+```
+
 **Purpose** — it reduces duplication and update anomalies by separating independent facts.
 
 **How it works / is used** — keep user, organization, and membership separately, linked by keys and constraints.
@@ -2768,7 +3163,14 @@ await api.completeUpload({ fileKey });
 
 **Минусы и ограничения** — cascade delete может неожиданно удалить данные; отсутствие FK переносит целостность в хрупкий application code.
 
----
+```sql
+CREATE TABLE comments (
+  id         bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  project_id bigint NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+  body       text NOT NULL
+);
+```
+
 **Purpose** — a primary key identifies a row uniquely, while a foreign key preserves referential integrity.
 
 **How it works / is used** — choose a stable ID, add FKs, and set an explicit on-delete policy by business meaning.
@@ -2812,7 +3214,7 @@ ON projects (workspace_id, created_at DESC);
 CREATE INDEX projects_workspace_updated_idx
   ON projects (workspace_id, updated_at DESC);
 
--- Ускоряет: WHERE workspace_id = $1 ORDER BY updated_at DESC
+-- Speeds up: WHERE workspace_id = $1 ORDER BY updated_at DESC
 ```
 **Purpose** — it covers a query filtering or sorting by several columns.
 
@@ -2881,7 +3283,7 @@ LEFT JOIN users u ON u.id = p.owner_id;
 **Минусы и ограничения** — giant join тоже может раздувать response; лечу конкретный access pattern, а не только число запросов.
 
 ```sql
--- Вместо запроса автора для каждого проекта:
+-- Instead of querying the author for every project:
 SELECT p.id, p.title, u.name AS author_name
 FROM projects p
 JOIN users u ON u.id = p.author_id
@@ -2929,7 +3331,13 @@ COMMIT;
 
 **Минусы и ограничения** — ACID не делает весь distributed workflow атомарным и не отменяет application bugs.
 
----
+```sql
+BEGIN;
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+COMMIT; -- atomic: both changes or neither, even on failure
+```
+
 **Purpose** — it describes atomicity, consistency, isolation, and durability in a transactional database.
 
 **How it works / is used** — rely on atomic commit and constraints and choose isolation level for concurrency-anomaly risk.
@@ -2947,7 +3355,13 @@ COMMIT;
 
 **Минусы и ограничения** — более строгая isolation снижает concurrency и может давать serialization failures, которые нужно retry-ить.
 
----
+```sql
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+SELECT balance FROM accounts WHERE id = 1;
+-- A repeated SELECT returns the same value: a concurrent COMMIT is not visible here.
+COMMIT;
+```
+
 **Purpose** — it defines which concurrent changes a transaction can observe.
 
 **How it works / is used** — start with the database default, then strengthen isolation or locking only for a proven race.
@@ -3011,7 +3425,13 @@ COMMIT;
 
 **Минусы и ограничения** — retry не исправляет логическую contention проблему; нужны метрики и root-cause analysis.
 
----
+```sql
+-- T1: UPDATE accounts ... WHERE id = 1;  then waits for the lock on id = 2
+-- T2: UPDATE accounts ... WHERE id = 2;  then waits for the lock on id = 1
+-- Cycle: the database aborts one transaction.
+-- Fix: acquire rows in one consistent order (for example, by id).
+```
+
 **Purpose** — it is a failure where transactions wait cyclically for each other’s locks.
 
 **How it works / is used** — acquire resources in one order, keep transactions short, and retry a safely aborted transaction.
@@ -3029,7 +3449,11 @@ COMMIT;
 
 **Минусы и ограничения** — pre-check «такой email есть?» не заменяет constraint; nullable semantics отличаются между БД.
 
----
+```sql
+ALTER TABLE users ADD CONSTRAINT users_email_unique UNIQUE (email);
+-- A race between two concurrent signups yields error 23505, not a duplicate.
+```
+
 **Purpose** — it makes a duplicate business identity impossible even under concurrent requests.
 
 **How it works / is used** — add unique on email or tenant-plus-slug and translate violations into a clear domain error.
@@ -3048,10 +3472,10 @@ COMMIT;
 **Минусы и ограничения** — destructive migration или long lock опасны; migration должна быть tested на realistic copy/data size.
 
 ```sql
--- Шаг 1: безопасное расширение схемы.
+-- Step 1: safe additive schema change.
 ALTER TABLE projects ADD COLUMN slug text;
--- Шаг 2: backfill и новый код пишут оба поля.
--- Шаг 3: только после выката добавляю NOT NULL/UNIQUE.
+-- Step 2: backfill; new code writes both fields.
+-- Step 3: add NOT NULL/UNIQUE only after rollout.
 ```
 **Purpose** — it versions safe production-schema change alongside code.
 
@@ -3070,7 +3494,14 @@ ALTER TABLE projects ADD COLUMN slug text;
 
 **Минусы и ограничения** — все queries должны фильтровать deleted rows; unique indexes и восстановление усложняются.
 
----
+```sql
+ALTER TABLE projects ADD COLUMN deleted_at timestamptz;
+
+-- Uniqueness among live rows only:
+CREATE UNIQUE INDEX projects_slug_alive_idx
+  ON projects (slug) WHERE deleted_at IS NULL;
+```
+
 **Purpose** — it hides a record from normal UI while preserving audit and recovery options.
 
 **How it works / is used** — add deletedAt and a centralized default scope, with a separate purge rule for GDPR where required.
@@ -3088,7 +3519,13 @@ ALTER TABLE projects ADD COLUMN slug text;
 
 **Минусы и ограничения** — JSON не повод избегать model design; queries, constraints и migrations становятся труднее.
 
----
+```sql
+SELECT id FROM projects
+WHERE settings @> '{"autosave": true}'; -- JSONB containment
+
+CREATE INDEX projects_settings_idx ON projects USING gin (settings);
+```
+
 **Purpose** — it stores a flexible attribute set when the schema is genuinely variable.
 
 **How it works / is used** — keep core relational fields in columns, validate JSON on write, and index only needed paths.
@@ -3155,7 +3592,16 @@ test("POST /projects persists a project", async () => {
 
 **Минусы и ограничения** — медленные и flaky, поэтому не заменяют unit/integration tests и нуждаются в stable selectors.
 
----
+```ts
+test("user can create a project", async ({ page }) => {
+  await page.goto("/projects");
+  await page.getByRole("button", { name: "Create project" }).click();
+  await page.getByLabel("Name").fill("Demo");
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByText("Demo")).toBeVisible();
+});
+```
+
 **Purpose** — it verifies a valuable user journey through a real browser and deployment-like system.
 
 **How it works / is used** — cover login, critical create or edit flow, and visual assertions where risk justifies the cost.
@@ -3173,7 +3619,12 @@ test("POST /projects persists a project", async () => {
 
 **Минусы и ограничения** — это эвристика, не quota; продукт с тяжёлой UI-интеграцией может нуждаться в другой форме.
 
----
+```mermaid
+flowchart TB
+  E[E2E: a few golden journeys] --> I[Integration: fewer, layer boundaries]
+  I --> U[Unit: many, fast business rules]
+```
+
 **Purpose** — it balances fast cheap tests with fewer high-value integration and E2E checks.
 
 **How it works / is used** — test most logic with units, boundaries with integration, and a few golden journeys end to end.
@@ -3191,7 +3642,15 @@ test("POST /projects persists a project", async () => {
 
 **Минусы и ограничения** — tests, привязанные к внутренним вызовам, ломаются при безопасном refactor.
 
----
+```ts
+const stub = { getRate: () => 0.2 };      // canned answer
+const fake = new InMemoryProjectRepo();   // working simplified implementation
+const mock = vi.fn();                     // verifies interaction
+
+await chargeUser(user, { sendReceipt: mock });
+expect(mock).toHaveBeenCalledWith(user.email);
+```
+
 **Purpose** — it isolates a dependency differently: a stub returns answers, a fake is a working simplification, and a mock verifies interaction.
 
 **How it works / is used** — prefer fakes or stubs for outcome tests and use mocks narrowly for important side effects.
@@ -3291,7 +3750,15 @@ expect(response).toMatchObject({
 
 **Минусы и ограничения** — автоматический deploy не отменяет feature flags, monitoring и rollback plan.
 
----
+```mermaid
+flowchart TD
+  C[Commit] --> B[Build + tests]
+  B --> S[Auto-deploy to staging]
+  S --> G{Gate}
+  G -->|Delivery: manual approval| M[Promote to prod]
+  G -->|Deployment: automatic| P[Prod]
+```
+
 **Purpose** — it reliably delivers a verified artifact to an environment through a repeatable process.
 
 **How it works / is used** — build once, promote the artifact, run migrations and health checks, and retain deployment audit trail.
@@ -3386,9 +3853,9 @@ return <LegacyTimeline />;
 
 ```mermaid
 flowchart LR
-  U[Пользователь] --> LB[Балансировщик]
-  LB --> B[Blue: текущая версия]
-  G[Green: новая версия] --> H[Проверки работоспособности]
+  U[User] --> LB[Load balancer]
+  LB --> B[Blue: current version]
+  G[Green: new version] --> H[Health checks]
   H --> LB
 ```
 
@@ -3411,12 +3878,12 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  U[Трафик] --> LB[Балансировщик]
-  LB -->|95%| S[Стабильная версия]
+  U[Traffic] --> LB[Load balancer]
+  LB -->|95%| S[Stable version]
   LB -->|5%| C[Canary]
-  C --> M[Метрики и алерты]
-  M -->|успех| R[Увеличить долю]
-  M -->|ошибка| RB[Откатить]
+  C --> M[Metrics and alerts]
+  M -->|success| R[Increase share]
+  M -->|failure| RB[Roll back]
 ```
 
 **Purpose** — it limits blast radius by exposing a new version to a small share of users first.
@@ -3436,7 +3903,13 @@ flowchart LR
 
 **Минусы и ограничения** — code rollback не отменяет необратимую data mutation, поэтому critical writes требуют repair strategy.
 
----
+```mermaid
+flowchart TD
+  A[Alert after release] --> D{Schema and data backward compatible?}
+  D -->|yes| R[Roll back to previous artifact]
+  D -->|no| F[Fix forward or disable the feature flag]
+```
+
 **Purpose** — it quickly returns a service to a known working version after a harmful release.
 
 **How it works / is used** — define triggers in advance, keep one-click artifact rollback, and use compatible schema and feature flags.
@@ -3510,7 +3983,18 @@ flowchart LR
 
 **Минусы и ограничения** — добавляет network, distributed data, observability и on-call complexity; не стартовая архитектура по умолчанию.
 
----
+```mermaid
+flowchart TD
+  subgraph MONO [Monolith]
+    M[One deploy: projects + billing + export]
+  end
+  subgraph MICRO [Microservices]
+    G[API gateway] --> S1[Projects]
+    G --> S2[Billing]
+    G --> S3[Video export]
+  end
+```
+
 **Purpose** — it enables independent deployment, scaling, and ownership for genuinely independent bounded contexts.
 
 **How it works / is used** — extract a service after a clear domain boundary, API ownership, and team operational capability exist.
@@ -3546,7 +4030,17 @@ flowchart LR
 
 **Минусы и ограничения** — не делю по таблицам или оргструктуре механически; boundary должен отражать язык и change patterns.
 
----
+```mermaid
+flowchart TD
+  subgraph BC1 [Billing context]
+    B[Project = billing unit]
+  end
+  subgraph BC2 [Editor context]
+    E[Project = scenes and timeline]
+  end
+  B -. shared id, different models .- E
+```
+
 **Purpose** — it defines where a domain term and model have one precise meaning.
 
 **How it works / is used** — separate content authoring, rendering, and billing with explicit translated contracts between them.
@@ -3564,7 +4058,14 @@ flowchart LR
 
 **Минусы и ограничения** — лишние layers для простой CRUD-фичи замедляют delivery; abstraction должна соответствовать volatility.
 
----
+```mermaid
+flowchart TD
+  H[HTTP handler] --> U[Use case]
+  U --> D[Domain rules]
+  U -->|via port| R[Repository interface]
+  PG[Postgres adapter] -. implements .-> R
+```
+
 **Purpose** — it keeps domain and use-case logic independent from framework, database, and transport.
 
 **How it works / is used** — handlers and adapters translate input, while an application service applies business rules through ports.
@@ -3582,7 +4083,14 @@ flowchart LR
 
 **Минусы и ограничения** — не каждый helper заслуживает port; слишком много interfaces скрывает простой flow.
 
----
+```mermaid
+flowchart TD
+  HTTP[HTTP adapter] -->|driving port| CORE[Domain core]
+  Q[Queue consumer] -->|driving port| CORE
+  CORE -->|driven port| DB[Postgres adapter]
+  CORE -->|driven port| MAIL[Email adapter]
+```
+
 **Purpose** — it isolates a domain through ports and adapters for HTTP, DB, queues, and external APIs.
 
 **How it works / is used** — a use case depends on an interface and a concrete adapter is wired at the composition root.
@@ -3602,11 +4110,11 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  C[Команда: изменить проект] --> W[Write model]
-  W --> DB[(Основная БД)]
-  DB --> P[Проекция]
+  C[Command: update project] --> W[Write model]
+  W --> DB[(Primary DB)]
+  DB --> P[Projection]
   P --> R[(Read model)]
-  Q[Запрос: список проектов] --> R
+  Q[Query: project list] --> R
 ```
 
 **Purpose** — it separates command and query models or paths when their requirements differ greatly.
@@ -3626,7 +4134,15 @@ flowchart LR
 
 **Минусы и ограничения** — replay, evolution, debugging и eventual consistency дороги; audit log сам по себе не требует event sourcing.
 
----
+```mermaid
+flowchart TD
+  C[Command] --> A[Aggregate]
+  A -->|new event| ES[(Event store, append-only)]
+  ES -->|replay| A
+  ES --> P[Projections]
+  P --> R[(Read models)]
+```
+
 **Purpose** — it stores an immutable sequence of domain events as the source of state and audit history.
 
 **How it works / is used** — an aggregate is rebuilt from events, projections make read models, and event schemas are versioned.
@@ -3644,7 +4160,14 @@ flowchart LR
 
 **Минусы и ограничения** — tracing и ordering сложнее; event нельзя трактовать как synchronous RPC с другим названием.
 
----
+```mermaid
+flowchart TD
+  P[Producer: video.uploaded] --> B[(Broker / queue)]
+  B --> T[Consumer: transcoding]
+  B --> N[Consumer: notifications]
+  B --> A[Consumer: analytics]
+```
+
 **Purpose** — it loosely couples producers and asynchronous consumers for background workflows.
 
 **How it works / is used** — a producer publishes a named fact, consumers process it idempotently, and lag and failure are monitored.
@@ -3731,7 +4254,7 @@ queue.consume("render-video", async ({ jobId }) => await renderVideo(jobId));
 ```sql
 INSERT INTO processed_events (event_id) VALUES ($1)
 ON CONFLICT DO NOTHING;
--- Побочный эффект выполняю только если вставлена новая строка.
+-- Run the side effect only if a new row was inserted.
 ```
 **Purpose** — it safely processes a duplicate message or webhook without repeating a side effect.
 
@@ -3799,9 +4322,18 @@ if (!project) {
 **Минусы и ограничения** — lock может истечь во время работы; это не магия exactly-once и требует failure model.
 
 ```ts
-const lock = await redis.set(`render:${videoId}`, workerId, { NX: true, PX: 30_000 });
+const token = crypto.randomUUID();
+const lock = await redis.set(`render:${videoId}`, token, { NX: true, PX: 30_000 });
 if (!lock) return;
-try { await renderVideo(videoId); } finally { await redis.del(`render:${videoId}`); }
+try {
+  await renderVideo(videoId);
+} finally {
+  // Atomic compare-and-delete: never release a lease acquired by another worker.
+  await redis.eval(
+    'if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) end',
+    { keys: [`render:${videoId}`], arguments: [token] },
+  );
+}
 ```
 **Purpose** — it coordinates single execution of a scheduled or critical job across instances.
 
@@ -3820,7 +4352,15 @@ try { await renderVideo(videoId); } finally { await redis.del(`render:${videoId}
 
 **Минусы и ограничения** — session affinity ухудшает баланс и failover; shared dependencies часто становятся реальным bottleneck.
 
----
+```mermaid
+flowchart TD
+  U[Clients] --> LB[Load balancer: round-robin / least connections]
+  LB --> A[Instance A]
+  LB --> B[Instance B]
+  LB --> C[Instance C]
+  LB -. health check .-> A
+```
+
 **Purpose** — it distributes requests across healthy instances for availability and horizontal scale.
 
 **How it works / is used** — a load balancer performs health checks and routing, sometimes sticky sessions; keep the app as stateless as possible.
@@ -3838,7 +4378,14 @@ try { await renderVideo(videoId); } finally { await redis.del(`render:${videoId}
 
 **Минусы и ограничения** — dropping/limiting work — product decision; бесконечная очередь лишь отложит failure.
 
----
+```mermaid
+flowchart TD
+  P[Producer: 1000 msg/s] --> Q[(Bounded queue)]
+  Q --> C[Consumer: 300 msg/s]
+  Q -->|full| S[Signal back: slow down, reject, or shed]
+  S -.-> P
+```
+
 **Purpose** — it prevents collapse when a producer creates work faster than a consumer can process it.
 
 **How it works / is used** — limit concurrency or queue size, return a retryable response or slow the producer, and monitor lag.
@@ -3948,7 +4495,16 @@ try { await renderVideo(videoId); } finally { await redis.del(`render:${videoId}
 
 **Минусы и ограничения** — большой context не гарантирует внимание к нужному факту и может ухудшить cost/качество.
 
----
+```txt
+A 200k-token window — input and output share one budget:
+  system prompt        1k
+  chat history        12k
+  RAG context          8k
+  question            0.2k
+  output reserve       8k   ← without a reserve the answer gets truncated
+Does not fit → summarize the history instead of silently dropping the tail.
+```
+
 **Purpose** — tokens determine billing and latency, while the context window limits input and output the model can consider per request.
 
 **How it works / is used** — budget instructions, retrieved evidence, and response; chunk documents by meaning rather than arbitrary limits.
@@ -3966,7 +4522,11 @@ try { await renderVideo(videoId); } finally { await redis.del(`render:${videoId}
 
 **Минусы и ограничения** — similarity не доказывает factual relevance; multilingual/domain quality нужно измерять на своих запросах.
 
----
+```ts
+const [a, b] = await embed(["how to trim a video", "clip cutting tool"]);
+cosineSimilarity(a, b); // ~0.8 — semantically close with no shared words
+```
+
 **Purpose** — it turns content into a vector for semantic similarity, search, or clustering.
 
 **How it works / is used** — embed chunks and queries with one model family, store metadata and filter fields, and reindex when the model changes.
@@ -4257,7 +4817,15 @@ for (const example of evalSet) {
 
 **Минусы и ограничения** — PII и duplicate events искажают аналитику; tracking plan требует versioning и privacy controls.
 
----
+```ts
+track("project_exported", {
+  projectId,
+  format: "mp4",
+  durationSec: 42,
+  plan: user.plan, // no PII: identifiers instead of email
+});
+```
+
 **Purpose** — it records user actions and funnel steps for product analysis and debugging.
 
 **How it works / is used** — an event has stable name, schema, timestamp, actor and context, plus documented ownership; send only necessary data.
