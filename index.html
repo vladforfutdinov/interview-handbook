@@ -39,13 +39,15 @@
       #toc a:hover, #toc a[aria-current="true"] { color: #175cd3; background: #eff4ff; }
       #toc .toc-h3 { padding-left: 1rem; font-size: .8rem; }
       #mobile-actions { display: none; }
-      #toc-toggle, #to-top { display: none; }
+      #toc-toggle, #refresh, #to-top { display: none; }
+      #refresh[hidden] { display: none !important; }
       @media (max-width: 1100px) {
         #toc { display: none; top: auto; right: .75rem; bottom: 4.25rem; width: min(320px, calc(100vw - 1.5rem)); max-height: 55vh; }
         #toc.toc-open { display: block; }
         #mobile-actions { display: flex; position: fixed; left: 50%; bottom: .75rem; z-index: 1; align-items: center; transform: translateX(-50%); }
-        #toc-toggle, #to-top { display: block; padding: .65rem .9rem; border: 0; border-radius: 999px; box-shadow: 0 8px 20px rgb(16 24 40 / 22%); font: inherit; font-weight: 650; }
+        #toc-toggle, #refresh, #to-top { display: block; padding: .65rem .9rem; border: 0; border-radius: 999px; box-shadow: 0 8px 20px rgb(16 24 40 / 22%); font: inherit; font-weight: 650; }
         #toc-toggle { background: #175cd3; color: white; }
+        #refresh { position: absolute; right: calc(100% + .45rem); background: white; color: #175cd3; }
         #to-top { position: fixed; right: .75rem; bottom: .75rem; z-index: 1; background: white; color: #175cd3; }
       }
     </style>
@@ -63,6 +65,7 @@
       <ol></ol>
     </aside>
     <div id="mobile-actions" hidden>
+      <button id="refresh" type="button" aria-label="Доступна новая версия" title="Обновить handbook" hidden>↻</button>
       <button id="toc-toggle" type="button" aria-controls="toc" aria-expanded="false">Содержание</button>
     </div>
     <button id="to-top" type="button" aria-label="Наверх" title="Наверх">↑</button>
@@ -72,6 +75,7 @@
     <script>
       const scrollPositionKey = `handbook-scroll:${location.pathname}`;
       const navigationType = performance.getEntriesByType("navigation")[0]?.type;
+      let loadedHandbookVersion;
       const savedScrollPosition = (() => {
         try {
           return Number(sessionStorage.getItem(scrollPositionKey));
@@ -206,6 +210,7 @@
       function showVersion(markdown) {
         const version = markdown.match(/data-version="([^"]+)"/)?.[1];
         if (!version) return;
+        loadedHandbookVersion = version;
         document.querySelectorAll("#content .handbook-version").forEach((element) => element.remove());
         const title = document.querySelector("#content h1");
         if (title) {
@@ -215,6 +220,20 @@
           title.after(badge);
         }
         document.getElementById("toc-version").textContent = version;
+      }
+
+      async function checkForUpdate() {
+        if (!loadedHandbookVersion) return;
+        try {
+          const response = await fetch(`./senior-fullstack-interview-handbook.md?check=${Date.now()}`, { cache: "no-store" });
+          const markdown = await response.text();
+          const availableVersion = markdown.match(/data-version="([^"]+)"/)?.[1];
+          if (availableVersion && availableVersion !== loadedHandbookVersion) {
+            document.getElementById("refresh").hidden = false;
+          }
+        } catch {
+          // A transient network failure should not affect reading the current handbook.
+        }
       }
 
       fetch("./senior-fullstack-interview-handbook.md")
@@ -230,6 +249,11 @@
           if (window.hljs) document.querySelectorAll("#content pre code").forEach((block) => hljs.highlightElement(block));
           showVersion(markdown);
           buildToc();
+          document.getElementById("refresh").addEventListener("click", () => location.reload());
+          setInterval(checkForUpdate, 60_000);
+          document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") checkForUpdate();
+          });
           restoreScrollPosition();
         })
         .catch((error) => {
