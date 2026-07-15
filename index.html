@@ -91,7 +91,15 @@
         });
       }
 
-      window.addEventListener("scroll", saveScrollPosition, { passive: true });
+      if ("onscrollend" in window) {
+        window.addEventListener("scrollend", saveScrollPosition, { passive: true });
+      } else {
+        let scrollEndTimer;
+        window.addEventListener("scroll", () => {
+          clearTimeout(scrollEndTimer);
+          scrollEndTimer = setTimeout(saveScrollPosition, 150);
+        }, { passive: true });
+      }
       window.addEventListener("pagehide", saveScrollPosition);
       window.addEventListener("beforeunload", saveScrollPosition);
       document.addEventListener("visibilitychange", () => {
@@ -171,9 +179,18 @@
         });
       }
 
-      function showVersion() {
-        const version = document.querySelector("#content .handbook-version[data-version]");
-        document.getElementById("toc-version").textContent = version?.dataset.version || "";
+      function showVersion(markdown) {
+        const version = markdown.match(/data-version="([^"]+)"/)?.[1];
+        if (!version) return;
+        document.querySelectorAll("#content .handbook-version").forEach((element) => element.remove());
+        const title = document.querySelector("#content h1");
+        if (title) {
+          const badge = document.createElement("p");
+          badge.className = "handbook-version";
+          badge.textContent = `Версия ${version}`;
+          title.after(badge);
+        }
+        document.getElementById("toc-version").textContent = version;
       }
 
       fetch("./senior-fullstack-interview-handbook.md")
@@ -186,7 +203,7 @@
           document.getElementById("content").innerHTML = marked.parse(markdown, { gfm: true });
           removeInlineToc();
           makeTablesScrollable();
-          showVersion();
+          showVersion(markdown);
           buildToc();
           restoreScrollPosition();
         })
