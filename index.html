@@ -42,10 +42,10 @@
       @media (max-width: 1100px) {
         #toc { display: none; top: auto; right: .75rem; bottom: 4.25rem; width: min(320px, calc(100vw - 1.5rem)); max-height: 55vh; }
         #toc.toc-open { display: block; }
-        #mobile-actions { display: flex; position: fixed; left: 50%; bottom: .75rem; z-index: 1; gap: .45rem; align-items: center; transform: translateX(-50%); }
+        #mobile-actions { display: flex; position: fixed; left: 50%; bottom: .75rem; z-index: 1; align-items: center; transform: translateX(-50%); }
         #toc-toggle, #to-top { display: block; padding: .65rem .9rem; border: 0; border-radius: 999px; box-shadow: 0 8px 20px rgb(16 24 40 / 22%); font: inherit; font-weight: 650; }
         #toc-toggle { background: #175cd3; color: white; }
-        #to-top { background: white; color: #175cd3; }
+        #to-top { position: fixed; right: .75rem; bottom: .75rem; z-index: 1; background: white; color: #175cd3; }
       }
     </style>
   </head>
@@ -63,8 +63,8 @@
     </aside>
     <div id="mobile-actions" hidden>
       <button id="toc-toggle" type="button" aria-controls="toc" aria-expanded="false">Содержание</button>
-      <button id="to-top" type="button" aria-label="Наверх" title="Наверх">↑</button>
     </div>
+    <button id="to-top" type="button" aria-label="Наверх" title="Наверх">↑</button>
     <main id="content"><p id="status">Loading handbook…</p></main>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
@@ -162,6 +162,7 @@
           toggle.setAttribute("aria-expanded", "false");
         });
         const links = new Map([...list.querySelectorAll("a")].map((link) => [link.hash.slice(1), link]));
+        let activeHeadingId;
         list.addEventListener("click", () => {
           toc.classList.remove("toc-open");
           toggle.setAttribute("aria-expanded", "false");
@@ -169,8 +170,12 @@
         const observer = new IntersectionObserver((entries) => {
           const current = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
           if (!current) return;
+          if (current.target.id === activeHeadingId) return;
+          activeHeadingId = current.target.id;
           links.forEach((link) => link.removeAttribute("aria-current"));
-          links.get(current.target.id)?.setAttribute("aria-current", "true");
+          const activeLink = links.get(current.target.id);
+          activeLink?.setAttribute("aria-current", "true");
+          activeLink?.scrollIntoView({ block: "nearest" });
         }, { rootMargin: "-18% 0px -70%" });
         headings.forEach((heading) => observer.observe(heading));
       }
