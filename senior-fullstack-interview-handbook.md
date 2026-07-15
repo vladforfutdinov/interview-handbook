@@ -2163,7 +2163,13 @@ localStorage.setItem("editor-preferences", JSON.stringify(preferences));
 
 **Минусы и ограничения** — также доступен JavaScript при XSS и не подходит для auth secrets; не синхронизируется как shared state между вкладками.
 
----
+```ts
+const draftKey = `project-draft:${projectId}`;
+sessionStorage.setItem(draftKey, JSON.stringify({ title, script }));
+
+const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
+```
+
 **Purpose** — it persists small non-sensitive data only for one browser tab or session, such as wizard progress.
 
 **How it works / is used** — use the same origin API but expect per-tab storage and cleanup when that tab closes.
