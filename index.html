@@ -57,6 +57,30 @@
     <main id="content"><p id="status">Loading handbook…</p></main>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
+      const scrollPositionKey = `handbook-scroll:${location.pathname}`;
+
+      function saveScrollPosition() {
+        try {
+          sessionStorage.setItem(scrollPositionKey, String(window.scrollY));
+        } catch {
+          // Storage may be disabled; the handbook should still render normally.
+        }
+      }
+
+      function restoreScrollPosition() {
+        if (location.hash) return;
+        try {
+          const savedPosition = Number(sessionStorage.getItem(scrollPositionKey));
+          if (!Number.isFinite(savedPosition) || savedPosition <= 0) return;
+          requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, savedPosition)));
+        } catch {
+          // Storage may be disabled; the browser's default scroll restoration remains available.
+        }
+      }
+
+      window.addEventListener("scroll", saveScrollPosition, { passive: true });
+      window.addEventListener("pagehide", saveScrollPosition);
+
       function slugify(value) {
         return value
           .toLowerCase()
@@ -136,10 +160,12 @@
           return response.text();
         })
         .then((markdown) => {
+          saveScrollPosition();
           document.getElementById("content").innerHTML = marked.parse(markdown, { gfm: true });
           removeInlineToc();
           makeTablesScrollable();
           buildToc();
+          restoreScrollPosition();
         })
         .catch((error) => {
           document.getElementById("status").textContent = `Unable to load handbook: ${error.message}`;
