@@ -71,7 +71,7 @@
     <button id="to-top" type="button" aria-label="Наверх" title="Наверх">↑</button>
     <main id="content"><p id="status">Loading handbook…</p></main>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/lib/common.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script>
     <script>
       const scrollPositionKey = `handbook-scroll:${location.pathname}`;
       const navigationType = performance.getEntriesByType("navigation")[0]?.type;
@@ -246,7 +246,21 @@
           document.getElementById("content").innerHTML = marked.parse(markdown, { gfm: true });
           removeInlineToc();
           makeTablesScrollable();
-          if (window.hljs) document.querySelectorAll("#content pre code").forEach((block) => hljs.highlightElement(block));
+          if (window.hljs) {
+            const aliases = { ts: "typescript", tsx: "typescript", yml: "yaml", dockerfile: "dockerfile", sh: "bash" };
+            document.querySelectorAll("#content pre code").forEach((block) => {
+              const language = [...block.classList].find((name) => name.startsWith("language-"))?.slice(9);
+              if (language && aliases[language]) {
+                block.classList.remove(`language-${language}`);
+                block.classList.add(`language-${aliases[language]}`);
+              }
+              try {
+                hljs.highlightElement(block);
+              } catch {
+                // A malformed or unknown language marker should leave readable plain code.
+              }
+            });
+          }
           showVersion(markdown);
           buildToc();
           document.getElementById("refresh").addEventListener("click", () => location.reload());
