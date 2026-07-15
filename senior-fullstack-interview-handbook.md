@@ -1,6 +1,6 @@
 # Senior Fullstack Engineer Interview Handbook
 
-<p class="handbook-version" data-version="v1.2.8">Версия <code>v1.2.8</code></p>
+<p class="handbook-version" data-version="v1.2.9">Версия <code>v1.2.9</code></p>
 
 Практический конспект для формата **tech roulette** и последующего system-design интервью. Он ориентирован на роль, где важны Next.js, React, TypeScript, простые REST-эндпоинты и SQL-запросы, производительность, тестируемый код и самостоятельное ведение фичи от UI до базы данных.
 
@@ -790,7 +790,16 @@ export async function GET() {
 
 **Минусы и ограничения** — не подходит для slow data fetching или полного session management; окончательную авторизацию всё равно проверяет endpoint, а runtime зависит от версии Next.js.
 
----
+```ts
+import { NextRequest, NextResponse } from "next/server";
+
+export function proxy(request: NextRequest) {
+  if (!request.cookies.get("session")) return NextResponse.redirect(new URL("/login", request.url));
+  return NextResponse.next();
+}
+
+export const config = { matcher: ["/projects/:path*"] };
+```
 **Purpose** — it performs short request-time logic before a route, such as redirects, rewrites, locale, or a coarse auth gate.
 
 **How it works / is used** — in Next.js 16, use proxy.ts and match only required paths; inspect request or cookie, then return next, rewrite, or redirect.
@@ -826,7 +835,12 @@ export async function GET() {
 
 **Минусы и ограничения** — cache — это часть корректности: неясный ownership или invalidation создают трудноуловимые stale bugs.
 
----
+```ts
+import { revalidatePath } from "next/cache";
+
+await db.project.update({ where: { id }, data: input });
+revalidatePath(`/projects/${id}`);
+```
 **Purpose** — it reduces repeated work and requests while keeping data acceptably fresh.
 
 **How it works / is used** — explicitly define cache scope, TTL, and invalidation tags or paths after mutations.
@@ -2187,7 +2201,14 @@ const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 
 **Минусы и ограничения** — ARIA не исправляет плохой HTML; custom widgets требуют особенно тщательной interaction semantics.
 
----
+```tsx
+<button type="button" aria-expanded={isOpen} aria-controls="filters">
+  Фильтры
+</button>
+<section id="filters" hidden={!isOpen} aria-label="Фильтры проектов">
+  <label>Статус <select value={status} onChange={onStatusChange}><option>Все</option></select></label>
+</section>
+```
 **Purpose** — it makes UI usable with keyboard, screen reader, zoom, and different user abilities.
 
 **How it works / is used** — start with semantic HTML, visible focus, labels, correct tab order, and keyboard-only testing.
@@ -2422,7 +2443,12 @@ if (!principal) return new Response("Unauthorized", { status: 401 });
 
 **Минусы и ограничения** — UI check полезен для UX, но не защищает endpoint; роли часто недостаточны без resource context.
 
----
+```ts
+const project = await projects.get(projectId);
+if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
+  return new Response("Forbidden", { status: 403 });
+}
+```
 **Purpose** — it checks whether a particular principal can perform an action on a particular resource.
 
 **How it works / is used** — policy checks tenant, ownership, role, and domain rules in the backend, not just by hiding a button.
@@ -2570,7 +2596,16 @@ Access-Control-Allow-Credentials: true
 
 **Минусы и ограничения** — preflight добавляет latency и cache policy; он не защищает API от non-browser client и не заменяет auth.
 
----
+```http
+OPTIONS /api/projects
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: content-type
+
+HTTP/1.1 204 No Content
+Access-Control-Allow-Origin: https://app.example.com
+Access-Control-Allow-Methods: POST
+Access-Control-Allow-Headers: Content-Type
+```
 **Purpose** — the browser checks in advance whether a server permits a cross-origin request with non-simple method or headers.
 
 **How it works / is used** — the browser sends credential-free OPTIONS; the server returns allowed origin, methods, headers, and when needed credentials, then the browser decides whether to send the actual request.
@@ -3012,7 +3047,12 @@ COMMIT;
 
 **Минусы и ограничения** — destructive migration или long lock опасны; migration должна быть tested на realistic copy/data size.
 
----
+```sql
+-- Шаг 1: безопасное расширение схемы.
+ALTER TABLE projects ADD COLUMN slug text;
+-- Шаг 2: backfill и новый код пишут оба поля.
+-- Шаг 3: только после выката добавляю NOT NULL/UNIQUE.
+```
 **Purpose** — it versions safe production-schema change alongside code.
 
 **How it works / is used** — make additive changes, backfill, use dual read or write if needed, then remove separately after deployment.
@@ -3296,7 +3336,14 @@ CMD ["node", "dist/server.js"]
 
 **Минусы и ограничения** — env sprawl не заменяет typed config; secret нельзя логировать или отправлять в client bundle.
 
----
+```ts
+const config = {
+  databaseUrl: process.env.DATABASE_URL,
+  port: Number(process.env.PORT ?? 3000),
+};
+
+if (!config.databaseUrl) throw new Error("DATABASE_URL is required");
+```
 **Purpose** — it separates deployment-specific values and secrets from application code.
 
 **How it works / is used** — validate an env schema at startup, keep secrets in a secret manager, and document required variables.
@@ -3937,7 +3984,13 @@ try { await renderVideo(videoId); } finally { await redis.del(`render:${videoId}
 
 **Минусы и ограничения** — это не замена source database и access control; index freshness, deletes и cost требуют ownership.
 
----
+```ts
+const matches = await vectorIndex.search({
+  vector: await embed(question),
+  limit: 8,
+  filter: { tenantId, permission: "read" },
+});
+```
 **Purpose** — it stores embeddings and rapidly finds approximate nearest neighbors with metadata filters.
 
 **How it works / is used** — index chunks with source, version, and permissions metadata, run top-k search, and apply tenant filters before response.
