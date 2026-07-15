@@ -1,6 +1,6 @@
 # Senior Fullstack Engineer Interview Handbook
 
-<p class="handbook-version" data-version="v1.1.10">Версия <code>v1.1.10</code></p>
+<p class="handbook-version" data-version="v1.1.12">Версия <code>v1.1.12</code></p>
 
 Практический конспект для формата **tech roulette** и последующего system-design интервью. Он ориентирован на роль, где важны Next.js, React, TypeScript, простые REST-эндпоинты и SQL-запросы, производительность, тестируемый код и самостоятельное ведение фичи от UI до базы данных.
 
@@ -230,6 +230,12 @@ const visibleUsers = useMemo(
 **Для чего используется** — Практический пример: применяю для фокусировки, таймера, AbortController или предыдущего значения, обновляя ссылку в эффекте либо обработчике.
 
 **Как используется / работает** — применяю для фокусировки, таймера, AbortController или предыдущего значения, обновляя ссылку в эффекте либо обработчике.
+
+```tsx
+const inputRef = useRef<HTMLInputElement>(null);
+<button onClick={() => inputRef.current?.focus()}>Найти</button>
+<input ref={inputRef} />
+```
 **Минусы и ограничения** — изменение ссылки не обновляет экран; не стоит хранить там состояние, которое должно быть видно пользователю.
 
 
@@ -315,6 +321,11 @@ onChange={(event) => {
 **Для чего используется** — Практический пример: размещаю провайдер близко к потребителям и разделяю контексты по частоте обновления.
 
 **Как используется / работает** — размещаю провайдер близко к потребителям и разделяю контексты по частоте обновления.
+
+```tsx
+const ThemeContext = createContext<"light" | "dark">("light");
+<ThemeContext.Provider value="dark"><Editor /></ThemeContext.Provider>
+```
 **Минусы и ограничения** — изменение значения перерендеривает всех потребителей; это не универсальная замена локальному или серверному состоянию.
 
 
@@ -487,6 +498,13 @@ const query = useQuery({
 **Для чего используется** — Практический пример: сервер получает данные, рендерит HTML, затем клиент гидратирует интерактивные части.
 
 **Как используется / работает** — сервер получает данные, рендерит HTML, затем клиент гидратирует интерактивные части.
+
+```tsx
+export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
+  const project = await getProject((await params).id);
+  return <ProjectView project={project} />;
+}
+```
 **Минусы и ограничения** — увеличивает TTFB и нагрузку сервера; стратегия кэширования критична для масштабирования.
 
 
@@ -529,6 +547,11 @@ const query = useQuery({
 **Для чего используется** — Практический пример: задаю revalidate или запускаю on-demand revalidation после изменения данных.
 
 **Как используется / работает** — задаю revalidate или запускаю on-demand revalidation после изменения данных.
+
+```ts
+export const revalidate = 60;
+// Next.js повторно создаст страницу не чаще одного раза в минуту.
+```
 **Минусы и ограничения** — нужно принять bounded staleness и продумать invalidation; неверная настройка показывает старые данные.
 **Версионная заметка** — в Next.js 16 актуальная cache-модель строится вокруг Cache Components и директивы use cache; термин ISR остаётся полезным, но детали зависят от версии и конфигурации.
 
@@ -716,6 +739,14 @@ export async function renameProject(formData: FormData) {
 **Для чего используется** — Практический пример: применяю для фабрик, private state и callbacks; React handlers также замыкают values render-а.
 
 **Как используется / работает** — применяю для фабрик, private state и callbacks; React handlers также замыкают values render-а.
+
+```ts
+function makeCounter() {
+  let count = 0;
+  return () => ++count;
+}
+const next = makeCounter();
+```
 **Минусы и ограничения** — долгоживущая closure может удерживать память или читать устаревший state.
 
 
@@ -730,6 +761,13 @@ export async function renameProject(formData: FormData) {
 **Для чего используется** — Практический пример: текущий call stack заканчивается, затем draining microtasks, затем browser получает шанс отрисовать следующий кадр.
 
 **Как используется / работает** — текущий call stack заканчивается, затем draining microtasks, затем browser получает шанс отрисовать следующий кадр.
+
+```ts
+console.log("A");
+Promise.resolve().then(() => console.log("microtask"));
+setTimeout(() => console.log("task"));
+console.log("B"); // A, B, microtask, task
+```
 **Минусы и ограничения** — длинный synchronous task блокирует ввод и paint независимо от async API.
 
 
@@ -1506,6 +1544,13 @@ declare module "legacy-analytics" {
 **Для чего используется** — Практический пример: применяю для lazy image, infinite scroll sentinel или impression analytics и disconnect-аю observer.
 
 **Как используется / работает** — применяю для lazy image, infinite scroll sentinel или impression analytics и disconnect-аю observer.
+
+```ts
+const observer = new IntersectionObserver(([entry]) => {
+  if (entry.isIntersecting) loadNextPage();
+});
+observer.observe(sentinel);
+```
 **Минусы и ограничения** — threshold и rootMargin требуют настройки; не заменяет нормальную pagination и accessibility.
 
 
@@ -1534,6 +1579,12 @@ declare module "legacy-analytics" {
 **Для чего используется** — Практический пример: отправляю serializable message в worker для parsing, image processing или большого search index.
 
 **Как используется / работает** — отправляю serializable message в worker для parsing, image processing или большого search index.
+
+```ts
+const worker = new Worker(new URL("./search-worker.ts", import.meta.url));
+worker.postMessage({ type: "index", documents });
+worker.onmessage = ({ data }) => setResults(data);
+```
 **Минусы и ограничения** — worker не имеет DOM и несёт serialization/startup overhead; сеть или простой код не ускорит.
 
 
@@ -1815,6 +1866,12 @@ LIMIT 25;
 **Для чего используется** — Практический пример: проверяю credential/session/token на сервере, создаю principal и передаю его в use case.
 
 **Как используется / работает** — проверяю credential/session/token на сервере, создаю principal и передаю его в use case.
+
+```ts
+const token = request.headers.get("authorization")?.replace("Bearer ", "");
+const principal = await verifyAccessToken(token);
+if (!principal) return new Response("Unauthorized", { status: 401 });
+```
 **Минусы и ограничения** — authenticated пользователь не обязательно имеет право на действие; это отдельная authorization проверка.
 
 
@@ -1982,6 +2039,14 @@ Access-Control-Allow-Credentials: true
 **Для чего используется** — Практический пример: проверяю signature и timestamp, быстро ack-аю, ставлю работу в queue и дедуплицирую event id.
 
 **Как используется / работает** — проверяю signature и timestamp, быстро ack-аю, ставлю работу в queue и дедуплицирую event id.
+
+```ts
+if (!verifySignature(rawBody, request.headers.get("x-signature"))) {
+  return new Response("Invalid signature", { status: 401 });
+}
+await queue.enqueue({ eventId: payload.id, type: payload.type });
+return new Response(null, { status: 202 });
+```
 **Минусы и ограничения** — delivery обычно at-least-once и неупорядочен; нужен retry, idempotency и observability.
 
 
@@ -2068,6 +2133,11 @@ Access-Control-Allow-Credentials: true
 **Для чего используется** — Практический пример: строю index под реальный WHERE/JOIN/ORDER BY, проверяю EXPLAIN и selectivity.
 
 **Как используется / работает** — строю index под реальный WHERE/JOIN/ORDER BY, проверяю EXPLAIN и selectivity.
+
+```sql
+CREATE INDEX projects_workspace_created_at_idx
+ON projects (workspace_id, created_at DESC);
+```
 **Минусы и ограничения** — лишние indexes замедляют insert/update; index не спасёт query, возвращающий слишком много данных.
 
 
@@ -2110,6 +2180,12 @@ Access-Control-Allow-Credentials: true
 **Для чего используется** — Практический пример: INNER JOIN берёт совпадения, LEFT JOIN сохраняет левую сторону; выбираю только нужные columns.
 
 **Как используется / работает** — INNER JOIN берёт совпадения, LEFT JOIN сохраняет левую сторону; выбираю только нужные columns.
+
+```sql
+SELECT p.id, p.name, u.name AS owner_name
+FROM projects p
+LEFT JOIN users u ON u.id = p.owner_id;
+```
 **Минусы и ограничения** — join с one-to-many размножает родительские rows; нужно понимать cardinality и pagination.
 
 
@@ -2313,6 +2389,13 @@ test("rejects an expired token", () => {
 **Для чего используется** — Практический пример: поднимаю реальный/ephemeral dependency либо contract-faithful fake и проверяю полный outcome.
 
 **Как используется / работает** — поднимаю реальный/ephemeral dependency либо contract-faithful fake и проверяю полный outcome.
+
+```ts
+test("POST /projects persists a project", async () => {
+  const response = await app.fetch(new Request("http://app/projects", { method: "POST", body: '{"name":"Demo"}' }));
+  expect(response.status).toBe(201);
+});
+```
 **Минусы и ограничения** — медленнее и хрупче unit tests; test data и isolation требуют дисциплины.
 
 
@@ -2411,6 +2494,12 @@ test("rejects an expired token", () => {
 **Для чего используется** — Практический пример: запускаю typecheck, tests, lint, build и быстрые security checks на clean reproducible environment.
 
 **Как используется / работает** — запускаю typecheck, tests, lint, build и быстрые security checks на clean reproducible environment.
+
+```yaml
+- run: bun install --frozen-lockfile
+- run: bun run lint
+- run: bun test
+```
 **Минусы и ограничения** — медленный/noisy pipeline обходят; local и CI gates должны быть согласованы.
 
 
@@ -2705,6 +2794,11 @@ socket.addEventListener("message", ({ data }) => updateProject(JSON.parse(data))
 **Для чего используется** — Практический пример: browser открывает EventSource, server посылает named events и id; client reconnect-ится и может передать last event id для continuation.
 
 **Как используется / работает** — browser открывает EventSource, server посылает named events и id; client reconnect-ится и может передать last event id для continuation.
+
+```ts
+const events = new EventSource("/api/jobs/42/events");
+events.addEventListener("progress", (event) => setProgress(JSON.parse(event.data)));
+```
 **Минусы и ограничения** — канал односторонний и text-based; client-to-server commands всё равно идут обычным HTTP, а connection limits/proxy buffering нужно проверить.
 
 **Purpose** — it delivers a server-to-client stream of updates over ordinary HTTP, such as video-generation progress or notifications.
@@ -2718,6 +2812,11 @@ socket.addEventListener("message", ({ data }) => updateProject(JSON.parse(data))
 **Для чего используется** — Практический пример: API сохраняет job, enqueue-ит message, worker берёт task с retry, visibility timeout и dead-letter policy.
 
 **Как используется / работает** — API сохраняет job, enqueue-ит message, worker берёт task с retry, visibility timeout и dead-letter policy.
+
+```ts
+await queue.enqueue({ type: "render-video", jobId });
+queue.consume("render-video", async ({ jobId }) => await renderVideo(jobId));
+```
 **Минусы и ограничения** — queue обычно at-least-once; handler обязан быть idempotent и observable.
 
 
@@ -2760,6 +2859,14 @@ socket.addEventListener("message", ({ data }) => updateProject(JSON.parse(data))
 **Для чего используется** — Практический пример: read пытается cache, при miss читает DB и заполняет TTL; mutation invalidates/updates key.
 
 **Как используется / работает** — read пытается cache, при miss читает DB и заполняет TTL; mutation invalidates/updates key.
+
+```ts
+let project = await cache.get(`project:${id}`);
+if (!project) {
+  project = await db.projects.find(id);
+  await cache.set(`project:${id}`, project, { ttl: 60 });
+}
+```
 **Минусы и ограничения** — stale cache и stampede требуют design; нельзя кешировать без явной freshness requirement.
 
 
@@ -2994,6 +3101,11 @@ const answer = await llm.generate({ question, context });
 **Для чего используется** — Практический пример: model выбирает tool и arguments, backend валидирует permissions/arguments, выполняет действие и возвращает result.
 
 **Как используется / работает** — model выбирает tool и arguments, backend валидирует permissions/arguments, выполняет действие и возвращает result.
+
+```ts
+const tools = [{ name: "get_project", parameters: { type: "object", properties: { id: { type: "string" } } } }];
+if (call.name === "get_project") return getProjectForUser(userId, call.arguments.id);
+```
 **Минусы и ограничения** — model никогда не получает прямой доступ к DB/production; tool output тоже может содержать prompt injection.
 
 
