@@ -1,6 +1,6 @@
 # Senior Fullstack Engineer Interview Handbook
 
-<p class="handbook-version" data-version="v1.5.4">Version <code>v1.5.4</code></p>
+<p class="handbook-version" data-version="v1.5.5">Version <code>v1.5.5</code></p>
 
 A practical playbook for the **tech roulette** format and the follow-up system-design interview. It targets a role where Next.js, React, TypeScript, simple REST endpoints and SQL queries, performance, testable code, and owning a feature end to end from the UI to the database all matter.
 

@@ -34,7 +34,8 @@
       h2 { margin-top: 3.5rem; padding-top: .6rem; border-top: 1px solid #e4e7ec; font-size: 1.7rem; }
       h3 { margin-top: 2.4rem; font-size: 1.3rem; padding-top: .6rem; border-top: 1px solid #e4e7ec; }
       h2 + h3 { margin-top: 1.5rem; border-top: 0; }
-      .language-answer { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e4e7ec; }
+      .language-answer + .language-answer { border-top: 1px solid #eee; }
+      .language-answer--base { border-top: 0; }
       h4 { margin: 1.15rem 0 .35rem; font-size: 1rem; color: #344054; }
       p, li { line-height: 1.65; }
       a { color: #175cd3; }
@@ -390,8 +391,10 @@
         const code = codeBlocks(base.body);
         return [
           base.heading,
+          "<!-- language-answer:base:start -->",
           withoutCode(base.body),
           ...code,
+          "<!-- language-answer:base:end -->",
           ...translations.flatMap(({ language, translation }) => {
             const content = withoutCode(translation.body);
             return content ? [
@@ -448,7 +451,7 @@
           if (!match) return;
           const [, language] = match;
           const wrapper = document.createElement("section");
-          wrapper.className = "language-answer";
+          wrapper.className = `language-answer${language === "base" ? " language-answer--base" : ""}`;
           wrapper.dataset.language = language;
           let node = start.nextSibling;
           while (node) {
