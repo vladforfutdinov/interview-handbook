@@ -19,9 +19,10 @@
       #lang-switch { display: inline-flex; margin-top: 1.25rem; border: 1px solid #475467; border-radius: 999px; overflow: hidden; }
       #lang-switch button { padding: .4rem .9rem; border: 0; background: transparent; color: #d0d5dd; font: inherit; font-size: .85rem; font-weight: 650; cursor: pointer; }
       #lang-switch button[aria-pressed="true"] { background: #175cd3; color: white; }
-      body[data-mode="eng"] .lang-rus { display: none; }
-      body[data-mode="rus"] .lang-eng, body[data-mode="rus"] .lang-eng-only { display: none; }
-      body[data-mode="both"] .lang-eng-only { display: none; }
+      body[data-mode="eng"] .lang-rus, body[data-mode="eng"] .lang-ukr { display: none; }
+      body[data-mode="rus"] .lang-eng, body[data-mode="rus"] .lang-eng-only, body[data-mode="rus"] .lang-ukr { display: none; }
+      body[data-mode="both"] .lang-eng-only, body[data-mode="both"] .lang-ukr { display: none; }
+      body[data-mode="ukr"] .lang-rus, body[data-mode="ukr"] .lang-eng, body[data-mode="ukr"] .lang-eng-only { display: none; }
       main { background: white; margin-top: 2rem; margin-bottom: 4rem; padding: clamp(1.25rem, 4vw, 4rem); border-radius: 18px; box-shadow: 0 12px 30px rgb(16 24 40 / 8%); }
       h2 { margin-top: 3.5rem; padding-top: .6rem; border-top: 1px solid #e4e7ec; font-size: 1.7rem; }
       h3 { margin-top: 2.4rem; font-size: 1.3rem; }
@@ -67,8 +68,9 @@
       <div>
         <h1>Interview handbook</h1>
         <p>Senior Fullstack Engineer — bilingual technical interview preparation.</p>
-        <div id="lang-switch" role="group" aria-label="Язык / Language">
+        <div id="lang-switch" role="group" aria-label="Язык / Мова / Language">
           <button type="button" data-mode="rus" aria-pressed="false">RU</button>
+          <button type="button" data-mode="ukr" aria-pressed="false">UA</button>
           <button type="button" data-mode="both" aria-pressed="false">RU+EN</button>
           <button type="button" data-mode="eng" aria-pressed="false">EN</button>
         </div>
@@ -94,12 +96,14 @@
     <script>
       if (window.mermaid) mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral" });
       const languageModeKey = "handbook-language-mode";
-      const languageModes = ["rus", "both", "eng"];
+      const languageModes = ["rus", "ukr", "both", "eng"];
 
       function applyLanguageMode(mode, { rebuild = true } = {}) {
         if (!languageModes.includes(mode)) mode = "both";
         document.body.dataset.mode = mode;
-        document.documentElement.lang = mode === "eng" ? "en" : "ru";
+        document.documentElement.lang = mode === "eng" ? "en" : mode === "ukr" ? "uk" : "ru";
+        document.getElementById("toc-toggle").textContent =
+          mode === "eng" ? "Contents" : mode === "ukr" ? "Зміст" : "Содержание";
         document.querySelectorAll("#lang-switch button").forEach((button) => {
           button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
         });
@@ -116,20 +120,25 @@
 
       function classifyLanguages() {
         const hasCyrillic = (text) => /[\u0400-\u04FF]/.test(text);
+        // Ukrainian-specific letters \u0456, \u0457, \u0454, \u0491; Russian prose never contains them.
+        const hasUkrainian = (text) => /[\u0456\u0457\u0454\u0491\u0406\u0407\u0404\u0490]/.test(text);
         let region = "all";
         [...document.getElementById("content").childNodes].forEach((node) => {
           if (node.nodeType === Node.COMMENT_NODE) {
-            const marker = node.textContent.trim().match(/^lang:(rus|eng|all)$/);
+            const marker = node.textContent.trim().match(/^lang:(rus|ukr|eng|all)$/);
             if (marker) region = marker[1];
             return;
           }
           if (node.nodeType !== Node.ELEMENT_NODE || node.classList.contains("handbook-version")) return;
           if (region === "rus") {
             node.classList.add("lang-rus");
+          } else if (region === "ukr") {
+            node.classList.add("lang-ukr");
           } else if (region === "eng") {
             node.classList.add("lang-eng-only");
           } else if (["P", "UL", "OL", "BLOCKQUOTE"].includes(node.tagName)) {
-            node.classList.add(hasCyrillic(node.textContent) ? "lang-rus" : "lang-eng");
+            const text = node.textContent;
+            node.classList.add(hasUkrainian(text) ? "lang-ukr" : hasCyrillic(text) ? "lang-rus" : "lang-eng");
           }
         });
       }
