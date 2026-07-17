@@ -16,7 +16,8 @@
       h1 { margin: 0; font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.08; letter-spacing: -.045em; }
       .handbook-version { display: inline-flex; align-items: center; gap: .4rem; margin: .75rem 0 1.75rem; padding: .3rem .65rem; border: 1px solid #b2ccff; border-radius: 999px; background: #eff4ff; color: #175cd3; font-size: .85rem; font-weight: 650; }
       .handbook-version code { background: transparent; padding: 0; color: inherit; }
-      #language-controls { display: flex; flex-wrap: wrap; gap: .9rem 1.25rem; margin-top: 1.25rem; }
+      #language-controls-wrap { position: sticky; top: 0; z-index: 3; background: rgb(16 24 40 / 96%); box-shadow: 0 2px 12px rgb(16 24 40 / 18%); }
+      #language-controls { display: flex; flex-wrap: wrap; gap: .9rem 1.25rem; max-width: 960px; margin: 0 auto; padding: .7rem 1.5rem; }
       #language-controls fieldset { display: flex; gap: .35rem; margin: 0; padding: 0; border: 0; }
       #language-controls legend { margin-bottom: .35rem; color: #d0d5dd; font-size: .75rem; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
       #language-controls label { display: inline-flex; align-items: center; gap: .3rem; color: #f2f4f7; font-size: .85rem; cursor: pointer; }
@@ -67,7 +68,10 @@
       <div>
         <h1>Interview handbook</h1>
         <p>Senior Fullstack Engineer — multilingual technical interview preparation.</p>
-        <div id="language-controls" aria-label="Язык / Мова / Language">
+      </div>
+    </header>
+    <div id="language-controls-wrap">
+      <div id="language-controls" aria-label="Язык / Мова / Language">
           <fieldset id="base-language">
             <legend>Base language</legend>
             <label><input type="radio" name="base-language" value="ukr" /><span>UA</span></label>
@@ -81,8 +85,7 @@
             <label><input type="checkbox" value="rus" /><span>RU</span></label>
           </fieldset>
         </div>
-      </div>
-    </header>
+    </div>
     <aside id="toc" aria-label="Table of contents" hidden>
       <h2>On this page</h2>
       <p class="toc-version" id="toc-version"></p>

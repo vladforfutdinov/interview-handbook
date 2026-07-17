@@ -1,6 +1,6 @@
 # Senior Fullstack Engineer Interview Handbook
 
-<p class="handbook-version" data-version="v1.5.1">Версия <code>v1.5.1</code></p>
+<p class="handbook-version" data-version="v1.5.2">Версия <code>v1.5.2</code></p>
 
 ---
 
