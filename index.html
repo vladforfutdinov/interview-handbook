@@ -16,13 +16,18 @@
       h1 { margin: 0; font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.08; letter-spacing: -.045em; }
       .handbook-version { display: inline-flex; align-items: center; gap: .4rem; margin: .75rem 0 1.75rem; padding: .3rem .65rem; border: 1px solid #b2ccff; border-radius: 999px; background: #eff4ff; color: #175cd3; font-size: .85rem; font-weight: 650; }
       .handbook-version code { background: transparent; padding: 0; color: inherit; }
-      #language-controls-wrap { position: sticky; top: 0; z-index: 3; background: rgb(16 24 40 / 96%); box-shadow: 0 2px 12px rgb(16 24 40 / 18%); }
-      #language-controls { display: flex; flex-wrap: wrap; gap: .9rem 1.25rem; max-width: 960px; margin: 0 auto; padding: .7rem 1.5rem; }
-      #language-controls fieldset { display: flex; gap: .35rem; margin: 0; padding: 0; border: 0; }
-      #language-controls legend { margin-bottom: .35rem; color: #d0d5dd; font-size: .75rem; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
-      #language-controls label { display: inline-flex; align-items: center; gap: .3rem; color: #f2f4f7; font-size: .85rem; cursor: pointer; }
-      #language-controls input { accent-color: #2e90fa; }
-      #language-controls input:disabled + span { color: #98a2b3; cursor: not-allowed; }
+      #language-controls-wrap { position: sticky; top: 0; z-index: 1; background: rgb(16 24 40 / 96%); box-shadow: 0 2px 12px rgb(16 24 40 / 18%); }
+      #language-controls { display: flex; flex-wrap: wrap; gap: .75rem 1rem; max-width: 960px; margin: 0 auto; padding: .7rem 1.5rem; }
+      #language-controls fieldset { display: flex; gap: 0; margin: 0; padding: 0; border: 1px solid #475467; border-radius: 999px; overflow: hidden; }
+      #language-controls legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+      #language-controls label { position: relative; display: inline-flex; align-items: center; color: #d0d5dd; cursor: pointer; }
+      #language-controls label + label { border-left: 1px solid #475467; }
+      #language-controls label span { padding: .4rem .8rem; font-size: .85rem; font-weight: 650; }
+      #language-controls input { position: absolute; inline-size: 1px; block-size: 1px; opacity: 0; }
+      #language-controls label:has(input:checked) { background: #175cd3; color: white; }
+      #language-controls label:has(input:focus-visible) { outline: 2px solid #84adff; outline-offset: -2px; }
+      #language-controls label:has(input:disabled) { color: #98a2b3; cursor: not-allowed; }
+      #language-controls label:has(input:disabled):has(input:checked) { background: #344054; }
       main { background: white; margin-top: 2rem; margin-bottom: 4rem; padding: clamp(1.25rem, 4vw, 4rem); border-radius: 18px; box-shadow: 0 12px 30px rgb(16 24 40 / 8%); }
       h2 { margin-top: 3.5rem; padding-top: .6rem; border-top: 1px solid #e4e7ec; font-size: 1.7rem; }
       h3 { margin-top: 2.4rem; font-size: 1.3rem; }
@@ -41,7 +46,7 @@
       #reading-progress { position: fixed; right: 0; bottom: 0; left: 0; z-index: 2; height: 3px; background: rgb(23 92 211 / 12%); pointer-events: none; }
       #reading-progress-fill { width: 0; height: 100%; background: #175cd3; transition: width 120ms linear; }
       #status { color: #667085; }
-      #toc { position: fixed; top: 1.25rem; right: 1.25rem; width: 240px; max-height: calc(100vh - 2.5rem); overflow: auto; padding: 1rem; border: 1px solid #e4e7ec; border-radius: 12px; background: rgb(255 255 255 / 94%); box-shadow: 0 10px 24px rgb(16 24 40 / 10%); backdrop-filter: blur(10px); }
+      #toc { position: fixed; z-index: 2; top: 1.25rem; right: 1.25rem; width: 240px; max-height: calc(100vh - 2.5rem); overflow: auto; padding: 1rem; border: 1px solid #e4e7ec; border-radius: 12px; background: rgb(255 255 255 / 94%); box-shadow: 0 10px 24px rgb(16 24 40 / 10%); backdrop-filter: blur(10px); }
       #toc h2 { margin: 0 0 .65rem; padding: 0; border: 0; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: #667085; }
       #toc .toc-version { margin: -.35rem 0 .8rem; color: #667085; font-size: .75rem; }
       #toc ol { display: grid; gap: .25rem; margin: 0; padding: 0; list-style: none; }
