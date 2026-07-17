@@ -393,8 +393,8 @@
           base.heading,
           "<!-- language-answer:base:start -->",
           withoutCode(base.body),
-          ...code,
           "<!-- language-answer:base:end -->",
+          ...code,
           ...translations.flatMap(({ language, translation }) => {
             const content = withoutCode(translation.body);
             return content ? [
