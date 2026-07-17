@@ -19,10 +19,6 @@
       #lang-switch { display: inline-flex; margin-top: 1.25rem; border: 1px solid #475467; border-radius: 999px; overflow: hidden; }
       #lang-switch button { padding: .4rem .9rem; border: 0; background: transparent; color: #d0d5dd; font: inherit; font-size: .85rem; font-weight: 650; cursor: pointer; }
       #lang-switch button[aria-pressed="true"] { background: #175cd3; color: white; }
-      body[data-mode="eng"] .lang-rus, body[data-mode="eng"] .lang-ukr { display: none; }
-      body[data-mode="rus"] .lang-eng, body[data-mode="rus"] .lang-eng-only, body[data-mode="rus"] .lang-ukr { display: none; }
-      body[data-mode="both"] .lang-eng-only, body[data-mode="both"] .lang-ukr { display: none; }
-      body[data-mode="ukr"] .lang-rus, body[data-mode="ukr"] .lang-eng, body[data-mode="ukr"] .lang-eng-only { display: none; }
       main { background: white; margin-top: 2rem; margin-bottom: 4rem; padding: clamp(1.25rem, 4vw, 4rem); border-radius: 18px; box-shadow: 0 12px 30px rgb(16 24 40 / 8%); }
       h2 { margin-top: 3.5rem; padding-top: .6rem; border-top: 1px solid #e4e7ec; font-size: 1.7rem; }
       h3 { margin-top: 2.4rem; font-size: 1.3rem; }
@@ -71,7 +67,8 @@
         <div id="lang-switch" role="group" aria-label="Язык / Мова / Language">
           <button type="button" data-mode="rus" aria-pressed="false">RU</button>
           <button type="button" data-mode="ukr" aria-pressed="false">UA</button>
-          <button type="button" data-mode="both" aria-pressed="false">RU+EN</button>
+          <button type="button" data-mode="rueng" aria-pressed="false">RU+EN</button>
+          <button type="button" data-mode="ukreng" aria-pressed="false">UA+EN</button>
           <button type="button" data-mode="eng" aria-pressed="false">EN</button>
         </div>
       </div>
@@ -96,14 +93,18 @@
     <script>
       if (window.mermaid) mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral" });
       const languageModeKey = "handbook-language-mode";
-      const languageModes = ["rus", "ukr", "both", "eng"];
+      const languageModes = ["eng", "ukr", "rus", "ukreng", "rueng"];
+      const sourceLanguages = new Set(["rus", "ukr", "eng"]);
+      let activeLanguageMode = "rueng";
 
-      function applyLanguageMode(mode, { rebuild = true } = {}) {
-        if (!languageModes.includes(mode)) mode = "both";
+      function applyLanguageMode(mode) {
+        if (!languageModes.includes(mode)) mode = "rueng";
+        activeLanguageMode = mode;
         document.body.dataset.mode = mode;
-        document.documentElement.lang = mode === "eng" ? "en" : mode === "ukr" ? "uk" : "ru";
+        const isUkrainian = mode === "ukr" || mode === "ukreng";
+        document.documentElement.lang = mode === "eng" ? "en" : isUkrainian ? "uk" : "ru";
         document.getElementById("toc-toggle").textContent =
-          mode === "eng" ? "Contents" : mode === "ukr" ? "Зміст" : "Содержание";
+          mode === "eng" ? "Contents" : isUkrainian ? "Зміст" : "Содержание";
         document.querySelectorAll("#lang-switch button").forEach((button) => {
           button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
         });
@@ -112,35 +113,6 @@
         } catch {
           // Storage may be disabled; the mode still applies for this visit.
         }
-        if (rebuild) {
-          buildToc();
-          updateReadingProgress();
-        }
-      }
-
-      function classifyLanguages() {
-        const hasCyrillic = (text) => /[\u0400-\u04FF]/.test(text);
-        // Ukrainian-specific letters \u0456, \u0457, \u0454, \u0491; Russian prose never contains them.
-        const hasUkrainian = (text) => /[\u0456\u0457\u0454\u0491\u0406\u0407\u0404\u0490]/.test(text);
-        let region = "all";
-        [...document.getElementById("content").childNodes].forEach((node) => {
-          if (node.nodeType === Node.COMMENT_NODE) {
-            const marker = node.textContent.trim().match(/^lang:(rus|ukr|eng|all)$/);
-            if (marker) region = marker[1];
-            return;
-          }
-          if (node.nodeType !== Node.ELEMENT_NODE || node.classList.contains("handbook-version")) return;
-          if (region === "rus") {
-            node.classList.add("lang-rus");
-          } else if (region === "ukr") {
-            node.classList.add("lang-ukr");
-          } else if (region === "eng") {
-            node.classList.add("lang-eng-only");
-          } else if (["P", "UL", "OL", "BLOCKQUOTE"].includes(node.tagName)) {
-            const text = node.textContent;
-            node.classList.add(hasUkrainian(text) ? "lang-ukr" : hasCyrillic(text) ? "lang-rus" : "lang-eng");
-          }
-        });
       }
 
       const scrollPositionKey = `handbook-scroll:${location.pathname}`;
@@ -333,11 +305,91 @@
         document.getElementById("toc-version").textContent = version;
       }
 
+      async function fetchSource(language, { fresh = false } = {}) {
+        if (!sourceLanguages.has(language)) throw new Error(`Unknown handbook language: ${language}`);
+        const suffix = fresh ? `?v=${Date.now()}` : "";
+        const response = await fetch(`./handbook.${language}.md${suffix}`, { cache: fresh ? "no-store" : "default" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.text();
+      }
+
+      function splitHandbook(markdown) {
+        const [intro, ...sections] = markdown.split(/(?=^## )/m);
+        return {
+          intro,
+          sections: sections.map((section) => {
+            const [preamble, ...terms] = section.split(/(?=^### )/m);
+            const title = preamble.match(/^## (.+)$/m)?.[1] ?? "";
+            return { preamble, title, terms };
+          }),
+        };
+      }
+
+      function splitTerm(term) {
+        const match = term.match(/^(### .+?)(?:\n|$)([\s\S]*)$/);
+        return match ? { heading: match[1], body: match[2] } : { heading: term, body: "" };
+      }
+
+      function withoutCode(body) {
+        return body
+          .replace(/```[\s\S]*?```/g, "")
+          .replace(/^---\s*$/gm, "")
+          .trim();
+      }
+
+      function codeBlocks(body) {
+        return body.match(/```[\s\S]*?```/g) ?? [];
+      }
+
+      function mergeTerm(nativeTerm, englishTerm) {
+        const native = splitTerm(nativeTerm);
+        const english = englishTerm ? splitTerm(englishTerm) : null;
+        const code = codeBlocks(native.body);
+        return [
+          native.heading,
+          withoutCode(native.body),
+          ...code,
+          english && withoutCode(english.body),
+        ].filter(Boolean).join("\n\n");
+      }
+
+      function combineHandbooks(nativeMarkdown, englishMarkdown) {
+        const native = splitHandbook(nativeMarkdown);
+        const english = splitHandbook(englishMarkdown);
+        const englishSections = new Map(english.sections.map((section) => [section.title, section]));
+        const result = [native.intro.trim()];
+
+        native.sections.forEach((section) => {
+          const matchingSection = englishSections.get(section.title);
+          const englishTerms = new Map((matchingSection?.terms ?? []).map((term) => {
+            const parsed = splitTerm(term);
+            return [parsed.heading.slice(4), term];
+          }));
+          result.push(section.preamble.trim());
+          section.terms.forEach((term) => {
+            const key = splitTerm(term).heading.slice(4);
+            result.push(mergeTerm(term, englishTerms.get(key)));
+          });
+        });
+        return result.filter(Boolean).join("\n\n");
+      }
+
+      async function markdownForMode(mode, { fresh = false } = {}) {
+        if (mode === "rueng" || mode === "ukreng") {
+          const nativeLanguage = mode === "rueng" ? "rus" : "ukr";
+          const [native, english] = await Promise.all([
+            fetchSource(nativeLanguage, { fresh }),
+            fetchSource("eng", { fresh }),
+          ]);
+          return combineHandbooks(native, english);
+        }
+        return fetchSource(mode, { fresh });
+      }
+
       async function checkForUpdate() {
         if (!loadedHandbookVersion) return;
         try {
-          const response = await fetch(`./senior-fullstack-interview-handbook.md?check=${Date.now()}`, { cache: "no-store" });
-          const markdown = await response.text();
+          const markdown = await markdownForMode(activeLanguageMode, { fresh: true });
           const availableVersion = markdown.match(/data-version="([^"]+)"/)?.[1];
           if (availableVersion && availableVersion !== loadedHandbookVersion) {
             document.getElementById("refresh").hidden = false;
@@ -353,7 +405,6 @@
         removeInlineToc();
         makeTablesScrollable();
         await renderMermaidDiagrams();
-        classifyLanguages();
         if (window.hljs) {
           const aliases = { ts: "typescript", tsx: "typescript", yml: "yaml", dockerfile: "dockerfile", sh: "bash" };
           document.querySelectorAll("#content pre code").forEach((block) => {
@@ -386,9 +437,7 @@
         const button = document.getElementById("refresh");
         button.disabled = true;
         try {
-          const response = await fetch(`./senior-fullstack-interview-handbook.md?update=${Date.now()}`, { cache: "no-store" });
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          await renderHandbook(await response.text(), { preservePosition: true });
+          await renderHandbook(await markdownForMode(activeLanguageMode, { fresh: true }), { preservePosition: true });
           button.hidden = true;
         } finally {
           button.disabled = false;
@@ -407,21 +456,28 @@
         } catch {
           // Storage may be disabled; fall back to the default mode.
         }
-        applyLanguageMode(savedMode, { rebuild: false });
+        applyLanguageMode(savedMode);
       })();
       document.querySelectorAll("#lang-switch button").forEach((button) => {
-        button.addEventListener("click", () => applyLanguageMode(button.dataset.mode));
+        button.addEventListener("click", async () => {
+          const nextMode = button.dataset.mode;
+          if (nextMode === activeLanguageMode) return;
+          applyLanguageMode(nextMode);
+          try {
+            await renderHandbook(await markdownForMode(nextMode), { preservePosition: true });
+            document.getElementById("refresh").hidden = true;
+            checkForUpdate();
+          } catch (error) {
+            document.getElementById("status").textContent = `Unable to load handbook: ${error.message}`;
+          }
+        });
       });
       setInterval(checkForUpdate, 60_000);
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") checkForUpdate();
       });
 
-      fetch("./senior-fullstack-interview-handbook.md")
-        .then((response) => {
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return response.text();
-        })
+      markdownForMode(activeLanguageMode)
         .then(async (markdown) => {
           saveScrollPosition();
           await renderHandbook(markdown);
