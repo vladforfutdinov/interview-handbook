@@ -34,6 +34,7 @@
       h2 { margin-top: 3.5rem; padding-top: .6rem; border-top: 1px solid #e4e7ec; font-size: 1.7rem; }
       h3 { margin-top: 2.4rem; font-size: 1.3rem; padding-top: .6rem; border-top: 1px solid #e4e7ec; }
       h2 + h3 { margin-top: 1.5rem; border-top: 0; }
+      .language-answer { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e4e7ec; }
       h4 { margin: 1.15rem 0 .35rem; font-size: 1rem; color: #344054; }
       p, li { line-height: 1.65; }
       a { color: #175cd3; }
@@ -385,32 +386,43 @@
 
       function mergeTerm(baseTerm, additionalTerms) {
         const base = splitTerm(baseTerm);
-        const translations = additionalTerms.map(splitTerm);
+        const translations = additionalTerms.map(({ language, term }) => ({ language, translation: splitTerm(term) }));
         const code = codeBlocks(base.body);
         return [
           base.heading,
           withoutCode(base.body),
           ...code,
-          ...translations.map((translation) => withoutCode(translation.body)),
+          ...translations.flatMap(({ language, translation }) => {
+            const content = withoutCode(translation.body);
+            return content ? [
+              `<!-- language-answer:${language}:start -->`,
+              content,
+              `<!-- language-answer:${language}:end -->`,
+            ] : [];
+          }),
         ].filter(Boolean).join("\n\n");
       }
 
-      function combineHandbooks(baseMarkdown, additionalMarkdowns) {
+      function combineHandbooks(baseMarkdown, additionalHandbooks) {
         const base = splitHandbook(baseMarkdown);
-        const additional = additionalMarkdowns.map(splitHandbook);
-        const additionalSections = additional.map((handbook) =>
-          new Map(handbook.sections.map((section) => [section.title, section])),
-        );
+        const additionalSections = additionalHandbooks.map(({ language, markdown }) => ({
+          language,
+          sections: new Map(splitHandbook(markdown).sections.map((section) => [section.title, section])),
+        }));
         const result = [base.intro.trim()];
 
         base.sections.forEach((section) => {
-          const additionalTerms = additionalSections.map((sections) => new Map(
-            (sections.get(section.title)?.terms ?? []).map((term) => [splitTerm(term).heading.slice(4), term]),
-          ));
+          const additionalTerms = additionalSections.map(({ language, sections }) => ({
+            language,
+            terms: new Map((sections.get(section.title)?.terms ?? [])
+              .map((term) => [splitTerm(term).heading.slice(4), term])),
+          }));
           result.push(section.preamble.trim());
           section.terms.forEach((term) => {
             const key = splitTerm(term).heading.slice(4);
-            result.push(mergeTerm(term, additionalTerms.map((terms) => terms.get(key)).filter(Boolean)));
+            result.push(mergeTerm(term, additionalTerms
+              .map(({ language, terms }) => ({ language, term: terms.get(key) }))
+              .filter(({ term }) => term)));
           });
         });
         return result.filter(Boolean).join("\n\n");
@@ -422,7 +434,34 @@
           fetchSource(normalized.base, { fresh }),
           ...normalized.additional.map((language) => fetchSource(language, { fresh })),
         ]);
-        return normalized.additional.length ? combineHandbooks(handbooks[0], handbooks.slice(1)) : handbooks[0];
+        return normalized.additional.length
+          ? combineHandbooks(handbooks[0], normalized.additional.map((language, index) => ({ language, markdown: handbooks[index + 1] })))
+          : handbooks[0];
+      }
+
+      function wrapLanguageAnswers() {
+        const content = document.getElementById("content");
+        const startPattern = /^language-answer:([a-z]+):start$/;
+        const endPattern = /^language-answer:([a-z]+):end$/;
+        [...content.childNodes].filter((node) => node.nodeType === Node.COMMENT_NODE).forEach((start) => {
+          const match = start.textContent.trim().match(startPattern);
+          if (!match) return;
+          const [, language] = match;
+          const wrapper = document.createElement("section");
+          wrapper.className = "language-answer";
+          wrapper.dataset.language = language;
+          let node = start.nextSibling;
+          while (node) {
+            const next = node.nextSibling;
+            if (node.nodeType === Node.COMMENT_NODE && endPattern.test(node.textContent.trim())) {
+              node.remove();
+              break;
+            }
+            wrapper.append(node);
+            node = next;
+          }
+          start.replaceWith(wrapper);
+        });
       }
 
       async function checkForUpdate() {
@@ -441,6 +480,7 @@
       async function renderHandbook(markdown, { preservePosition = false } = {}) {
         const previousPosition = preservePosition ? window.scrollY : 0;
         document.getElementById("content").innerHTML = marked.parse(markdown, { gfm: true });
+        wrapLanguageAnswers();
         removeInlineToc();
         makeTablesScrollable();
         await renderMermaidDiagrams();

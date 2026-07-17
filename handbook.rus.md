@@ -1,6 +1,6 @@
 # Senior Fullstack Engineer Interview Handbook
 
-<p class="handbook-version" data-version="v1.5.3">Версия <code>v1.5.3</code></p>
+<p class="handbook-version" data-version="v1.5.4">Версия <code>v1.5.4</code></p>
 
 Практический конспект для формата **tech roulette** и последующего system-design интервью. Он ориентирован на роль, где важны Next.js, React, TypeScript, простые REST-эндпоинты и SQL-запросы, производительность, тестируемый код и самостоятельное ведение фичи от UI до базы данных.
 
