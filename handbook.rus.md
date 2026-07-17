@@ -2,8 +2,6 @@
 
 <p class="handbook-version" data-version="v1.5.3">Версия <code>v1.5.3</code></p>
 
----
-
 Практический конспект для формата **tech roulette** и последующего system-design интервью. Он ориентирован на роль, где важны Next.js, React, TypeScript, простые REST-эндпоинты и SQL-запросы, производительность, тестируемый код и самостоятельное ведение фичи от UI до базы данных.
 
 ## Как отвечать
@@ -89,8 +87,6 @@
 
 ## React
 
----
-
 ### Reconciliation
 
 **Что это** — алгоритм React, сопоставляющий новое дерево элементов с предыдущим.
@@ -107,8 +103,6 @@
 // Bad: key={index} — reordering moves state to the wrong row.
 {tasks.map((task) => <TaskRow key={task.id} task={task} />)}
 ```
-
----
 
 ### Virtual DOM
 
@@ -128,8 +122,6 @@ flowchart TD
   M --> B[Real DOM]
 ```
 
----
-
 ### Concurrent rendering
 
 **Что это** — модель рендеринга React, в которой менее приоритетную работу можно прервать и возобновить.
@@ -147,8 +139,6 @@ flowchart TD
   C --> D[Restart render with current state]
   B -->|no| E[Commit to DOM]
 ```
-
----
 
 ### Suspense
 
@@ -168,8 +158,6 @@ const Chart = lazy(() => import("./Chart"));
 </Suspense>
 ```
 
----
-
 ### Error Boundary
 
 **Что это** — компонентная граница, перехватывающая ошибки рендера дочернего поддерева.
@@ -188,8 +176,6 @@ import { ErrorBoundary } from "react-error-boundary";
 </ErrorBoundary>
 ```
 
----
-
 ### React.memo
 
 **Что это** — обёртка React, мемоизирующая результат рендера компонента по его свойствам.
@@ -205,8 +191,6 @@ const UserRow = memo(function UserRow({ user }: { user: User }) {
   return <li>{user.name}</li>;
 });
 ```
-
----
 
 ### useMemo
 
@@ -224,8 +208,6 @@ const visibleUsers = useMemo(
   [users, query],
 );
 ```
-
----
 
 ### useCallback
 
@@ -245,8 +227,6 @@ const onSelect = useCallback((id: string) => {
 return <MemoizedProjectList onSelect={onSelect} />;
 ```
 
----
-
 ### useRef
 
 **Что это** — хук React для изменяемого контейнера, не участвующего в рендеринге.
@@ -262,8 +242,6 @@ const inputRef = useRef<HTMLInputElement>(null);
 <button onClick={() => inputRef.current?.focus()}>Search</button>
 <input ref={inputRef} />
 ```
-
----
 
 ### useEffect
 
@@ -281,8 +259,6 @@ useEffect(() => {
   return () => subscription.unsubscribe();
 }, [roomId]);
 ```
-
----
 
 ### useLayoutEffect
 
@@ -302,8 +278,6 @@ useLayoutEffect(() => {
 }, [open]);
 ```
 
----
-
 ### useTransition
 
 **Что это** — хук, помечающий обновление React как несрочное.
@@ -321,8 +295,6 @@ onChange={(event) => {
   startTransition(() => setFilter(event.target.value));
 }}
 ```
-
----
 
 ### useDeferredValue
 
@@ -342,8 +314,6 @@ const deferredQuery = useDeferredValue(query);
 <SlowResults query={deferredQuery} />;
 ```
 
----
-
 ### Context
 
 **Что это** — механизм React для передачи одного значения поддереву без явной передачи свойств на каждом уровне.
@@ -358,8 +328,6 @@ const deferredQuery = useDeferredValue(query);
 const ThemeContext = createContext<"light" | "dark">("light");
 <ThemeContext.Provider value="dark"><Editor /></ThemeContext.Provider>
 ```
-
----
 
 ### Controlled vs uncontrolled components
 
@@ -378,8 +346,6 @@ const ThemeContext = createContext<"light" | "dark">("light");
 // Uncontrolled: the value lives in the DOM, read via ref.
 <input ref={emailRef} defaultValue={initialEmail} />
 ```
-
----
 
 ### Lifting state up
 
@@ -400,8 +366,6 @@ function Editor() {
   </>;
 }
 ```
-
----
 
 ### State colocation
 
@@ -427,8 +391,6 @@ function ProjectList() {
 }
 ```
 
----
-
 ### Server state
 
 **Что это** — данные с сервера, имеющие собственный жизненный цикл кэширования, устаревания и повторного получения.
@@ -446,8 +408,6 @@ const { data: projects } = useQuery({ queryKey: ["projects"], queryFn: fetchProj
 // UI state: local, no cache or invalidation.
 const [selectedId, setSelectedId] = useState<string | null>(null);
 ```
-
----
 
 ### Redux
 
@@ -471,8 +431,6 @@ const projectsSlice = createSlice({
 });
 ```
 
----
-
 ### Zustand
 
 **Что это** — минималистичное внешнее хранилище состояния с подписками через селекторы.
@@ -492,8 +450,6 @@ const usePlayerStore = create<{ playing: boolean; toggle: () => void }>((set) =>
 const playing = usePlayerStore((state) => state.playing); // subscribe to a slice only
 ```
 
----
-
 ### TanStack Query / React Query
 
 **Что это** — библиотека управления серверными запросами, кэшем и мутациями в React.
@@ -512,11 +468,7 @@ const query = useQuery({
 });
 ```
 
----
-
 ## Next.js
-
----
 
 ### App Router
 
@@ -540,8 +492,6 @@ app/
       error.tsx     segment error boundary
 ```
 
----
-
 ### Pages Router
 
 **Что это** — прежняя файловая модель маршрутизации Next.js с функциями получения данных на уровне страниц.
@@ -564,8 +514,6 @@ export default function ProjectPage({ project }: { project: Project }) {
 }
 ```
 
----
-
 ### Server Components
 
 **Что это** — React-компонент, выполняемый только на сервере и не попадающий в клиентский JavaScript-бандл.
@@ -582,8 +530,6 @@ export default async function ProjectsPage() {
   return <ProjectList projects={projects} />;
 }
 ```
-
----
 
 ### Client Components
 
@@ -604,8 +550,6 @@ export function LikeButton() {
 }
 ```
 
----
-
 ### SSR — Server-Side Rendering
 
 **Что это** — создание HTML на сервере для каждого запроса.
@@ -623,8 +567,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 }
 ```
 
----
-
 ### CSR — Client-Side Rendering
 
 **Что это** — рендеринг и получение данных после загрузки JavaScript в браузере.
@@ -634,8 +576,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 **Как используется / работает** — отдаём оболочку и JavaScript, затем запрос из клиента заполняет интерфейс.
 
 **Минусы и ограничения** — полезный первый экран появляется медленнее и хуже SEO; требуется продуманный UX загрузки и ошибок.
-
----
 
 ### SSG — Static Site Generation
 
@@ -654,8 +594,6 @@ export async function generateStaticParams() {
 }
 ```
 
----
-
 ### ISR — Incremental Static Regeneration
 
 **Что это** — статическая страница Next.js, которую можно пересоздавать после публикации.
@@ -672,8 +610,6 @@ export async function generateStaticParams() {
 export const revalidate = 60;
 // Next.js regenerates the page at most once per minute.
 ```
-
----
 
 ### Hydration
 
@@ -692,8 +628,6 @@ flowchart TD
   J --> H[React matches markup and attaches handlers]
   H --> I[Interactive page]
 ```
-
----
 
 ### Hydration mismatch
 
@@ -714,8 +648,6 @@ const [now, setNow] = useState<string | null>(null);
 useEffect(() => setNow(new Date().toLocaleTimeString()), []);
 ```
 
----
-
 ### Layouts
 
 **Что это** — общий маршрутный компонент Next.js, сохраняющийся между дочерними страницами.
@@ -735,8 +667,6 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 }
 ```
 
----
-
 ### Route Handlers
 
 **Что это** — обработчик HTTP-запросов в директории `app` Next.js.
@@ -753,8 +683,6 @@ export async function GET() {
   return Response.json({ projects });
 }
 ```
-
----
 
 ### Proxy (formerly Middleware)
 
@@ -777,8 +705,6 @@ export function proxy(request: NextRequest) {
 export const config = { matcher: ["/projects/:path*"] };
 ```
 
----
-
 ### Streaming
 
 **Что это** — поэтапная передача HTML-ответа по мере готовности его частей.
@@ -800,8 +726,6 @@ export default function ProjectPage() {
 }
 ```
 
----
-
 ### Caching and revalidation
 
 **Что это** — механизмы кэширования данных и рендера в Next.js и правила их инвалидации (revalidation).
@@ -818,8 +742,6 @@ import { revalidatePath } from "next/cache";
 await db.project.update({ where: { id }, data: input });
 revalidatePath(`/projects/${id}`);
 ```
-
----
 
 ### Server Actions
 
@@ -839,8 +761,6 @@ export async function renameProject(formData: FormData) {
 }
 ```
 
----
-
 ### Dynamic imports
 
 **Что это** — ленивое подключение модуля или компонента отдельным chunk-ом в момент необходимости.
@@ -857,8 +777,6 @@ const VideoTimeline = dynamic(() => import("./VideoTimeline"), {
   ssr: false,
 });
 ```
-
----
 
 ### Image optimization
 
@@ -881,8 +799,6 @@ const VideoTimeline = dynamic(() => import("./VideoTimeline"), {
 />
 ```
 
----
-
 ### Edge Runtime
 
 **Что это** — ограниченная среда исполнения на Web APIs, которая может выполняться ближе к пользователю.
@@ -902,11 +818,7 @@ export async function GET(request: Request) {
 }
 ```
 
----
-
 ## JavaScript
-
----
 
 ### Closure
 
@@ -926,8 +838,6 @@ function makeCounter() {
 const next = makeCounter();
 ```
 
----
-
 ### Event loop
 
 **Что это** — модель JavaScript-рантайма, планирующая стек вызовов, очереди задач, микрозадачи и отрисовку.
@@ -944,8 +854,6 @@ Promise.resolve().then(() => console.log("microtask"));
 setTimeout(() => console.log("task"));
 console.log("B"); // A, B, microtask, task
 ```
-
----
 
 ### Microtasks
 
@@ -965,8 +873,6 @@ Promise.resolve()
 // microtask 1, microtask 2, task — the microtask queue drains fully before the task
 ```
 
----
-
 ### Macrotasks
 
 **Что это** — обычная задача очереди событий, выполняемая после завершения текущего цикла.
@@ -976,8 +882,6 @@ Promise.resolve()
 **Как используется / работает** — setTimeout, message events и I/O callbacks обычно создают tasks, между которыми браузер может рендерить.
 
 **Минусы и ограничения** — timer не является точным расписанием; активный main thread задерживает его выполнение.
-
----
 
 ### Promise
 
@@ -996,8 +900,6 @@ loadProject(id)
   .finally(() => setLoading(false));
 ```
 
----
-
 ### async / await
 
 **Что это** — синтаксис JavaScript поверх Promise для ожидания результата внутри асинхронной функции.
@@ -1015,8 +917,6 @@ const [project, comments] = await Promise.all([
 ]);
 ```
 
----
-
 ### AbortController
 
 **Что это** — объект сигнала отмены для Fetch и других поддерживающих API.
@@ -1032,8 +932,6 @@ const controller = new AbortController();
 fetch(`/api/search?q=${query}`, { signal: controller.signal });
 return () => controller.abort();
 ```
-
----
 
 ### Hoisting
 
@@ -1052,8 +950,6 @@ var a = 1;
 console.log(b); // ReferenceError: let is in the temporal dead zone
 let b = 2;
 ```
-
----
 
 ### this
 
@@ -1074,8 +970,6 @@ print(); // strict mode: TypeError (this is undefined); sloppy mode: this is glo
 setTimeout(player.print.bind(player), 0); // "Demo" — receiver fixed by bind
 ```
 
----
-
 ### Prototype chain
 
 **Что это** — цепочка объектов-прототипов, по которой JavaScript ищет отсутствующее свойство.
@@ -1094,8 +988,6 @@ child.greet(); // "hi" — not on child, found on the prototype
 Object.getPrototypeOf(child) === base; // true
 ```
 
----
-
 ### Equality: === vs ==
 
 **Что это** — два оператора сравнения: строгий без неявного преобразования и нестрогий с ним.
@@ -1111,8 +1003,6 @@ Object.getPrototypeOf(child) === base; // true
 0 === "";      // false
 value == null; // deliberate idiom: true for both null and undefined
 ```
-
----
 
 ### Shallow copy
 
@@ -1132,8 +1022,6 @@ copy.meta.views = 99;
 original.meta.views; // 99 — the nested object is still shared
 ```
 
----
-
 ### Deep copy
 
 **Что это** — копирование всей вложенной структуры без общих ссылок с исходным объектом.
@@ -1150,8 +1038,6 @@ const copy = structuredClone(original); // Date, Map, cyclic references — ok
 copy.meta.views = 99;
 original.meta.views; // 10 — the structure is fully independent
 ```
-
----
 
 ### Immutability
 
@@ -1172,8 +1058,6 @@ const next = {
 };
 ```
 
----
-
 ### Debounce
 
 **Что это** — отложенный запуск функции после паузы в серии событий.
@@ -1192,8 +1076,6 @@ const searchLater = (query: string) => {
 };
 ```
 
----
-
 ### Throttle
 
 **Что это** — ограничение максимальной частоты вызова функции в непрерывном потоке событий.
@@ -1211,8 +1093,6 @@ const reportScroll = throttle(() => {
 
 window.addEventListener("scroll", reportScroll, { passive: true });
 ```
-
----
 
 ### Generators and iterators
 
@@ -1241,8 +1121,6 @@ const playlist = {
 for (const track of playlist) console.log(track);
 ```
 
----
-
 ### Modules
 
 **Что это** — единица изоляции JavaScript-кода с явными импортами и экспортами.
@@ -1265,8 +1143,6 @@ import multiply, { add } from "./math.js";
 const { renderChart } = await import("./chart.js");
 ```
 
----
-
 ### Memory leaks
 
 **Что это** — ситуация, когда память остаётся достижимой после того, как данные больше не нужны.
@@ -1288,11 +1164,7 @@ useEffect(() => {
 }, []);
 ```
 
----
-
 ## TypeScript
-
----
 
 ### any
 
@@ -1308,8 +1180,6 @@ useEffect(() => {
 // Bad: value.name compiles even when value is null.
 const value: any = JSON.parse(body);
 ```
-
----
 
 ### unknown
 
@@ -1327,8 +1197,6 @@ if (typeof value === "object" && value !== null && "name" in value) {
   console.log(value.name);
 }
 ```
-
----
 
 ### never
 
@@ -1350,8 +1218,6 @@ switch (result.status) {
 }
 ```
 
----
-
 ### Type narrowing
 
 **Что это** — уточнение широкого объединения до конкретного типа после проверки во время выполнения.
@@ -1367,8 +1233,6 @@ function format(value: string | Date) {
   return value instanceof Date ? value.toISOString() : value.trim();
 }
 ```
-
----
 
 ### Type guards
 
@@ -1387,8 +1251,6 @@ function isUser(value: unknown): value is User {
 }
 ```
 
----
-
 ### Generics
 
 **Что это** — параметр типа, связывающий типы входа, выхода и ограничений в одном обобщённом API.
@@ -1405,8 +1267,6 @@ function first<T>(items: readonly T[]): T | undefined {
 }
 const project = first([{ id: "p1", name: "Handbook" }]); // object type is preserved
 ```
-
----
 
 ### keyof
 
@@ -1425,8 +1285,6 @@ function get<T, K extends keyof T>(object: T, key: K): T[K] {
 get({ id: "p1", name: "Handbook" }, "name");
 ```
 
----
-
 ### typeof in type positions
 
 **Что это** — оператор в позиции типа, извлекающий тип уже объявленного значения.
@@ -1441,8 +1299,6 @@ get({ id: "p1", name: "Handbook" }, "name");
 const config = { retries: 3, region: "eu" } as const;
 type Config = typeof config;
 ```
-
----
 
 ### Mapped types
 
@@ -1459,8 +1315,6 @@ type User = { id: string; name: string; email: string };
 type EditableUser = { [K in "name" | "email"]?: User[K] };
 ```
 
----
-
 ### Conditional types
 
 **Что это** — конструкция типа вида T extends U ? X : Y, выбирающая результат по отношению типов.
@@ -1475,8 +1329,6 @@ type EditableUser = { [K in "name" | "email"]?: User[K] };
 type ApiResult<T> = T extends Promise<infer Value> ? Value : T;
 type Project = ApiResult<Promise<{ id: string }>>;
 ```
-
----
 
 ### infer
 
@@ -1493,8 +1345,6 @@ type ElementOf<T> = T extends readonly (infer Item)[] ? Item : never;
 type User = ElementOf<readonly [{ id: string }]>;
 ```
 
----
-
 ### Discriminated unions
 
 **Что это** — union типов с общим tag-полем, по которому компилятор различает варианты.
@@ -1509,8 +1359,6 @@ type User = ElementOf<readonly [{ id: string }]>;
 type Result = { status: "loading" } | { status: "error"; message: string } | { status: "success"; data: User };
 if (result.status === "success") console.log(result.data.name);
 ```
-
----
 
 ### type vs interface
 
@@ -1527,8 +1375,6 @@ interface Project { id: string; name: string }
 type LoadState = "idle" | "loading" | "error";
 ```
 
----
-
 ### Utility types
 
 **Что это** — встроенные типы-помощники (Partial, Pick, Omit, Record, Required, Readonly) для производных типов.
@@ -1544,8 +1390,6 @@ type User = { id: string; name: string; passwordHash: string };
 type PublicUser = Omit<User, "passwordHash">;
 const labels: Record<"draft" | "published", string> = { draft: "Draft", published: "Published" };
 ```
-
----
 
 ### readonly
 
@@ -1564,8 +1408,6 @@ function renderTags(tags: readonly string[]) {
 }
 ```
 
----
-
 ### as const
 
 **Что это** — assertion, фиксирующая literal values и readonly структуру вместо широких string/number типов.
@@ -1580,8 +1422,6 @@ function renderTags(tags: readonly string[]) {
 const statuses = ["draft", "published"] as const;
 type Status = (typeof statuses)[number];
 ```
-
----
 
 ### satisfies
 
@@ -1598,8 +1438,6 @@ type Route = "/" | "/projects";
 const labels = { "/": "Home", "/projects": "Projects" } satisfies Record<Route, string>;
 ```
 
----
-
 ### Enums
 
 **Что это** — конструкция TypeScript для именованного набора констант; часто заменима string literal union.
@@ -1614,8 +1452,6 @@ const labels = { "/": "Home", "/projects": "Projects" } satisfies Record<Route, 
 const Role = { Admin: "admin", Member: "member" } as const;
 type Role = (typeof Role)[keyof typeof Role];
 ```
-
----
 
 ### Declaration files
 
@@ -1634,11 +1470,7 @@ declare module "legacy-analytics" {
 }
 ```
 
----
-
 ## Browser & Performance
-
----
 
 ### Critical rendering path
 
@@ -1661,8 +1493,6 @@ flowchart TD
   P --> K[Compositing]
 ```
 
----
-
 ### Reflow / layout
 
 **Что это** — этап рендеринга, на котором браузер пересчитывает геометрию элементов после изменения размеров, текста или CSS rules.
@@ -1682,8 +1512,6 @@ const heights = items.map((el) => el.offsetHeight);
 items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 ```
 
----
-
 ### Repaint
 
 **Что это** — этап рендеринга, перерисовывающий пиксели без пересчёта layout, например после изменения цвета.
@@ -1693,8 +1521,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 **Как используется / работает** — анимирую transform и opacity, когда возможно, и проверяю paint flashing в DevTools.
 
 **Минусы и ограничения** — даже без layout большие paint area могут быть дорогими.
-
----
 
 ### Compositing
 
@@ -1706,8 +1532,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 
 **Минусы и ограничения** — слишком много layers расходует GPU memory и может ухудшить performance.
 
----
-
 ### Core Web Vitals
 
 **Что это** — набор user-centric метрик Google: LCP (loading), CLS (visual stability) и INP (responsiveness).
@@ -1717,8 +1541,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 **Как используется / работает** — смотрю field data и lab trace, затем связываю LCP, CLS и INP с конкретным пользовательским путём.
 
 **Минусы и ограничения** — score не заменяет product judgment; synthetic результаты не всегда совпадают с реальными устройствами.
-
----
 
 ### LCP — Largest Contentful Paint
 
@@ -1730,8 +1552,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 
 **Минусы и ограничения** — «крупнейший» элемент меняется по viewport; не стоит preload-ить всё подряд.
 
----
-
 ### CLS — Cumulative Layout Shift
 
 **Что это** — метрика суммарного неожиданного смещения layout во время жизни страницы.
@@ -1742,8 +1562,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 
 **Минусы и ограничения** — допустимые user-initiated shifts не равны плохому CLS; нужно проверять конкретный сценарий.
 
----
-
 ### INP — Interaction to Next Paint
 
 **Что это** — метрика задержки между пользовательским взаимодействием и следующей отрисовкой кадра.
@@ -1753,8 +1571,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 **Как используется / работает** — разбиваю long tasks, уменьшаю handler work и показываю immediate feedback для долгой mutation.
 
 **Минусы и ограничения** — оптимизация только одного click не гарантирует хороший worst-case interaction.
-
----
 
 ### requestAnimationFrame
 
@@ -1784,8 +1600,6 @@ window.addEventListener("pointermove", (event) => {
 });
 ```
 
----
-
 ### IntersectionObserver
 
 **Что это** — browser API для наблюдения пересечения элемента с viewport или container без scroll polling.
@@ -1802,8 +1616,6 @@ const observer = new IntersectionObserver(([entry]) => {
 });
 observer.observe(sentinel);
 ```
-
----
 
 ### ResizeObserver
 
@@ -1824,8 +1636,6 @@ observer.observe(chartContainer);
 // On component removal: observer.disconnect().
 ```
 
----
-
 ### Web Workers
 
 **Что это** — механизм браузера для выполнения JavaScript в отдельном потоке без доступа к DOM.
@@ -1841,8 +1651,6 @@ const worker = new Worker(new URL("./search-worker.ts", import.meta.url));
 worker.postMessage({ type: "index", documents });
 worker.onmessage = ({ data }) => setResults(data);
 ```
-
----
 
 ### Web Vitals field monitoring
 
@@ -1863,8 +1671,6 @@ const report = (metric: Metric) =>
 onLCP(report); onCLS(report); onINP(report);
 ```
 
----
-
 ### Code splitting
 
 **Что это** — разбиение JavaScript-бандла на chunks, загружаемые по route или по потребности.
@@ -1882,8 +1688,6 @@ exportButton.addEventListener("click", async () => {
 });
 ```
 
----
-
 ### Tree shaking
 
 **Что это** — удаление недостижимого ESM-кода из production bundle при сборке.
@@ -1899,8 +1703,6 @@ import { debounce } from "es-toolkit"; // named ESM import — unused code is dr
 import lodash from "lodash";           // antipattern: the whole package lands in the bundle
 ```
 
----
-
 ### Bundle analysis
 
 **Что это** — анализ реального состава и размера клиентского JavaScript-бандла.
@@ -1910,8 +1712,6 @@ import lodash from "lodash";           // antipattern: the whole package lands i
 **Как используется / работает** — запускаю analyzer перед/после изменения и ищу duplicate packages, тяжёлые editor/media libraries и client leaks.
 
 **Минусы и ограничения** — размер не равен runtime cost; подтверждаю находку performance trace-ом и реальным UX.
-
----
 
 ### Virtualization
 
@@ -1943,8 +1743,6 @@ return <div ref={parentRef} style={{ height: 480, overflow: "auto" }}>
 </div>;
 ```
 
----
-
 ### Caching in the browser
 
 **Что это** — слои повторного использования данных и assets в браузере: HTTP cache, service worker, in-memory.
@@ -1963,8 +1761,6 @@ Cache-Control: public, max-age=31536000, immutable
 Cache-Control: no-cache
 ```
 
----
-
 ### localStorage
 
 **Что это** — синхронное key-value хранилище браузера по origin, переживающее закрытие вкладки и сессии.
@@ -1980,8 +1776,6 @@ const stored = localStorage.getItem("editor-preferences");
 const preferences = stored ? JSON.parse(stored) : { snapToGrid: true };
 localStorage.setItem("editor-preferences", JSON.stringify(preferences));
 ```
-
----
 
 ### sessionStorage
 
@@ -1999,8 +1793,6 @@ sessionStorage.setItem(draftKey, JSON.stringify({ title, script }));
 
 const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 ```
-
----
 
 ### Accessibility
 
@@ -2021,8 +1813,6 @@ const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 </section>
 ```
 
----
-
 ### Progressive enhancement
 
 **Что это** — подход, при котором базовый сценарий работает без JavaScript, а возможности браузера его улучшают.
@@ -2033,11 +1823,7 @@ const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 
 **Минусы и ограничения** — не любой rich editor реалистично работает без JS; подход требует дисциплины в server contract.
 
----
-
 ## HTTP, Backend & Security
-
----
 
 ### REST — Representational State Transfer
 
@@ -2056,8 +1842,6 @@ GET    /api/projects/42     # single resource
 PATCH  /api/projects/42     # partial update
 DELETE /api/projects/42     # delete
 ```
-
----
 
 ### GraphQL
 
@@ -2079,8 +1863,6 @@ query ProjectCard($id: ID!) {
 }
 ```
 
----
-
 ### HTTP methods
 
 **Что это** — стандартные глаголы HTTP с закреплённой семантикой: GET читает, POST обрабатывает представление ресурса, PUT создаёт или заменяет representation по известному URI, PATCH меняет часть, DELETE удаляет.
@@ -2099,8 +1881,6 @@ DELETE /api/projects/42   # idempotent: retry does not change the outcome
 POST   /api/projects      # processing/creation: retry may create a duplicate
 ```
 
----
-
 ### ETag and conditional requests
 
 **Что это** — HTTP-механизм версии representation (ETag) и условных запросов If-None-Match/If-Match.
@@ -2117,8 +1897,6 @@ If-None-Match: "project-42-v7"
 
 HTTP/1.1 304 Not Modified
 ```
-
----
 
 ### Idempotency
 
@@ -2138,8 +1916,6 @@ HTTP/1.1 200 OK
 # A retry with the same key returns the stored result, not a second charge.
 ```
 
----
-
 ### Status codes
 
 **Что это** — стандартизированный machine-readable результат HTTP-операции в ответе сервера.
@@ -2150,8 +1926,6 @@ HTTP/1.1 200 OK
 
 **Минусы и ограничения** — status без стабильного error body недостаточен; не маскирую domain validation под 500.
 
----
-
 ### Pagination
 
 **Что это** — выдача большой коллекции порциями ограниченного размера.
@@ -2161,8 +1935,6 @@ HTTP/1.1 200 OK
 **Как используется / работает** — API возвращает items и next cursor/metadata; UI сохраняет filters и показывает loading/error состояние.
 
 **Минусы и ограничения** — pagination требует deterministic sort; без него появляются пропуски и duplicates между страницами.
-
----
 
 ### Cursor pagination
 
@@ -2181,8 +1953,6 @@ ORDER BY created_at DESC, id DESC
 LIMIT 25;
 ```
 
----
-
 ### Offset pagination
 
 **Что это** — пагинация через номер страницы и смещение (LIMIT/OFFSET).
@@ -2199,8 +1969,6 @@ ORDER BY created_at DESC, id DESC
 LIMIT 25 OFFSET 50; -- page 3; a deep OFFSET scans every skipped row
 ```
 
----
-
 ### Authentication
 
 **Что это** — процесс установления того, кто делает запрос.
@@ -2216,8 +1984,6 @@ const token = request.headers.get("authorization")?.replace("Bearer ", "");
 const principal = await verifyAccessToken(token);
 if (!principal) return new Response("Unauthorized", { status: 401 });
 ```
-
----
 
 ### Authorization
 
@@ -2236,8 +2002,6 @@ if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
 }
 ```
 
----
-
 ### Sessions and cookies
 
 **Что это** — схема хранения server-side login state с непрозрачным идентификатором в cookie.
@@ -2252,8 +2016,6 @@ if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
 HTTP/1.1 200 OK
 Set-Cookie: session=opaque-id-7f3a; Secure; HttpOnly; SameSite=Lax; Max-Age=1209600; Path=/
 ```
-
----
 
 ### JWT — JSON Web Token
 
@@ -2271,8 +2033,6 @@ eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI0MiIsImF1ZCI6ImFwaSIsImV4cCI6MTc1MjU4NDAwMH0.MEU
 payload is signed but not encrypted: base64url is readable by anyone
 ```
 
----
-
 ### Access token
 
 **Что это** — короткоживущий credential, доказывающий API, что caller authenticated, и несущий его claims/scopes.
@@ -2282,8 +2042,6 @@ payload is signed but not encrypted: base64url is readable by anyone
 **Как используется / работает** — API валидирует token на каждом request и authorise-ит конкретное действие; выбираю короткий expiry и минимальные scopes.
 
 **Минусы и ограничения** — token theft даёт доступ до expiry; client-side storage должен соответствовать threat model, а token не заменяет resource-level authorization.
-
----
 
 ### Refresh token
 
@@ -2307,8 +2065,6 @@ sequenceDiagram
   C->>API: retry with new access token
 ```
 
----
-
 ### CSRF — Cross-Site Request Forgery
 
 **Что это** — атака, при которой чужой сайт заставляет browser отправить authenticated cookie request.
@@ -2326,8 +2082,6 @@ Set-Cookie: session=opaque-id; Secure; HttpOnly; SameSite=Lax
 POST /api/projects/42/delete
 X-CSRF-Token: f3a91c0d…
 ```
-
----
 
 ### XSS — Cross-Site Scripting
 
@@ -2347,8 +2101,6 @@ element.innerHTML = comment.text;
 element.textContent = comment.text;
 ```
 
----
-
 ### CORS — Cross-Origin Resource Sharing
 
 **Что это** — политика браузера, определяющая, какой cross-origin JavaScript может читать response.
@@ -2363,8 +2115,6 @@ element.textContent = comment.text;
 Access-Control-Allow-Origin: https://app.example.com
 Access-Control-Allow-Credentials: true
 ```
-
----
 
 ### CORS preflight
 
@@ -2387,8 +2137,6 @@ Access-Control-Allow-Methods: POST
 Access-Control-Allow-Headers: Content-Type
 ```
 
----
-
 ### CSP — Content Security Policy
 
 **Что это** — HTTP-политика, ограничивающая допустимые источники script, style, images и frames.
@@ -2406,8 +2154,6 @@ Content-Security-Policy: default-src 'self';
   frame-ancestors 'none'
 ```
 
----
-
 ### Rate limiting
 
 **Что это** — ограничение частоты запросов к endpoint по ключу (user, API key, IP).
@@ -2424,8 +2170,6 @@ const allowed = await limiter.consume(key, { limit: 5, windowMs: 60_000 });
 
 if (!allowed) return new Response("Too Many Requests", { status: 429 });
 ```
-
----
 
 ### Webhooks
 
@@ -2445,8 +2189,6 @@ await queue.enqueue({ eventId: payload.id, type: payload.type });
 return new Response(null, { status: 202 });
 ```
 
----
-
 ### File uploads
 
 **Что это** — приём пользовательских файлов, обычно напрямую в object storage по signed URL.
@@ -2463,8 +2205,6 @@ await fetch(uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": f
 await api.completeUpload({ fileKey });
 ```
 
----
-
 ### Observability
 
 **Что это** — свойство системы быть понятной снаружи через logs, metrics и traces.
@@ -2475,11 +2215,7 @@ await api.completeUpload({ fileKey });
 
 **Минусы и ограничения** — telemetry стоит денег и может утечь PII; сигнал должен быть actionable, а не просто шумным.
 
----
-
 ## SQL & Databases
-
----
 
 ### Relational model
 
@@ -2490,8 +2226,6 @@ await api.completeUpload({ fileKey });
 **Как используется / работает** — моделирую tables, primary/foreign keys и constraints вокруг domain invariants, а не вокруг экранов UI.
 
 **Минусы и ограничения** — join-heavy schema требует понимания access patterns; не каждая нагрузка лучше решается реляционной БД.
-
----
 
 ### Normalization
 
@@ -2518,8 +2252,6 @@ CREATE TABLE order_items (
 );
 ```
 
----
-
 ### Primary and foreign keys
 
 **Что это** — primary key однозначно идентифицирует row, foreign key сохраняет ссылочную целостность.
@@ -2538,8 +2270,6 @@ CREATE TABLE comments (
 );
 ```
 
----
-
 ### Index
 
 **Что это** — вспомогательная структура данных БД для быстрого lookup, sorting или join.
@@ -2554,8 +2284,6 @@ CREATE TABLE comments (
 CREATE INDEX projects_workspace_created_at_idx
 ON projects (workspace_id, created_at DESC);
 ```
-
----
 
 ### Composite index
 
@@ -2573,8 +2301,6 @@ CREATE INDEX projects_workspace_updated_idx
 
 -- Speeds up: WHERE workspace_id = $1 ORDER BY updated_at DESC
 ```
-
----
 
 ### Query plan / EXPLAIN
 
@@ -2595,8 +2321,6 @@ ORDER BY updated_at DESC
 LIMIT 20;
 ```
 
----
-
 ### JOIN
 
 **Что это** — операция SQL, объединяющая rows из таблиц по условию связи.
@@ -2612,8 +2336,6 @@ SELECT p.id, p.name, u.name AS owner_name
 FROM projects p
 LEFT JOIN users u ON u.id = p.owner_id;
 ```
-
----
 
 ### N+1 queries
 
@@ -2633,8 +2355,6 @@ JOIN users u ON u.id = p.author_id
 WHERE p.workspace_id = $1;
 ```
 
----
-
 ### Transactions
 
 **Что это** — единица работы БД, в которой связанные writes фиксируются вместе или откатываются вместе.
@@ -2651,8 +2371,6 @@ UPDATE accounts SET balance = balance - 10 WHERE id = $1;
 UPDATE accounts SET balance = balance + 10 WHERE id = $2;
 COMMIT;
 ```
-
----
 
 ### ACID — Atomicity, Consistency, Isolation, Durability
 
@@ -2671,8 +2389,6 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 2;
 COMMIT; -- atomic: both changes or neither, even on failure
 ```
 
----
-
 ### Isolation levels
 
 **Что это** — настройка транзакции, определяющая, какие concurrent changes она видит.
@@ -2690,8 +2406,6 @@ SELECT balance FROM accounts WHERE id = 1;
 COMMIT;
 ```
 
----
-
 ### Optimistic locking
 
 **Что это** — контроль конкурентных изменений через версию записи вместо удержания lock.
@@ -2707,8 +2421,6 @@ UPDATE documents
 SET body = $1, version = version + 1
 WHERE id = $2 AND version = $3;
 ```
-
----
 
 ### Pessimistic locking
 
@@ -2727,8 +2439,6 @@ UPDATE workshops SET seats_left = seats_left - 1 WHERE id = $1 AND seats_left > 
 COMMIT;
 ```
 
----
-
 ### Deadlocks
 
 **Что это** — взаимная блокировка, при которой transactions циклически ждут locks друг друга.
@@ -2746,8 +2456,6 @@ COMMIT;
 -- Fix: acquire rows in one consistent order (for example, by id).
 ```
 
----
-
 ### Unique constraints
 
 **Что это** — ограничение БД, гарантирующее уникальность значения или комбинации колонок.
@@ -2762,8 +2470,6 @@ COMMIT;
 ALTER TABLE users ADD CONSTRAINT users_email_unique UNIQUE (email);
 -- A race between two concurrent signups yields error 23505, not a duplicate.
 ```
-
----
 
 ### Migrations
 
@@ -2781,8 +2487,6 @@ ALTER TABLE projects ADD COLUMN slug text;
 -- Step 2: backfill; new code writes both fields.
 -- Step 3: add NOT NULL/UNIQUE only after rollout.
 ```
-
----
 
 ### Soft delete
 
@@ -2802,8 +2506,6 @@ CREATE UNIQUE INDEX projects_slug_alive_idx
   ON projects (slug) WHERE deleted_at IS NULL;
 ```
 
----
-
 ### JSON columns
 
 **Что это** — колонки типа JSON/JSONB для хранения вариативного attribute set.
@@ -2821,11 +2523,7 @@ WHERE settings @> '{"autosave": true}'; -- JSONB containment
 CREATE INDEX projects_settings_idx ON projects USING gin (settings);
 ```
 
----
-
 ## Testing & DevOps
-
----
 
 ### Unit tests
 
@@ -2843,8 +2541,6 @@ test("rejects an expired token", () => {
 });
 ```
 
----
-
 ### Integration tests
 
 **Что это** — тесты совместной работы modules, HTTP layer, database или queue boundary.
@@ -2861,8 +2557,6 @@ test("POST /projects persists a project", async () => {
   expect(response.status).toBe(201);
 });
 ```
-
----
 
 ### End-to-end tests
 
@@ -2884,8 +2578,6 @@ test("user can create a project", async ({ page }) => {
 });
 ```
 
----
-
 ### Test pyramid
 
 **Что это** — эвристика распределения тестов: много быстрых unit, меньше integration, единицы E2E.
@@ -2901,8 +2593,6 @@ flowchart TB
   E[E2E: a few golden journeys] --> I[Integration: fewer, layer boundaries]
   I --> U[Unit: many, fast business rules]
 ```
-
----
 
 ### Mock vs fake vs stub
 
@@ -2923,8 +2613,6 @@ await chargeUser(user, { sendReceipt: mock });
 expect(mock).toHaveBeenCalledWith(user.email);
 ```
 
----
-
 ### Contract testing
 
 **Что это** — тесты согласованности producer и consumer по API/message contract.
@@ -2942,8 +2630,6 @@ expect(response).toMatchObject({
 });
 ```
 
----
-
 ### TDD — Test-Driven Development
 
 **Что это** — цикл разработки red → green → refactor: тест формулирует behavior до реализации.
@@ -2954,8 +2640,6 @@ expect(response).toMatchObject({
 
 **Минусы и ограничения** — не превращаю TDD в ритуал для CSS или exploratory prototype; тест должен быть meaningful.
 
----
-
 ### Test flakiness
 
 **Что это** — недетерминированные падения теста, разрушающие доверие к CI.
@@ -2965,8 +2649,6 @@ expect(response).toMatchObject({
 **Как используется / работает** — убираю real time, random, shared state, arbitrary sleeps и network dependency; retry — только временное containment.
 
 **Минусы и ограничения** — игнорировать flaky test опасно: он скрывает regression и замедляет команду.
-
----
 
 ### CI — Continuous Integration
 
@@ -2983,8 +2665,6 @@ expect(response).toMatchObject({
 - run: bun run lint
 - run: bun test
 ```
-
----
 
 ### CD — Continuous Delivery / Continuous Deployment
 
@@ -3004,8 +2684,6 @@ flowchart TD
   G -->|Delivery: manual approval| M[Promote to prod]
   G -->|Deployment: automatic| P[Prod]
 ```
-
----
 
 ### Docker
 
@@ -3027,8 +2705,6 @@ COPY --from=build /app/dist ./dist
 CMD ["node", "dist/server.js"]
 ```
 
----
-
 ### Environment configuration
 
 **Что это** — вынесение deploy-specific values и secrets из application code в окружение.
@@ -3048,8 +2724,6 @@ const config = {
 if (!config.databaseUrl) throw new Error("DATABASE_URL is required");
 ```
 
----
-
 ### Feature flags
 
 **Что это** — runtime-переключатели функциональности, разделяющие deploy и release.
@@ -3066,8 +2740,6 @@ if (flags.isEnabled("new-timeline", { tenantId, userId })) {
 }
 return <LegacyTimeline />;
 ```
-
----
 
 ### Blue-green deployment
 
@@ -3086,8 +2758,6 @@ flowchart LR
   G[Green: new version] --> H[Health checks]
   H --> LB
 ```
-
----
 
 ### Canary deployment
 
@@ -3109,8 +2779,6 @@ flowchart LR
   M -->|failure| RB[Roll back]
 ```
 
----
-
 ### Rollback
 
 **Что это** — возврат сервиса к известной working version после harmful release.
@@ -3128,8 +2796,6 @@ flowchart TD
   D -->|no| F[Fix forward or disable the feature flag]
 ```
 
----
-
 ### SLI, SLO, SLA — Service Level Indicator, Objective, Agreement
 
 **Что это** — SLI измеряет service behavior, SLO задаёт целевой уровень, SLA — внешнее обещание с последствиями.
@@ -3139,8 +2805,6 @@ flowchart TD
 **Как используется / работает** — выбираю user-facing indicator, например successful video publish latency, и error budget для release decisions.
 
 **Минусы и ограничения** — metric без user value стимулирует неверную оптимизацию; SLA не стоит обещать без operational capacity.
-
----
 
 ### Incident response
 
@@ -3152,11 +2816,7 @@ flowchart TD
 
 **Минусы и ограничения** — postmortem без follow-up owners ничего не меняет; не надо в момент инцидента искать виноватого.
 
----
-
 ## Architecture & System Design
-
----
 
 ### Monolith
 
@@ -3167,8 +2827,6 @@ flowchart TD
 **Как используется / работает** — держу clear modules и internal boundaries внутри одного repo/process, извлекая сервис только по доказанному давлению.
 
 **Минусы и ограничения** — без modularity растёт coupling и deployment blast radius; один runtime не означает один огромный файл.
-
----
 
 ### Microservices
 
@@ -3192,8 +2850,6 @@ flowchart TD
   end
 ```
 
----
-
 ### Modular monolith
 
 **Что это** — монолит с domain modules и enforced internal boundaries внутри одного deployable.
@@ -3203,8 +2859,6 @@ flowchart TD
 **Как используется / работает** — модули общаются через explicit interfaces/events, не импортируют private persistence детали друг друга.
 
 **Минусы и ограничения** — boundaries требуют discipline/tooling; shared database всё ещё допускает обход архитектуры.
-
----
 
 ### Bounded context
 
@@ -3227,8 +2881,6 @@ flowchart TD
   B -. shared id, different models .- E
 ```
 
----
-
 ### Clean architecture
 
 **Что это** — слоистая архитектура, где domain/use-case logic не зависит от framework, database и transport.
@@ -3247,8 +2899,6 @@ flowchart TD
   PG[Postgres adapter] -. implements .-> R
 ```
 
----
-
 ### Hexagonal architecture
 
 **Что это** — архитектура ports-and-adapters: domain общается с HTTP, DB, queue и внешними API через интерфейсы.
@@ -3266,8 +2916,6 @@ flowchart TD
   CORE -->|driven port| DB[Postgres adapter]
   CORE -->|driven port| MAIL[Email adapter]
 ```
-
----
 
 ### CQRS — Command Query Responsibility Segregation
 
@@ -3288,8 +2936,6 @@ flowchart LR
   Q[Query: project list] --> R
 ```
 
----
-
 ### Event sourcing
 
 **Что это** — хранение состояния как immutable последовательности domain events.
@@ -3309,8 +2955,6 @@ flowchart TD
   P --> R[(Read models)]
 ```
 
----
-
 ### Event-driven architecture
 
 **Что это** — архитектура, где producer публикует события, а asynchronous consumers реагируют на них.
@@ -3329,8 +2973,6 @@ flowchart TD
   B --> A[Consumer: analytics]
 ```
 
----
-
 ### WebSocket
 
 **Что это** — протокол двустороннего persistent connection между client и server поверх одного TCP-соединения.
@@ -3345,8 +2987,6 @@ flowchart TD
 const socket = new WebSocket("wss://api.example.com/live");
 socket.addEventListener("message", ({ data }) => updateProject(JSON.parse(data)));
 ```
-
----
 
 ### SSE — Server-Sent Events
 
@@ -3363,8 +3003,6 @@ const events = new EventSource("/api/jobs/42/events");
 events.addEventListener("progress", (event) => setProgress(JSON.parse(event.data)));
 ```
 
----
-
 ### Message queue
 
 **Что это** — буфер асинхронных задач между producer и worker-ами.
@@ -3379,8 +3017,6 @@ events.addEventListener("progress", (event) => setProgress(JSON.parse(event.data
 await queue.enqueue({ type: "render-video", jobId });
 queue.consume("render-video", async ({ jobId }) => await renderVideo(jobId));
 ```
-
----
 
 ### Idempotent consumer
 
@@ -3397,8 +3033,6 @@ INSERT INTO processed_events (event_id) VALUES ($1)
 ON CONFLICT DO NOTHING;
 -- Run the side effect only if a new row was inserted.
 ```
-
----
 
 ### Outbox pattern
 
@@ -3417,8 +3051,6 @@ INSERT INTO outbox (topic, payload) VALUES ('video.queued', json_build_object('i
 COMMIT;
 ```
 
----
-
 ### Cache-aside
 
 **Что это** — паттерн кэширования: приложение само читает cache, при miss идёт в БД и заполняет cache.
@@ -3436,8 +3068,6 @@ if (!project) {
   await cache.set(`project:${id}`, project, { ttl: 60 });
 }
 ```
-
----
 
 ### Distributed lock
 
@@ -3464,8 +3094,6 @@ try {
 }
 ```
 
----
-
 ### Load balancing
 
 **Что это** — распределение requests между healthy instances через выделенный балансировщик.
@@ -3485,8 +3113,6 @@ flowchart TD
   LB -. health check .-> A
 ```
 
----
-
 ### Backpressure
 
 **Что это** — механизм сдерживания producer-а, когда работа поступает быстрее, чем consumer её обрабатывает.
@@ -3505,8 +3131,6 @@ flowchart TD
   S -.-> P
 ```
 
----
-
 ### Rate limiting vs backpressure
 
 **Что это** — rate limit защищает policy/abuse boundary, backpressure защищает downstream capacity.
@@ -3516,8 +3140,6 @@ flowchart TD
 **Как используется / работает** — API limit ставлю на caller, concurrency/queue limit — на service or worker capacity.
 
 **Минусы и ограничения** — один механизм не заменяет другой; limits без user messaging выглядят как случайная поломка.
-
----
 
 ### System-design interview framing
 
@@ -3529,11 +3151,7 @@ flowchart TD
 
 **Минусы и ограничения** — нельзя преждевременно рисовать Kafka/микросервисы; но и нельзя молча делать опасные assumptions.
 
----
-
 ## AI, LLM & Product Engineering
-
----
 
 ### LLM — Large Language Model
 
@@ -3545,8 +3163,6 @@ flowchart TD
 
 **Минусы и ограничения** — output может быть неверным, нестабильным и дорогим; модель не является source of truth.
 
----
-
 ### Prompt engineering
 
 **Что это** — практика формулирования задачи модели: роль, ограничения, формат, примеры.
@@ -3557,8 +3173,6 @@ flowchart TD
 
 **Минусы и ограничения** — длинный prompt повышает latency/cost и не заменяет retrieval, validation или product design.
 
----
-
 ### System prompt
 
 **Что это** — служебная инструкция с устойчивыми правилами поведения модели и product guardrails.
@@ -3568,8 +3182,6 @@ flowchart TD
 **Как используется / работает** — отделяю system instructions от user content, версиирую их и оцениваю изменения на representative eval set.
 
 **Минусы и ограничения** — system prompt не является security boundary против malicious input; нужен least privilege у tools и validation output.
-
----
 
 ### Tokens and context window
 
@@ -3591,8 +3203,6 @@ A 200k-token window — input and output share one budget:
 Does not fit → summarize the history instead of silently dropping the tail.
 ```
 
----
-
 ### Embeddings
 
 **Что это** — векторное представление контента для оценки семантической близости, поиска и кластеризации.
@@ -3607,8 +3217,6 @@ Does not fit → summarize the history instead of silently dropping the tail.
 const [a, b] = await embed(["how to trim a video", "clip cutting tool"]);
 cosineSimilarity(a, b); // ~0.8 — semantically close with no shared words
 ```
-
----
 
 ### Vector database
 
@@ -3628,8 +3236,6 @@ const matches = await vectorIndex.search({
 });
 ```
 
----
-
 ### RAG — Retrieval-Augmented Generation
 
 **Что это** — паттерн генерации с предварительным поиском: найденные разрешённые знания добавляются в prompt.
@@ -3648,8 +3254,6 @@ const context = matches.map(({ text, sourceUrl }) => ({ text, sourceUrl }));
 const answer = await llm.generate({ question, context });
 ```
 
----
-
 ### Reranking
 
 **Что это** — второй этап поиска, переупорядочивающий initial retrieval results более точной моделью.
@@ -3660,8 +3264,6 @@ const answer = await llm.generate({ question, context });
 
 **Минусы и ограничения** — добавляет latency/cost; плохие chunks или filters остаются плохой базой.
 
----
-
 ### Hallucination
 
 **Что это** — режим сбоя, при котором модель уверенно утверждает неподтверждённый или выдуманный факт.
@@ -3671,8 +3273,6 @@ const answer = await llm.generate({ question, context });
 **Как используется / работает** — ограничиваю answer предоставленными sources, требую citations, валидирую structured fields и даю abstain path.
 
 **Минусы и ограничения** — prompt warning «не галлюцинируй» недостаточен; high-stakes output нуждается в human review или deterministic verification.
-
----
 
 ### Structured output
 
@@ -3695,8 +3295,6 @@ const answer = await llm.generate({
 const result = SummarySchema.parse(answer);
 ```
 
----
-
 ### Tool calling
 
 **Что это** — механизм, в котором модель запрашивает действие или данные через строго описанный application tool.
@@ -3711,8 +3309,6 @@ const result = SummarySchema.parse(answer);
 const tools = [{ name: "get_project", parameters: { type: "object", properties: { id: { type: "string" } } } }];
 if (call.name === "get_project") return getProjectForUser(userId, call.arguments.id);
 ```
-
----
 
 ### Prompt injection
 
@@ -3731,8 +3327,6 @@ if (!tool || !canUseTool(user, tool) || !tool.schema.safeParse(call.arguments).s
 }
 ```
 
----
-
 ### Evaluation (evals)
 
 **Что это** — измеримые проверки качества LLM feature на представительном наборе примеров.
@@ -3750,8 +3344,6 @@ for (const example of evalSet) {
 }
 ```
 
----
-
 ### AI — Artificial Intelligence: latency and cost
 
 **Что это** — инженерная дисциплина удержания LLM feature интерактивной и экономически оправданной.
@@ -3761,8 +3353,6 @@ for (const example of evalSet) {
 **Как используется / работает** — выбираю smallest capable model, сокращаю context/output, cache-ю safe results, async-ю long generation и показываю progress.
 
 **Минусы и ограничения** — дешёвая модель может ухудшить quality/support cost; cache нельзя применять к personal/fresh content без policy.
-
----
 
 ### Human-in-the-loop
 
@@ -3774,8 +3364,6 @@ for (const example of evalSet) {
 
 **Минусы и ограничения** — ручной review создаёт очередь и latency; нужно выбирать рискованные decision points, а не всё подряд.
 
----
-
 ### Product discovery
 
 **Что это** — процесс проверки, какую проблему пользователя стоит решать, до масштабной реализации.
@@ -3785,8 +3373,6 @@ for (const example of evalSet) {
 **Как используется / работает** — формулирую target user, job-to-be-done, current workaround, hypothesis и smallest experiment с success signal.
 
 **Минусы и ограничения** — interviews не равны реальному поведению; discovery не должна становиться бесконечной отсрочкой доставки.
-
----
 
 ### Product metrics
 
@@ -3798,8 +3384,6 @@ for (const example of evalSet) {
 
 **Минусы и ограничения** — vanity metrics легко растут без value; metric нельзя использовать без privacy/ethics review.
 
----
-
 ### A/B testing
 
 **Что это** — контролируемый эксперимент со случайным разделением пользователей между вариантами.
@@ -3809,8 +3393,6 @@ for (const example of evalSet) {
 **Как используется / работает** — заранее задаю hypothesis, primary metric, guardrails, sample size и assignment unit, затем анализирую эффект.
 
 **Минусы и ограничения** — плохая randomization, peeking и multiple comparisons создают ложные выводы; не каждый change достоин эксперимента.
-
----
 
 ### Analytics events
 
@@ -3831,8 +3413,6 @@ track("project_exported", {
 });
 ```
 
----
-
 ### Optimistic UI
 
 **Что это** — паттерн UI, показывающий ожидаемый результат mutation до network response.
@@ -3850,8 +3430,6 @@ try { await api.createProject(input); }
 catch { queryClient.setQueryData(["projects"], previous); }
 ```
 
----
-
 ### Design systems
 
 **Что это** — переиспользуемый набор компонентов, tokens и accessibility patterns с документацией.
@@ -3862,49 +3440,33 @@ catch { queryClient.setQueryData(["projects"], previous); }
 
 **Минусы и ограничения** — не делаю универсальный компонент на все случаи; premature systemisation замедляет product learning.
 
----
-
 ## Fast system-design practice prompts
 
 Перед интервью проговорите вслух по 10–15 минут каждый сценарий: requirements → API/data model → happy path → failure/retry → scale/observability → trade-offs.
-
----
 
 ### 1. Создать AI-видео из текста
 
 **По-русски:** начинаю с POST /projects/:id/renders с idempotency key. В одной transaction создаю render job и outbox event; worker берёт job из queue, получает разрешённые input assets, вызывает generation/render stages и сохраняет итог в object storage. В БД храню state machine (queued → running → completed/failed/cancelled), а UI получает status через polling или SSE. Retries только для transient failure, cancel — идемпотентный и проверяется между stages. Сначала это modular monolith с worker-ами; отдельно масштабирую CPU/GPU rendering только при измеренной очереди/нагрузке.
 
----
-
 ### 2. Совместное редактирование учебного сценария
 
 **По-русски:** сначала уточняю, нужна ли настоящая одновременная правка текста. Для autosave без real-time collaboration достаточно revision number и optimistic locking: client отправляет base revision, server возвращает 409 Conflict при устаревшей версии. Presence и live cursors идут через WebSocket как ephemeral data. Если требуется одновременное редактирование одного rich-text поля без конфликтов, выбираю CRDT или OT, храню snapshots и append-only operations, а permissions проверяю на каждом connection и write.
-
----
 
 ### 3. Загрузка 5 GB видео
 
 **По-русски:** browser не проксирует 5 GB через application server. API authorise-ит upload и выдаёт short-lived signed multipart URL; browser загружает части напрямую в storage, умеет resume и показывает локальный progress. После complete server проверяет ownership/size/type, ставит scan/transcode job в очередь и только затем помечает asset usable. Нужны quota, expiry незавершённых uploads, content validation по байтам, malware scan и lifecycle policy.
 
----
-
 ### 4. Поиск по проектам и сценариям
 
 **По-русски:** начинаю с Postgres full-text search и structured filters, а не с отдельного search cluster. API принимает query/filters/cursor и возвращает results с deterministic sort (rank, updated_at, id); authorization/tenant filter применяются до выдачи. UI debounce-ит query, отменяет устаревший request и показывает cursor pagination. Vector retrieval добавляю, только если keyword/full-text search не покрывает semantic intent; его results всё равно проходят metadata и permission filters.
-
----
 
 ### 5. Analytics для learning content
 
 **По-русски:** сначала определяю события и метрики: например, lesson_started, scene_completed, assessment_submitted, а не расплывчатые «engagement». Client отправляет versioned, минимальный по PII event с event id и timestamp; ingestion API валидирует schema и кладёт event в durable queue/storage. Асинхронный pipeline дедуплицирует, обрабатывает late events и строит aggregates для dashboard. Хранение и retention согласую с privacy/legal requirements, а metric definitions документирую рядом с dashboard.
 
----
-
 ### 6. Notification system
 
 **По-русски:** domain mutation записывает notification intent и outbox event в одной transaction. Worker применяет user preferences, dedupe key и channel policy, затем создаёт delivery record и отправляет email/in-app notification через provider. Provider webhooks обновляют delivery state идемпотентно; transient errors получают exponential backoff и dead-letter visibility. Unsubscribe и quiet hours применяются до отправки. In-app inbox хранится в БД, а SSE/WebSocket — только ускоряет его обновление в UI, не является source of truth.
-
----
 
 ## Final interview reminders
 

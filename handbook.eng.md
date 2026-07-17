@@ -2,8 +2,6 @@
 
 <p class="handbook-version" data-version="v1.5.3">Version <code>v1.5.3</code></p>
 
----
-
 A practical playbook for the **tech roulette** format and the follow-up system-design interview. It targets a role where Next.js, React, TypeScript, simple REST endpoints and SQL queries, performance, testable code, and owning a feature end to end from the UI to the database all matter.
 
 ## How to answer
@@ -86,11 +84,7 @@ Say the expansion out loud exactly as written — that is how it naturally sound
 
 **Not acronyms:** GET, POST, PUT, PATCH, DELETE, SELECT, UPDATE, WHERE, JOIN, INNER JOIN, LEFT JOIN, ORDER BY, LIMIT, OFFSET, IN, FOR, and EXPLAIN are HTTP method names or SQL keywords. Their meaning is covered in the corresponding sections.
 
----
-
 ## React
-
----
 
 ### Reconciliation
 
@@ -106,8 +100,6 @@ Say the expansion out loud exactly as written — that is how it naturally sound
 // Bad: key={index} — reordering moves state to the wrong row.
 {tasks.map((task) => <TaskRow key={task.id} task={task} />)}
 ```
-
----
 
 ### Virtual DOM
 
@@ -125,8 +117,6 @@ flowchart TD
   M --> B[Real DOM]
 ```
 
----
-
 ### Concurrent rendering
 
 **Purpose** — it keeps the UI responsive by allowing less urgent rendering to yield to user input.
@@ -142,8 +132,6 @@ flowchart TD
   C --> D[Restart render with current state]
   B -->|no| E[Commit to DOM]
 ```
-
----
 
 ### Suspense
 
@@ -161,8 +149,6 @@ const Chart = lazy(() => import("./Chart"));
 </Suspense>
 ```
 
----
-
 ### Error Boundary
 
 **Purpose** — it isolates a rendering failure to a UI region and keeps the rest of the app usable.
@@ -179,8 +165,6 @@ import { ErrorBoundary } from "react-error-boundary";
 </ErrorBoundary>
 ```
 
----
-
 ### React.memo
 
 **Purpose** — it skips rendering a pure child when its props have not changed.
@@ -194,8 +178,6 @@ const UserRow = memo(function UserRow({ user }: { user: User }) {
   return <li>{user.name}</li>;
 });
 ```
-
----
 
 ### useMemo
 
@@ -211,8 +193,6 @@ const visibleUsers = useMemo(
   [users, query],
 );
 ```
-
----
 
 ### useCallback
 
@@ -230,8 +210,6 @@ const onSelect = useCallback((id: string) => {
 return <MemoizedProjectList onSelect={onSelect} />;
 ```
 
----
-
 ### useRef
 
 **Purpose** — it stores a mutable value or DOM node without triggering a render.
@@ -245,8 +223,6 @@ const inputRef = useRef<HTMLInputElement>(null);
 <button onClick={() => inputRef.current?.focus()}>Search</button>
 <input ref={inputRef} />
 ```
-
----
 
 ### useEffect
 
@@ -262,8 +238,6 @@ useEffect(() => {
   return () => subscription.unsubscribe();
 }, [roomId]);
 ```
-
----
 
 ### useLayoutEffect
 
@@ -281,8 +255,6 @@ useLayoutEffect(() => {
 }, [open]);
 ```
 
----
-
 ### useTransition
 
 **Purpose** — it keeps urgent UI, such as typing, fast while a list or route update is expensive.
@@ -298,8 +270,6 @@ onChange={(event) => {
   startTransition(() => setFilter(event.target.value));
 }}
 ```
-
----
 
 ### useDeferredValue
 
@@ -317,8 +287,6 @@ const deferredQuery = useDeferredValue(query);
 <SlowResults query={deferredQuery} />;
 ```
 
----
-
 ### Context
 
 **Purpose** — it shares cross-cutting data without prop drilling, such as theme, locale, or current user.
@@ -331,8 +299,6 @@ const deferredQuery = useDeferredValue(query);
 const ThemeContext = createContext<"light" | "dark">("light");
 <ThemeContext.Provider value="dark"><Editor /></ThemeContext.Provider>
 ```
-
----
 
 ### Controlled vs uncontrolled components
 
@@ -349,8 +315,6 @@ const ThemeContext = createContext<"light" | "dark">("light");
 // Uncontrolled: the value lives in the DOM, read via ref.
 <input ref={emailRef} defaultValue={initialEmail} />
 ```
-
----
 
 ### Lifting state up
 
@@ -369,8 +333,6 @@ function Editor() {
   </>;
 }
 ```
-
----
 
 ### State colocation
 
@@ -394,8 +356,6 @@ function ProjectList() {
 }
 ```
 
----
-
 ### Server state
 
 **Purpose** — it manages remote, cacheable, and potentially stale API data.
@@ -411,8 +371,6 @@ const { data: projects } = useQuery({ queryKey: ["projects"], queryFn: fetchProj
 // UI state: local, no cache or invalidation.
 const [selectedId, setSelectedId] = useState<string | null>(null);
 ```
-
----
 
 ### Redux
 
@@ -434,8 +392,6 @@ const projectsSlice = createSlice({
 });
 ```
 
----
-
 ### Zustand
 
 **Purpose** — it provides a small external store for shared client state with less ceremony than Redux.
@@ -453,8 +409,6 @@ const usePlayerStore = create<{ playing: boolean; toggle: () => void }>((set) =>
 const playing = usePlayerStore((state) => state.playing); // subscribe to a slice only
 ```
 
----
-
 ### TanStack Query / React Query
 
 **Purpose** — it manages server state: caching, loading and error, retries, refetching, invalidation, and optimistic mutations.
@@ -471,11 +425,7 @@ const query = useQuery({
 });
 ```
 
----
-
 ## Next.js
-
----
 
 ### App Router
 
@@ -497,8 +447,6 @@ app/
       error.tsx     segment error boundary
 ```
 
----
-
 ### Pages Router
 
 **Purpose** — it is the earlier Next.js router built around getServerSideProps and getStaticProps.
@@ -519,8 +467,6 @@ export default function ProjectPage({ project }: { project: Project }) {
 }
 ```
 
----
-
 ### Server Components
 
 **Purpose** — it executes a UI component on the server and keeps its JavaScript out of the browser bundle.
@@ -535,8 +481,6 @@ export default async function ProjectsPage() {
   return <ProjectList projects={projects} />;
 }
 ```
-
----
 
 ### Client Components
 
@@ -555,8 +499,6 @@ export function LikeButton() {
 }
 ```
 
----
-
 ### SSR — Server-Side Rendering
 
 **Purpose** — it generates HTML on the server per request for fresh content and a strong initial render.
@@ -572,8 +514,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 }
 ```
 
----
-
 ### CSR — Client-Side Rendering
 
 ---
@@ -582,8 +522,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 **How it works / is used** — serve a shell and JavaScript, then client fetches populate the interface.
 
 **Downsides and limits** — useful content appears later and SEO is weaker; loading and error UX need deliberate design.
-
----
 
 ### SSG — Static Site Generation
 
@@ -600,8 +538,6 @@ export async function generateStaticParams() {
 }
 ```
 
----
-
 ### ISR — Incremental Static Regeneration
 
 **Purpose** — it combines static speed with periodic page-cache refresh.
@@ -616,8 +552,6 @@ export async function generateStaticParams() {
 export const revalidate = 60;
 // Next.js regenerates the page at most once per minute.
 ```
-
----
 
 ### Hydration
 
@@ -634,8 +568,6 @@ flowchart TD
   J --> H[React matches markup and attaches handlers]
   H --> I[Interactive page]
 ```
-
----
 
 ### Hydration mismatch
 
@@ -654,8 +586,6 @@ const [now, setNow] = useState<string | null>(null);
 useEffect(() => setNow(new Date().toLocaleTimeString()), []);
 ```
 
----
-
 ### Layouts
 
 **Purpose** — it preserves shared chrome, navigation, and providers across child routes.
@@ -673,8 +603,6 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 }
 ```
 
----
-
 ### Route Handlers
 
 **Purpose** — it implements an HTTP API alongside the application in the App Router.
@@ -689,8 +617,6 @@ export async function GET() {
   return Response.json({ projects });
 }
 ```
-
----
 
 ### Proxy (formerly Middleware)
 
@@ -711,8 +637,6 @@ export function proxy(request: NextRequest) {
 export const config = { matcher: ["/projects/:path*"] };
 ```
 
----
-
 ### Streaming
 
 **Purpose** — it sends ready parts of a page earlier instead of waiting for the slowest request.
@@ -732,8 +656,6 @@ export default function ProjectPage() {
 }
 ```
 
----
-
 ### Caching and revalidation
 
 **Purpose** — it reduces repeated work and requests while keeping data acceptably fresh.
@@ -748,8 +670,6 @@ import { revalidatePath } from "next/cache";
 await db.project.update({ where: { id }, data: input });
 revalidatePath(`/projects/${id}`);
 ```
-
----
 
 ### Server Actions
 
@@ -767,8 +687,6 @@ export async function renameProject(formData: FormData) {
 }
 ```
 
----
-
 ### Dynamic imports
 
 **Purpose** — it moves rarely needed code out of the initial bundle to speed page startup.
@@ -783,8 +701,6 @@ const VideoTimeline = dynamic(() => import("./VideoTimeline"), {
   ssr: false,
 });
 ```
-
----
 
 ### Image optimization
 
@@ -805,8 +721,6 @@ const VideoTimeline = dynamic(() => import("./VideoTimeline"), {
 />
 ```
 
----
-
 ### Edge Runtime
 
 **Purpose** — it runs short logic closer to users to reduce network latency.
@@ -824,11 +738,7 @@ export async function GET(request: Request) {
 }
 ```
 
----
-
 ## JavaScript
-
----
 
 ### Closure
 
@@ -846,8 +756,6 @@ function makeCounter() {
 const next = makeCounter();
 ```
 
----
-
 ### Event loop
 
 **Purpose** — it coordinates synchronous code, task queues, microtasks, and browser rendering.
@@ -862,8 +770,6 @@ Promise.resolve().then(() => console.log("microtask"));
 setTimeout(() => console.log("task"));
 console.log("B"); // A, B, microtask, task
 ```
-
----
 
 ### Microtasks
 
@@ -881,8 +787,6 @@ Promise.resolve()
 // microtask 1, microtask 2, task — the microtask queue drains fully before the task
 ```
 
----
-
 ### Macrotasks
 
 ---
@@ -891,8 +795,6 @@ Promise.resolve()
 **How it works / is used** — setTimeout, message events, and I/O callbacks typically create tasks, between which the browser may render.
 
 **Downsides and limits** — a timer is not an exact schedule; a busy main thread delays it.
-
----
 
 ### Promise
 
@@ -909,8 +811,6 @@ loadProject(id)
   .finally(() => setLoading(false));
 ```
 
----
-
 ### async / await
 
 **Purpose** — it makes sequential Promise code read like synchronous code.
@@ -926,8 +826,6 @@ const [project, comments] = await Promise.all([
 ]);
 ```
 
----
-
 ### AbortController
 
 **Purpose** — it cancels fetch or another supporting operation when its result is no longer needed.
@@ -941,8 +839,6 @@ const controller = new AbortController();
 fetch(`/api/search?q=${query}`, { signal: controller.signal });
 return () => controller.abort();
 ```
-
----
 
 ### Hoisting
 
@@ -959,8 +855,6 @@ var a = 1;
 console.log(b); // ReferenceError: let is in the temporal dead zone
 let b = 2;
 ```
-
----
 
 ### this
 
@@ -979,8 +873,6 @@ print(); // strict mode: TypeError (this is undefined); sloppy mode: this is glo
 setTimeout(player.print.bind(player), 0); // "Demo" — receiver fixed by bind
 ```
 
----
-
 ### Prototype chain
 
 **Purpose** — it implements inheritance and property lookup in JavaScript.
@@ -997,8 +889,6 @@ child.greet(); // "hi" — not on child, found on the prototype
 Object.getPrototypeOf(child) === base; // true
 ```
 
----
-
 ### Equality: === vs ==
 
 **Purpose** — it compares values either without coercion or with implicit coercion.
@@ -1012,8 +902,6 @@ Object.getPrototypeOf(child) === base; // true
 0 === "";      // false
 value == null; // deliberate idiom: true for both null and undefined
 ```
-
----
 
 ### Shallow copy
 
@@ -1031,8 +919,6 @@ copy.meta.views = 99;
 original.meta.views; // 99 — the nested object is still shared
 ```
 
----
-
 ### Deep copy
 
 **Purpose** — it creates an independent copy of a nested structure when that is genuinely necessary.
@@ -1047,8 +933,6 @@ const copy = structuredClone(original); // Date, Map, cyclic references — ok
 copy.meta.views = 99;
 original.meta.views; // 10 — the structure is fully independent
 ```
-
----
 
 ### Immutability
 
@@ -1067,8 +951,6 @@ const next = {
 };
 ```
 
----
-
 ### Debounce
 
 **Purpose** — it waits for a pause in a burst of events so work does not run on every keystroke.
@@ -1085,8 +967,6 @@ const searchLater = (query: string) => {
 };
 ```
 
----
-
 ### Throttle
 
 **Purpose** — it limits execution frequency during a continuous event stream.
@@ -1102,8 +982,6 @@ const reportScroll = throttle(() => {
 
 window.addEventListener("scroll", reportScroll, { passive: true });
 ```
-
----
 
 ### Generators and iterators
 
@@ -1130,8 +1008,6 @@ const playlist = {
 for (const track of playlist) console.log(track);
 ```
 
----
-
 ### Modules
 
 **Purpose** — it isolates scope and declares application dependencies explicitly.
@@ -1152,8 +1028,6 @@ import multiply, { add } from "./math.js";
 const { renderChart } = await import("./chart.js");
 ```
 
----
-
 ### Memory leaks
 
 **Purpose** — it is a diagnostic term: memory remains reachable after the data is no longer needed.
@@ -1173,11 +1047,7 @@ useEffect(() => {
 }, []);
 ```
 
----
-
 ## TypeScript
-
----
 
 ### any
 
@@ -1191,8 +1061,6 @@ useEffect(() => {
 // Bad: value.name compiles even when value is null.
 const value: any = JSON.parse(body);
 ```
-
----
 
 ### unknown
 
@@ -1208,8 +1076,6 @@ if (typeof value === "object" && value !== null && "name" in value) {
   console.log(value.name);
 }
 ```
-
----
 
 ### never
 
@@ -1229,8 +1095,6 @@ switch (result.status) {
 }
 ```
 
----
-
 ### Type narrowing
 
 **Purpose** — it turns a broad union into a concrete safe type in a code branch.
@@ -1244,8 +1108,6 @@ function format(value: string | Date) {
   return value instanceof Date ? value.toISOString() : value.trim();
 }
 ```
-
----
 
 ### Type guards
 
@@ -1262,8 +1124,6 @@ function isUser(value: unknown): value is User {
 }
 ```
 
----
-
 ### Generics
 
 **Purpose** — it expresses a relationship between input and output without losing the concrete type.
@@ -1278,8 +1138,6 @@ function first<T>(items: readonly T[]): T | undefined {
 }
 const project = first([{ id: "p1", name: "Handbook" }]); // object type is preserved
 ```
-
----
 
 ### keyof
 
@@ -1296,8 +1154,6 @@ function get<T, K extends keyof T>(object: T, key: K): T[K] {
 get({ id: "p1", name: "Handbook" }, "name");
 ```
 
----
-
 ### typeof in type positions
 
 **Purpose** — it derives a type from an existing value without duplicating its declaration.
@@ -1310,8 +1166,6 @@ get({ id: "p1", name: "Handbook" }, "name");
 const config = { retries: 3, region: "eu" } as const;
 type Config = typeof config;
 ```
-
----
 
 ### Mapped types
 
@@ -1326,8 +1180,6 @@ type User = { id: string; name: string; email: string };
 type EditableUser = { [K in "name" | "email"]?: User[K] };
 ```
 
----
-
 ### Conditional types
 
 **Purpose** — it chooses a result type based on the relationship between two types.
@@ -1340,8 +1192,6 @@ type EditableUser = { [K in "name" | "email"]?: User[K] };
 type ApiResult<T> = T extends Promise<infer Value> ? Value : T;
 type Project = ApiResult<Promise<{ id: string }>>;
 ```
-
----
 
 ### infer
 
@@ -1356,8 +1206,6 @@ type ElementOf<T> = T extends readonly (infer Item)[] ? Item : never;
 type User = ElementOf<readonly [{ id: string }]>;
 ```
 
----
-
 ### Discriminated unions
 
 **Purpose** — it models finite states with a tag field so invalid combinations become impossible.
@@ -1370,8 +1218,6 @@ type User = ElementOf<readonly [{ id: string }]>;
 type Result = { status: "loading" } | { status: "error"; message: string } | { status: "success"; data: User };
 if (result.status === "success") console.log(result.data.name);
 ```
-
----
 
 ### type vs interface
 
@@ -1386,8 +1232,6 @@ interface Project { id: string; name: string }
 type LoadState = "idle" | "loading" | "error";
 ```
 
----
-
 ### Utility types
 
 **Purpose** — built-in Partial, Pick, Omit, Record, Required, and Readonly reduce repeated type-level code.
@@ -1401,8 +1245,6 @@ type User = { id: string; name: string; passwordHash: string };
 type PublicUser = Omit<User, "passwordHash">;
 const labels: Record<"draft" | "published", string> = { draft: "Draft", published: "Published" };
 ```
-
----
 
 ### readonly
 
@@ -1419,8 +1261,6 @@ function renderTags(tags: readonly string[]) {
 }
 ```
 
----
-
 ### as const
 
 **Purpose** — it preserves literal values and readonly structure instead of broad string or number types.
@@ -1433,8 +1273,6 @@ function renderTags(tags: readonly string[]) {
 const statuses = ["draft", "published"] as const;
 type Status = (typeof statuses)[number];
 ```
-
----
 
 ### satisfies
 
@@ -1449,8 +1287,6 @@ type Route = "/" | "/projects";
 const labels = { "/": "Home", "/projects": "Projects" } satisfies Record<Route, string>;
 ```
 
----
-
 ### Enums
 
 **Purpose** — it defines a named set of constants, though a string-literal union is often enough.
@@ -1463,8 +1299,6 @@ const labels = { "/": "Home", "/projects": "Projects" } satisfies Record<Route, 
 const Role = { Admin: "admin", Member: "member" } as const;
 type Role = (typeof Role)[keyof typeof Role];
 ```
-
----
 
 ### Declaration files
 
@@ -1481,11 +1315,7 @@ declare module "legacy-analytics" {
 }
 ```
 
----
-
 ## Browser & Performance
-
----
 
 ### Critical rendering path
 
@@ -1506,8 +1336,6 @@ flowchart TD
   P --> K[Compositing]
 ```
 
----
-
 ### Reflow / layout
 
 **Purpose** — layout computes element geometry after size, text, or CSS-rule changes.
@@ -1525,8 +1353,6 @@ const heights = items.map((el) => el.offsetHeight);
 items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 ```
 
----
-
 ### Repaint
 
 ---
@@ -1535,8 +1361,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 **How it works / is used** — animate transform and opacity when possible and inspect paint flashing in DevTools.
 
 **Downsides and limits** — even without layout, a large paint area can be expensive.
-
----
 
 ### Compositing
 
@@ -1547,8 +1371,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 
 **Downsides and limits** — too many layers consume GPU memory and can hurt performance.
 
----
-
 ### Core Web Vitals
 
 ---
@@ -1557,8 +1379,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 **How it works / is used** — inspect field data and lab traces, then connect LCP, CLS, and INP to a user journey.
 
 **Downsides and limits** — a score does not replace product judgment, and synthetic results may differ from real devices.
-
----
 
 ### LCP — Largest Contentful Paint
 
@@ -1569,8 +1389,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 
 **Downsides and limits** — the largest element varies by viewport, and preloading everything is counterproductive.
 
----
-
 ### CLS — Cumulative Layout Shift
 
 ---
@@ -1580,8 +1398,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 
 **Downsides and limits** — user-initiated shifts are not necessarily bad CLS, so inspect the actual scenario.
 
----
-
 ### INP — Interaction to Next Paint
 
 ---
@@ -1590,8 +1406,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 **How it works / is used** — split long tasks, reduce handler work, and show immediate feedback for a long mutation.
 
 **Downsides and limits** — optimizing one click does not guarantee a good worst-case interaction.
-
----
 
 ### requestAnimationFrame
 
@@ -1617,8 +1431,6 @@ window.addEventListener("pointermove", (event) => {
 });
 ```
 
----
-
 ### IntersectionObserver
 
 **Purpose** — it observes an element intersecting a viewport or container without continuous scroll polling.
@@ -1633,8 +1445,6 @@ const observer = new IntersectionObserver(([entry]) => {
 });
 observer.observe(sentinel);
 ```
-
----
 
 ### ResizeObserver
 
@@ -1653,8 +1463,6 @@ observer.observe(chartContainer);
 // On component removal: observer.disconnect().
 ```
 
----
-
 ### Web Workers
 
 **Purpose** — it moves CPU-heavy computation off the main thread to keep the interface responsive.
@@ -1668,8 +1476,6 @@ const worker = new Worker(new URL("./search-worker.ts", import.meta.url));
 worker.postMessage({ type: "index", documents });
 worker.onmessage = ({ data }) => setResults(data);
 ```
-
----
 
 ### Web Vitals field monitoring
 
@@ -1688,8 +1494,6 @@ const report = (metric: Metric) =>
 onLCP(report); onCLS(report); onINP(report);
 ```
 
----
-
 ### Code splitting
 
 **Purpose** — it splits JavaScript into chunks loaded by route or on demand.
@@ -1705,8 +1509,6 @@ exportButton.addEventListener("click", async () => {
 });
 ```
 
----
-
 ### Tree shaking
 
 **Purpose** — it removes unreachable ESM code from a production bundle.
@@ -1720,8 +1522,6 @@ import { debounce } from "es-toolkit"; // named ESM import — unused code is dr
 import lodash from "lodash";           // antipattern: the whole package lands in the bundle
 ```
 
----
-
 ### Bundle analysis
 
 ---
@@ -1730,8 +1530,6 @@ import lodash from "lodash";           // antipattern: the whole package lands i
 **How it works / is used** — run an analyzer before and after a change and look for duplicate packages, heavy editor/media libraries, and client leaks.
 
 **Downsides and limits** — size is not runtime cost; confirm findings with a performance trace and actual UX.
-
----
 
 ### Virtualization
 
@@ -1761,8 +1559,6 @@ return <div ref={parentRef} style={{ height: 480, overflow: "auto" }}>
 </div>;
 ```
 
----
-
 ### Caching in the browser
 
 **Purpose** — it reuses data and assets to reduce latency and bandwidth.
@@ -1779,8 +1575,6 @@ Cache-Control: public, max-age=31536000, immutable
 Cache-Control: no-cache
 ```
 
----
-
 ### localStorage
 
 **Purpose** — it persists small non-sensitive origin data across browser sessions, such as a theme preference or draft key.
@@ -1794,8 +1588,6 @@ const stored = localStorage.getItem("editor-preferences");
 const preferences = stored ? JSON.parse(stored) : { snapToGrid: true };
 localStorage.setItem("editor-preferences", JSON.stringify(preferences));
 ```
-
----
 
 ### sessionStorage
 
@@ -1811,8 +1603,6 @@ sessionStorage.setItem(draftKey, JSON.stringify({ title, script }));
 
 const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 ```
-
----
 
 ### Accessibility
 
@@ -1831,8 +1621,6 @@ const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 </section>
 ```
 
----
-
 ### Progressive enhancement
 
 ---
@@ -1842,11 +1630,7 @@ const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 
 **Downsides and limits** — not every rich editor realistically works without JS, and the approach requires server-contract discipline.
 
----
-
 ## HTTP, Backend & Security
-
----
 
 ### REST — Representational State Transfer
 
@@ -1863,8 +1647,6 @@ GET    /api/projects/42     # single resource
 PATCH  /api/projects/42     # partial update
 DELETE /api/projects/42     # delete
 ```
-
----
 
 ### GraphQL
 
@@ -1884,8 +1666,6 @@ query ProjectCard($id: ID!) {
 }
 ```
 
----
-
 ### HTTP methods
 
 **Purpose** — it conveys standardized operation semantics: GET reads, POST processes a resource representation, PUT creates or replaces a representation at a known URI, PATCH partially modifies, and DELETE removes.
@@ -1902,8 +1682,6 @@ DELETE /api/projects/42   # idempotent: retry does not change the outcome
 POST   /api/projects      # processing/creation: retry may create a duplicate
 ```
 
----
-
 ### ETag and conditional requests
 
 **Purpose** — it reduces transfer of unchanged representations and supports optimistic concurrency through a resource version.
@@ -1918,8 +1696,6 @@ If-None-Match: "project-42-v7"
 
 HTTP/1.1 304 Not Modified
 ```
-
----
 
 ### Idempotency
 
@@ -1937,8 +1713,6 @@ HTTP/1.1 200 OK
 # A retry with the same key returns the stored result, not a second charge.
 ```
 
----
-
 ### Status codes
 
 ---
@@ -1948,8 +1722,6 @@ HTTP/1.1 200 OK
 
 **Downsides and limits** — status alone is insufficient without a stable error body, and domain validation should not become a 500.
 
----
-
 ### Pagination
 
 ---
@@ -1958,8 +1730,6 @@ HTTP/1.1 200 OK
 **How it works / is used** — return items plus a next cursor or metadata; preserve filters and show loading and error state in UI.
 
 **Downsides and limits** — pagination needs deterministic sorting or pages can skip or duplicate rows.
-
----
 
 ### Cursor pagination
 
@@ -1976,8 +1746,6 @@ ORDER BY created_at DESC, id DESC
 LIMIT 25;
 ```
 
----
-
 ### Offset pagination
 
 **Purpose** — it simply implements page and limit for small, relatively stable tables.
@@ -1992,8 +1760,6 @@ ORDER BY created_at DESC, id DESC
 LIMIT 25 OFFSET 50; -- page 3; a deep OFFSET scans every skipped row
 ```
 
----
-
 ### Authentication
 
 **Purpose** — it establishes who is making a request.
@@ -2007,8 +1773,6 @@ const token = request.headers.get("authorization")?.replace("Bearer ", "");
 const principal = await verifyAccessToken(token);
 if (!principal) return new Response("Unauthorized", { status: 401 });
 ```
-
----
 
 ### Authorization
 
@@ -2025,8 +1789,6 @@ if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
 }
 ```
 
----
-
 ### Sessions and cookies
 
 **Purpose** — it stores server-side login state through an opaque cookie identifier.
@@ -2039,8 +1801,6 @@ if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
 HTTP/1.1 200 OK
 Set-Cookie: session=opaque-id-7f3a; Secure; HttpOnly; SameSite=Lax; Max-Age=1209600; Path=/
 ```
-
----
 
 ### JWT — JSON Web Token
 
@@ -2056,8 +1816,6 @@ eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI0MiIsImF1ZCI6ImFwaSIsImV4cCI6MTc1MjU4NDAwMH0.MEU
 payload is signed but not encrypted: base64url is readable by anyone
 ```
 
----
-
 ### Access token
 
 ---
@@ -2066,8 +1824,6 @@ payload is signed but not encrypted: base64url is readable by anyone
 **How it works / is used** — the API validates the token on each request and authorizes the specific action; choose short expiry and minimal scopes.
 
 **Downsides and limits** — token theft grants access until expiry; client-side storage must fit the threat model, and a token does not replace resource-level authorization.
-
----
 
 ### Refresh token
 
@@ -2089,8 +1845,6 @@ sequenceDiagram
   C->>API: retry with new access token
 ```
 
----
-
 ### CSRF — Cross-Site Request Forgery
 
 **Purpose** — it is an attack where another site makes a browser send an authenticated cookie request.
@@ -2106,8 +1860,6 @@ Set-Cookie: session=opaque-id; Secure; HttpOnly; SameSite=Lax
 POST /api/projects/42/delete
 X-CSRF-Token: f3a91c0d…
 ```
-
----
 
 ### XSS — Cross-Site Scripting
 
@@ -2125,8 +1877,6 @@ element.innerHTML = comment.text;
 element.textContent = comment.text;
 ```
 
----
-
 ### CORS — Cross-Origin Resource Sharing
 
 **Purpose** — it is a browser policy controlling which cross-origin JavaScript may read a response.
@@ -2139,8 +1889,6 @@ element.textContent = comment.text;
 Access-Control-Allow-Origin: https://app.example.com
 Access-Control-Allow-Credentials: true
 ```
-
----
 
 ### CORS preflight
 
@@ -2161,8 +1909,6 @@ Access-Control-Allow-Methods: POST
 Access-Control-Allow-Headers: Content-Type
 ```
 
----
-
 ### CSP — Content Security Policy
 
 **Purpose** — it restricts script, style, image, and frame sources to reduce XSS impact.
@@ -2178,8 +1924,6 @@ Content-Security-Policy: default-src 'self';
   frame-ancestors 'none'
 ```
 
----
-
 ### Rate limiting
 
 **Purpose** — it protects an endpoint from abuse, brute force, and accidental traffic spikes.
@@ -2194,8 +1938,6 @@ const allowed = await limiter.consume(key, { limit: 5, windowMs: 60_000 });
 
 if (!allowed) return new Response("Too Many Requests", { status: 429 });
 ```
-
----
 
 ### Webhooks
 
@@ -2213,8 +1955,6 @@ await queue.enqueue({ eventId: payload.id, type: payload.type });
 return new Response(null, { status: 202 });
 ```
 
----
-
 ### File uploads
 
 **Purpose** — it accepts user media or documents safely and at scale.
@@ -2229,8 +1969,6 @@ await fetch(uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": f
 await api.completeUpload({ fileKey });
 ```
 
----
-
 ### Observability
 
 ---
@@ -2240,11 +1978,7 @@ await api.completeUpload({ fileKey });
 
 **Downsides and limits** — telemetry costs money and can leak PII; signals should be actionable rather than noisy.
 
----
-
 ## SQL & Databases
-
----
 
 ### Relational model
 
@@ -2254,8 +1988,6 @@ await api.completeUpload({ fileKey });
 **How it works / is used** — model tables, primary and foreign keys, and constraints around domain invariants, not UI screens.
 
 **Downsides and limits** — join-heavy schemas require understanding access patterns, and not every workload suits a relational database.
-
----
 
 ### Normalization
 
@@ -2280,8 +2012,6 @@ CREATE TABLE order_items (
 );
 ```
 
----
-
 ### Primary and foreign keys
 
 **Purpose** — a primary key identifies a row uniquely, while a foreign key preserves referential integrity.
@@ -2298,8 +2028,6 @@ CREATE TABLE comments (
 );
 ```
 
----
-
 ### Index
 
 **Purpose** — it speeds up lookup, sorting, or joins at the cost of storage and slower writes.
@@ -2312,8 +2040,6 @@ CREATE TABLE comments (
 CREATE INDEX projects_workspace_created_at_idx
 ON projects (workspace_id, created_at DESC);
 ```
-
----
 
 ### Composite index
 
@@ -2329,8 +2055,6 @@ CREATE INDEX projects_workspace_updated_idx
 
 -- Speeds up: WHERE workspace_id = $1 ORDER BY updated_at DESC
 ```
-
----
 
 ### Query plan / EXPLAIN
 
@@ -2349,8 +2073,6 @@ ORDER BY updated_at DESC
 LIMIT 20;
 ```
 
----
-
 ### JOIN
 
 **Purpose** — it combines rows from tables through a relationship.
@@ -2364,8 +2086,6 @@ SELECT p.id, p.name, u.name AS owner_name
 FROM projects p
 LEFT JOIN users u ON u.id = p.owner_id;
 ```
-
----
 
 ### N+1 queries
 
@@ -2383,8 +2103,6 @@ JOIN users u ON u.id = p.author_id
 WHERE p.workspace_id = $1;
 ```
 
----
-
 ### Transactions
 
 **Purpose** — it guarantees that related writes commit together or roll back together.
@@ -2399,8 +2117,6 @@ UPDATE accounts SET balance = balance - 10 WHERE id = $1;
 UPDATE accounts SET balance = balance + 10 WHERE id = $2;
 COMMIT;
 ```
-
----
 
 ### ACID — Atomicity, Consistency, Isolation, Durability
 
@@ -2417,8 +2133,6 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 2;
 COMMIT; -- atomic: both changes or neither, even on failure
 ```
 
----
-
 ### Isolation levels
 
 **Purpose** — it defines which concurrent changes a transaction can observe.
@@ -2434,8 +2148,6 @@ SELECT balance FROM accounts WHERE id = 1;
 COMMIT;
 ```
 
----
-
 ### Optimistic locking
 
 **Purpose** — it prevents silent lost updates without holding a long database lock.
@@ -2449,8 +2161,6 @@ UPDATE documents
 SET body = $1, version = version + 1
 WHERE id = $2 AND version = $3;
 ```
-
----
 
 ### Pessimistic locking
 
@@ -2467,8 +2177,6 @@ UPDATE workshops SET seats_left = seats_left - 1 WHERE id = $1 AND seats_left > 
 COMMIT;
 ```
 
----
-
 ### Deadlocks
 
 **Purpose** — it is a failure where transactions wait cyclically for each other’s locks.
@@ -2484,8 +2192,6 @@ COMMIT;
 -- Fix: acquire rows in one consistent order (for example, by id).
 ```
 
----
-
 ### Unique constraints
 
 **Purpose** — it makes a duplicate business identity impossible even under concurrent requests.
@@ -2498,8 +2204,6 @@ COMMIT;
 ALTER TABLE users ADD CONSTRAINT users_email_unique UNIQUE (email);
 -- A race between two concurrent signups yields error 23505, not a duplicate.
 ```
-
----
 
 ### Migrations
 
@@ -2515,8 +2219,6 @@ ALTER TABLE projects ADD COLUMN slug text;
 -- Step 2: backfill; new code writes both fields.
 -- Step 3: add NOT NULL/UNIQUE only after rollout.
 ```
-
----
 
 ### Soft delete
 
@@ -2534,8 +2236,6 @@ CREATE UNIQUE INDEX projects_slug_alive_idx
   ON projects (slug) WHERE deleted_at IS NULL;
 ```
 
----
-
 ### JSON columns
 
 **Purpose** — it stores a flexible attribute set when the schema is genuinely variable.
@@ -2551,11 +2251,7 @@ WHERE settings @> '{"autosave": true}'; -- JSONB containment
 CREATE INDEX projects_settings_idx ON projects USING gin (settings);
 ```
 
----
-
 ## Testing & DevOps
-
----
 
 ### Unit tests
 
@@ -2571,8 +2267,6 @@ test("rejects an expired token", () => {
 });
 ```
 
----
-
 ### Integration tests
 
 **Purpose** — it verifies modules, an HTTP layer, a database, or a queue boundary working together.
@@ -2587,8 +2281,6 @@ test("POST /projects persists a project", async () => {
   expect(response.status).toBe(201);
 });
 ```
-
----
 
 ### End-to-end tests
 
@@ -2608,8 +2300,6 @@ test("user can create a project", async ({ page }) => {
 });
 ```
 
----
-
 ### Test pyramid
 
 **Purpose** — it balances fast cheap tests with fewer high-value integration and E2E checks.
@@ -2623,8 +2313,6 @@ flowchart TB
   E[E2E: a few golden journeys] --> I[Integration: fewer, layer boundaries]
   I --> U[Unit: many, fast business rules]
 ```
-
----
 
 ### Mock vs fake vs stub
 
@@ -2643,8 +2331,6 @@ await chargeUser(user, { sendReceipt: mock });
 expect(mock).toHaveBeenCalledWith(user.email);
 ```
 
----
-
 ### Contract testing
 
 **Purpose** — it verifies that producer and consumer agree on an API or message contract.
@@ -2660,8 +2346,6 @@ expect(response).toMatchObject({
 });
 ```
 
----
-
 ### TDD — Test-Driven Development
 
 ---
@@ -2671,8 +2355,6 @@ expect(response).toMatchObject({
 
 **Downsides and limits** — do not turn TDD into ritual for CSS or exploratory prototypes; the test must be meaningful.
 
----
-
 ### Test flakiness
 
 ---
@@ -2681,8 +2363,6 @@ expect(response).toMatchObject({
 **How it works / is used** — remove real time, randomness, shared state, arbitrary sleeps, and network dependency; retry is temporary containment only.
 
 **Downsides and limits** — ignoring a flaky test is dangerous because it hides regressions and slows the team.
-
----
 
 ### CI — Continuous Integration
 
@@ -2697,8 +2377,6 @@ expect(response).toMatchObject({
 - run: bun run lint
 - run: bun test
 ```
-
----
 
 ### CD — Continuous Delivery / Continuous Deployment
 
@@ -2716,8 +2394,6 @@ flowchart TD
   G -->|Delivery: manual approval| M[Promote to prod]
   G -->|Deployment: automatic| P[Prod]
 ```
-
----
 
 ### Docker
 
@@ -2737,8 +2413,6 @@ COPY --from=build /app/dist ./dist
 CMD ["node", "dist/server.js"]
 ```
 
----
-
 ### Environment configuration
 
 **Purpose** — it separates deployment-specific values and secrets from application code.
@@ -2756,8 +2430,6 @@ const config = {
 if (!config.databaseUrl) throw new Error("DATABASE_URL is required");
 ```
 
----
-
 ### Feature flags
 
 **Purpose** — it decouples deployment from release, enabling gradual feature exposure and safe rollback.
@@ -2772,8 +2444,6 @@ if (flags.isEnabled("new-timeline", { tenantId, userId })) {
 }
 return <LegacyTimeline />;
 ```
-
----
 
 ### Blue-green deployment
 
@@ -2790,8 +2460,6 @@ flowchart LR
   G[Green: new version] --> H[Health checks]
   H --> LB
 ```
-
----
 
 ### Canary deployment
 
@@ -2811,8 +2479,6 @@ flowchart LR
   M -->|failure| RB[Roll back]
 ```
 
----
-
 ### Rollback
 
 **Purpose** — it quickly returns a service to a known working version after a harmful release.
@@ -2828,8 +2494,6 @@ flowchart TD
   D -->|no| F[Fix forward or disable the feature flag]
 ```
 
----
-
 ### SLI, SLO, SLA — Service Level Indicator, Objective, Agreement
 
 ---
@@ -2838,8 +2502,6 @@ flowchart TD
 **How it works / is used** — choose a user-facing indicator, such as successful video-publish latency, and use an error budget for release decisions.
 
 **Downsides and limits** — a metric without user value drives wrong optimization, and SLA should not be promised without operational capacity.
-
----
 
 ### Incident response
 
@@ -2850,11 +2512,7 @@ flowchart TD
 
 **Downsides and limits** — a postmortem without follow-up owners changes nothing, and an incident is not the time to find blame.
 
----
-
 ## Architecture & System Design
-
----
 
 ### Monolith
 
@@ -2864,8 +2522,6 @@ flowchart TD
 **How it works / is used** — keep clear modules and internal boundaries in one repo or process, extracting a service only for proven pressure.
 
 **Downsides and limits** — without modularity coupling and deployment blast radius grow; one runtime does not mean one giant file.
-
----
 
 ### Microservices
 
@@ -2887,8 +2543,6 @@ flowchart TD
   end
 ```
 
----
-
 ### Modular monolith
 
 ---
@@ -2897,8 +2551,6 @@ flowchart TD
 **How it works / is used** — modules communicate through explicit interfaces or events and do not import each other’s private persistence details.
 
 **Downsides and limits** — boundaries need discipline and tooling, while a shared database still allows architectural bypass.
-
----
 
 ### Bounded context
 
@@ -2919,8 +2571,6 @@ flowchart TD
   B -. shared id, different models .- E
 ```
 
----
-
 ### Clean architecture
 
 **Purpose** — it keeps domain and use-case logic independent from framework, database, and transport.
@@ -2937,8 +2587,6 @@ flowchart TD
   PG[Postgres adapter] -. implements .-> R
 ```
 
----
-
 ### Hexagonal architecture
 
 **Purpose** — it isolates a domain through ports and adapters for HTTP, DB, queues, and external APIs.
@@ -2954,8 +2602,6 @@ flowchart TD
   CORE -->|driven port| DB[Postgres adapter]
   CORE -->|driven port| MAIL[Email adapter]
 ```
-
----
 
 ### CQRS — Command Query Responsibility Segregation
 
@@ -2974,8 +2620,6 @@ flowchart LR
   Q[Query: project list] --> R
 ```
 
----
-
 ### Event sourcing
 
 **Purpose** — it stores an immutable sequence of domain events as the source of state and audit history.
@@ -2993,8 +2637,6 @@ flowchart TD
   P --> R[(Read models)]
 ```
 
----
-
 ### Event-driven architecture
 
 **Purpose** — it loosely couples producers and asynchronous consumers for background workflows.
@@ -3011,8 +2653,6 @@ flowchart TD
   B --> A[Consumer: analytics]
 ```
 
----
-
 ### WebSocket
 
 **Purpose** — it maintains a bidirectional persistent connection between client and server for presence, collaboration, live status, or low-latency interaction.
@@ -3025,8 +2665,6 @@ flowchart TD
 const socket = new WebSocket("wss://api.example.com/live");
 socket.addEventListener("message", ({ data }) => updateProject(JSON.parse(data)));
 ```
-
----
 
 ### SSE — Server-Sent Events
 
@@ -3041,8 +2679,6 @@ const events = new EventSource("/api/jobs/42/events");
 events.addEventListener("progress", (event) => setProgress(JSON.parse(event.data)));
 ```
 
----
-
 ### Message queue
 
 **Purpose** — it buffers slow or retryable work such as video rendering, email, or document processing.
@@ -3055,8 +2691,6 @@ events.addEventListener("progress", (event) => setProgress(JSON.parse(event.data
 await queue.enqueue({ type: "render-video", jobId });
 queue.consume("render-video", async ({ jobId }) => await renderVideo(jobId));
 ```
-
----
 
 ### Idempotent consumer
 
@@ -3071,8 +2705,6 @@ INSERT INTO processed_events (event_id) VALUES ($1)
 ON CONFLICT DO NOTHING;
 -- Run the side effect only if a new row was inserted.
 ```
-
----
 
 ### Outbox pattern
 
@@ -3089,8 +2721,6 @@ INSERT INTO outbox (topic, payload) VALUES ('video.queued', json_build_object('i
 COMMIT;
 ```
 
----
-
 ### Cache-aside
 
 **Purpose** — it lowers read latency and load while keeping the database as source of truth.
@@ -3106,8 +2736,6 @@ if (!project) {
   await cache.set(`project:${id}`, project, { ttl: 60 });
 }
 ```
-
----
 
 ### Distributed lock
 
@@ -3132,8 +2760,6 @@ try {
 }
 ```
 
----
-
 ### Load balancing
 
 **Purpose** — it distributes requests across healthy instances for availability and horizontal scale.
@@ -3151,8 +2777,6 @@ flowchart TD
   LB -. health check .-> A
 ```
 
----
-
 ### Backpressure
 
 **Purpose** — it prevents collapse when a producer creates work faster than a consumer can process it.
@@ -3169,8 +2793,6 @@ flowchart TD
   S -.-> P
 ```
 
----
-
 ### Rate limiting vs backpressure
 
 ---
@@ -3179,8 +2801,6 @@ flowchart TD
 **How it works / is used** — apply API limits to callers and concurrency or queue limits to service or worker capacity.
 
 **Downsides and limits** — one mechanism does not replace the other, and limits without user messaging look like random failure.
-
----
 
 ### System-design interview framing
 
@@ -3191,11 +2811,7 @@ flowchart TD
 
 **Downsides and limits** — do not prematurely draw Kafka or microservices, but do not silently make risky assumptions either.
 
----
-
 ## AI, LLM & Product Engineering
-
----
 
 ### LLM — Large Language Model
 
@@ -3206,8 +2822,6 @@ flowchart TD
 
 **Downsides and limits** — output can be wrong, variable, and expensive; the model is not a source of truth.
 
----
-
 ### Prompt engineering
 
 ---
@@ -3217,8 +2831,6 @@ flowchart TD
 
 **Downsides and limits** — a long prompt raises latency and cost and cannot replace retrieval, validation, or product design.
 
----
-
 ### System prompt
 
 ---
@@ -3227,8 +2839,6 @@ flowchart TD
 **How it works / is used** — separate system instructions from user content, version them, and evaluate changes on a representative eval set.
 
 **Downsides and limits** — a system prompt is not a security boundary against malicious input; tools need least privilege and output validation.
-
----
 
 ### Tokens and context window
 
@@ -3248,8 +2858,6 @@ A 200k-token window — input and output share one budget:
 Does not fit → summarize the history instead of silently dropping the tail.
 ```
 
----
-
 ### Embeddings
 
 **Purpose** — it turns content into a vector for semantic similarity, search, or clustering.
@@ -3262,8 +2870,6 @@ Does not fit → summarize the history instead of silently dropping the tail.
 const [a, b] = await embed(["how to trim a video", "clip cutting tool"]);
 cosineSimilarity(a, b); // ~0.8 — semantically close with no shared words
 ```
-
----
 
 ### Vector database
 
@@ -3281,8 +2887,6 @@ const matches = await vectorIndex.search({
 });
 ```
 
----
-
 ### RAG — Retrieval-Augmented Generation
 
 **Purpose** — it adds retrieved, authorized, and fresh knowledge to a prompt before generation.
@@ -3299,8 +2903,6 @@ const context = matches.map(({ text, sourceUrl }) => ({ text, sourceUrl }));
 const answer = await llm.generate({ question, context });
 ```
 
----
-
 ### Reranking
 
 ---
@@ -3310,8 +2912,6 @@ const answer = await llm.generate({ question, context });
 
 **Downsides and limits** — it adds latency and cost; poor chunks or filters remain a poor foundation.
 
----
-
 ### Hallucination
 
 ---
@@ -3320,8 +2920,6 @@ const answer = await llm.generate({ question, context });
 **How it works / is used** — constrain answers to supplied sources, require citations, validate structured fields, and provide an abstain path.
 
 **Downsides and limits** — a prompt warning not to hallucinate is insufficient; high-stakes output needs human review or deterministic verification.
-
----
 
 ### Structured output
 
@@ -3342,8 +2940,6 @@ const answer = await llm.generate({
 const result = SummarySchema.parse(answer);
 ```
 
----
-
 ### Tool calling
 
 **Purpose** — it lets a model request an action or data through a strictly described application tool.
@@ -3356,8 +2952,6 @@ const result = SummarySchema.parse(answer);
 const tools = [{ name: "get_project", parameters: { type: "object", properties: { id: { type: "string" } } } }];
 if (call.name === "get_project") return getProjectForUser(userId, call.arguments.id);
 ```
-
----
 
 ### Prompt injection
 
@@ -3374,8 +2968,6 @@ if (!tool || !canUseTool(user, tool) || !tool.schema.safeParse(call.arguments).s
 }
 ```
 
----
-
 ### Evaluation (evals)
 
 **Purpose** — it measures whether an LLM feature actually solves its task before and after a prompt or model change.
@@ -3391,8 +2983,6 @@ for (const example of evalSet) {
 }
 ```
 
----
-
 ### AI — Artificial Intelligence: latency and cost
 
 ---
@@ -3401,8 +2991,6 @@ for (const example of evalSet) {
 **How it works / is used** — choose the smallest capable model, reduce context and output, cache safe results, run long generation asynchronously, and show progress.
 
 **Downsides and limits** — a cheaper model can increase quality or support cost; do not cache personal or fresh content without policy.
-
----
 
 ### Human-in-the-loop
 
@@ -3413,8 +3001,6 @@ for (const example of evalSet) {
 
 **Downsides and limits** — manual review creates a queue and latency; choose risky decision points rather than reviewing everything.
 
----
-
 ### Product discovery
 
 ---
@@ -3423,8 +3009,6 @@ for (const example of evalSet) {
 **How it works / is used** — define target user, job to be done, current workaround, hypothesis, and smallest experiment with a success signal.
 
 **Downsides and limits** — interviews are not the same as behavior, and discovery must not become endless delivery delay.
-
----
 
 ### Product metrics
 
@@ -3435,8 +3019,6 @@ for (const example of evalSet) {
 
 **Downsides and limits** — vanity metrics can rise without value, and metrics need privacy and ethics review.
 
----
-
 ### A/B testing
 
 ---
@@ -3445,8 +3027,6 @@ for (const example of evalSet) {
 **How it works / is used** — define hypothesis, primary metric, guardrails, sample size, and assignment unit before analysis.
 
 **Downsides and limits** — poor randomization, peeking, and multiple comparisons create false conclusions, and not every change needs an experiment.
-
----
 
 ### Analytics events
 
@@ -3465,8 +3045,6 @@ track("project_exported", {
 });
 ```
 
----
-
 ### Optimistic UI
 
 **Purpose** — it provides immediate feedback by showing expected mutation results before the network response.
@@ -3482,8 +3060,6 @@ try { await api.createProject(input); }
 catch { queryClient.setQueryData(["projects"], previous); }
 ```
 
----
-
 ### Design systems
 
 ---
@@ -3493,48 +3069,32 @@ catch { queryClient.setQueryData(["projects"], previous); }
 
 **Downsides and limits** — do not build one universal component for every case; premature systemization slows product learning.
 
----
-
 ## Fast system-design practice prompts
 
 Before the interview, talk through each scenario out loud for 10–15 minutes: requirements → API/data model → happy path → failure/retry → scale/observability → trade-offs.
-
----
 
 ### 1. Создать AI-видео из текста
 
 **In English:** I would start with POST /projects/:id/renders and an idempotency key. One transaction creates a render job and outbox event; a worker consumes it, accesses authorized input assets, runs generation and rendering stages, and saves the result to object storage. The database keeps a state machine (queued → running → completed/failed/cancelled), while the UI receives status through polling or SSE. Retry only transient failures, make cancellation idempotent, and check it between stages. I would begin with a modular monolith plus workers and separately scale CPU/GPU rendering only when queue pressure proves the need.
 
----
-
 ### 2. Совместное редактирование учебного сценария
 
 **In English:** I would first clarify whether true simultaneous text editing is required. For autosave without real-time collaboration, a revision number and optimistic locking are enough: the client sends its base revision and the server returns 409 Conflict for a stale version. Presence and live cursors travel over WebSocket as ephemeral data. If users must edit the same rich-text field concurrently without conflicts, I would choose CRDT or OT, store snapshots plus append-only operations, and check permissions on every connection and write.
-
----
 
 ### 3. Загрузка 5 GB видео
 
 **In English:** The browser should not proxy 5 GB through the application server. The API authorizes the upload and issues short-lived signed multipart URLs; the browser uploads parts directly to storage, supports resume, and shows local progress. After complete, the server verifies ownership, size, and type, queues scanning and transcoding, and marks the asset usable only afterward. Include quota, expiry for incomplete uploads, byte-level content validation, malware scanning, and lifecycle policy.
 
----
-
 ### 4. Поиск по проектам и сценариям
 
 **In English:** I would start with Postgres full-text search and structured filters rather than a separate search cluster. The API accepts query, filters, and cursor, then returns results with deterministic sort (rank, updated_at, id); authorization and tenant filters apply before returning results. The UI debounces query input, cancels stale requests, and uses cursor pagination. I would add vector retrieval only if keyword and full-text search fail to cover semantic intent; its results still pass metadata and permission filters.
-
----
 
 ### 5. Analytics для learning content
 
 **In English:** I would first define events and metrics, for example lesson_started, scene_completed, and assessment_submitted, rather than vague “engagement.” The client sends a versioned, PII-minimized event with event ID and timestamp; the ingestion API validates schema and stores it in a durable queue or storage. An asynchronous pipeline deduplicates, handles late events, and builds dashboard aggregates. Retention follows privacy and legal requirements, and metric definitions live beside the dashboard.
 
----
-
 ### 6. Notification system
 
 **In English:** A domain mutation writes notification intent and an outbox event in one transaction. A worker applies user preferences, a dedupe key, and channel policy, then creates a delivery record and sends email or in-app notification through a provider. Provider webhooks update delivery state idempotently; transient failures receive exponential backoff and dead-letter visibility. Apply unsubscribe and quiet hours before send. The in-app inbox lives in the database, while SSE or WebSocket only accelerates UI updates and is not the source of truth.
-
----
 
 ## Final interview reminders

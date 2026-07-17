@@ -2,8 +2,6 @@
 
 <p class="handbook-version" data-version="v1.5.3">Версія <code>v1.5.3</code></p>
 
----
-
 Практичний конспект для формату **tech roulette** та подальшого system-design інтерв'ю. Він орієнтований на роль, де важливі Next.js, React, TypeScript, прості REST-ендпоінти та SQL-запити, продуктивність, тестований код і самостійне ведення фічі від UI до бази даних.
 
 ## Як відповідати
@@ -86,11 +84,7 @@
 
 **Не є скороченнями:** GET, POST, PUT, PATCH, DELETE, SELECT, UPDATE, WHERE, JOIN, INNER JOIN, LEFT JOIN, ORDER BY, LIMIT, OFFSET, IN, FOR та EXPLAIN — це назви HTTP-методів або ключові слова SQL. Їхній зміст розкрито у відповідних розділах.
 
----
-
 ## React
-
----
 
 ### Reconciliation
 
@@ -108,8 +102,6 @@
 // Bad: key={index} — reordering moves state to the wrong row.
 {tasks.map((task) => <TaskRow key={task.id} task={task} />)}
 ```
-
----
 
 ### Virtual DOM
 
@@ -129,8 +121,6 @@ flowchart TD
   M --> B[Real DOM]
 ```
 
----
-
 ### Concurrent rendering
 
 **Що це** — модель рендерингу React, у якій менш пріоритетну роботу можна перервати й відновити.
@@ -148,8 +138,6 @@ flowchart TD
   C --> D[Restart render with current state]
   B -->|no| E[Commit to DOM]
 ```
-
----
 
 ### Suspense
 
@@ -169,8 +157,6 @@ const Chart = lazy(() => import("./Chart"));
 </Suspense>
 ```
 
----
-
 ### Error Boundary
 
 **Що це** — компонентна межа, що перехоплює помилки рендера дочірнього піддерева.
@@ -189,8 +175,6 @@ import { ErrorBoundary } from "react-error-boundary";
 </ErrorBoundary>
 ```
 
----
-
 ### React.memo
 
 **Що це** — обгортка React, що мемоїзує результат рендера компонента за його властивостями.
@@ -206,8 +190,6 @@ const UserRow = memo(function UserRow({ user }: { user: User }) {
   return <li>{user.name}</li>;
 });
 ```
-
----
 
 ### useMemo
 
@@ -225,8 +207,6 @@ const visibleUsers = useMemo(
   [users, query],
 );
 ```
-
----
 
 ### useCallback
 
@@ -246,8 +226,6 @@ const onSelect = useCallback((id: string) => {
 return <MemoizedProjectList onSelect={onSelect} />;
 ```
 
----
-
 ### useRef
 
 **Що це** — хук React для змінюваного контейнера, що не бере участі в рендерингу.
@@ -263,8 +241,6 @@ const inputRef = useRef<HTMLInputElement>(null);
 <button onClick={() => inputRef.current?.focus()}>Search</button>
 <input ref={inputRef} />
 ```
-
----
 
 ### useEffect
 
@@ -282,8 +258,6 @@ useEffect(() => {
   return () => subscription.unsubscribe();
 }, [roomId]);
 ```
-
----
 
 ### useLayoutEffect
 
@@ -303,8 +277,6 @@ useLayoutEffect(() => {
 }, [open]);
 ```
 
----
-
 ### useTransition
 
 **Що це** — хук, що позначає оновлення React як нетермінове.
@@ -322,8 +294,6 @@ onChange={(event) => {
   startTransition(() => setFilter(event.target.value));
 }}
 ```
-
----
 
 ### useDeferredValue
 
@@ -343,8 +313,6 @@ const deferredQuery = useDeferredValue(query);
 <SlowResults query={deferredQuery} />;
 ```
 
----
-
 ### Context
 
 **Що це** — механізм React для передавання одного значення піддереву без явного передавання властивостей на кожному рівні.
@@ -359,8 +327,6 @@ const deferredQuery = useDeferredValue(query);
 const ThemeContext = createContext<"light" | "dark">("light");
 <ThemeContext.Provider value="dark"><Editor /></ThemeContext.Provider>
 ```
-
----
 
 ### Controlled vs uncontrolled components
 
@@ -379,8 +345,6 @@ const ThemeContext = createContext<"light" | "dark">("light");
 // Uncontrolled: the value lives in the DOM, read via ref.
 <input ref={emailRef} defaultValue={initialEmail} />
 ```
-
----
 
 ### Lifting state up
 
@@ -401,8 +365,6 @@ function Editor() {
   </>;
 }
 ```
-
----
 
 ### State colocation
 
@@ -428,8 +390,6 @@ function ProjectList() {
 }
 ```
 
----
-
 ### Server state
 
 **Що це** — дані з сервера, що мають власний життєвий цикл кешування, застарівання й повторного отримання.
@@ -447,8 +407,6 @@ const { data: projects } = useQuery({ queryKey: ["projects"], queryFn: fetchProj
 // UI state: local, no cache or invalidation.
 const [selectedId, setSelectedId] = useState<string | null>(null);
 ```
-
----
 
 ### Redux
 
@@ -472,8 +430,6 @@ const projectsSlice = createSlice({
 });
 ```
 
----
-
 ### Zustand
 
 **Що це** — мінімалістичне зовнішнє сховище стану з підписками через селектори.
@@ -493,8 +449,6 @@ const usePlayerStore = create<{ playing: boolean; toggle: () => void }>((set) =>
 const playing = usePlayerStore((state) => state.playing); // subscribe to a slice only
 ```
 
----
-
 ### TanStack Query / React Query
 
 **Що це** — бібліотека керування серверними запитами, кешем і мутаціями в React.
@@ -513,11 +467,7 @@ const query = useQuery({
 });
 ```
 
----
-
 ## Next.js
-
----
 
 ### App Router
 
@@ -541,8 +491,6 @@ app/
       error.tsx     segment error boundary
 ```
 
----
-
 ### Pages Router
 
 **Що це** — колишня файлова модель маршрутизації Next.js із функціями отримання даних на рівні сторінок.
@@ -565,8 +513,6 @@ export default function ProjectPage({ project }: { project: Project }) {
 }
 ```
 
----
-
 ### Server Components
 
 **Що це** — React-компонент, що виконується лише на сервері й не потрапляє в клієнтський JavaScript-бандл.
@@ -583,8 +529,6 @@ export default async function ProjectsPage() {
   return <ProjectList projects={projects} />;
 }
 ```
-
----
 
 ### Client Components
 
@@ -605,8 +549,6 @@ export function LikeButton() {
 }
 ```
 
----
-
 ### SSR — Server-Side Rendering
 
 **Що це** — створення HTML на сервері для кожного запиту.
@@ -624,8 +566,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 }
 ```
 
----
-
 ### CSR — Client-Side Rendering
 
 **Що це** — рендеринг і отримання даних після завантаження JavaScript у браузері.
@@ -635,8 +575,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 **Як використовується / працює** — віддаємо оболонку і JavaScript, потім запит із клієнта заповнює інтерфейс.
 
 **Мінуси й обмеження** — корисний перший екран з’являється повільніше й гірше для SEO; потрібен продуманий UX завантаження та помилок.
-
----
 
 ### SSG — Static Site Generation
 
@@ -655,8 +593,6 @@ export async function generateStaticParams() {
 }
 ```
 
----
-
 ### ISR — Incremental Static Regeneration
 
 **Що це** — статична сторінка Next.js, яку можна перестворювати після публікації.
@@ -673,8 +609,6 @@ export async function generateStaticParams() {
 export const revalidate = 60;
 // Next.js regenerates the page at most once per minute.
 ```
-
----
 
 ### Hydration
 
@@ -693,8 +627,6 @@ flowchart TD
   J --> H[React matches markup and attaches handlers]
   H --> I[Interactive page]
 ```
-
----
 
 ### Hydration mismatch
 
@@ -715,8 +647,6 @@ const [now, setNow] = useState<string | null>(null);
 useEffect(() => setNow(new Date().toLocaleTimeString()), []);
 ```
 
----
-
 ### Layouts
 
 **Що це** — спільний маршрутний компонент Next.js, що зберігається між дочірніми сторінками.
@@ -736,8 +666,6 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 }
 ```
 
----
-
 ### Route Handlers
 
 **Що це** — обробник HTTP-запитів у директорії `app` Next.js.
@@ -754,8 +682,6 @@ export async function GET() {
   return Response.json({ projects });
 }
 ```
-
----
 
 ### Proxy (formerly Middleware)
 
@@ -778,8 +704,6 @@ export function proxy(request: NextRequest) {
 export const config = { matcher: ["/projects/:path*"] };
 ```
 
----
-
 ### Streaming
 
 **Що це** — поетапна передача HTML-відповіді в міру готовності її частин.
@@ -801,8 +725,6 @@ export default function ProjectPage() {
 }
 ```
 
----
-
 ### Caching and revalidation
 
 **Що це** — механізми кешування даних і рендера в Next.js та правила їх інвалідації (revalidation).
@@ -819,8 +741,6 @@ import { revalidatePath } from "next/cache";
 await db.project.update({ where: { id }, data: input });
 revalidatePath(`/projects/${id}`);
 ```
-
----
 
 ### Server Actions
 
@@ -840,8 +760,6 @@ export async function renameProject(formData: FormData) {
 }
 ```
 
----
-
 ### Dynamic imports
 
 **Що це** — ліниве підключення модуля або компонента окремим chunk-ом у момент потреби.
@@ -858,8 +776,6 @@ const VideoTimeline = dynamic(() => import("./VideoTimeline"), {
   ssr: false,
 });
 ```
-
----
 
 ### Image optimization
 
@@ -882,8 +798,6 @@ const VideoTimeline = dynamic(() => import("./VideoTimeline"), {
 />
 ```
 
----
-
 ### Edge Runtime
 
 **Що це** — обмежене середовище виконання на базі Web APIs, яке може працювати ближче до користувача.
@@ -903,11 +817,7 @@ export async function GET(request: Request) {
 }
 ```
 
----
-
 ## JavaScript
-
----
 
 ### Closure
 
@@ -927,8 +837,6 @@ function makeCounter() {
 const next = makeCounter();
 ```
 
----
-
 ### Event loop
 
 **Що це** — модель JavaScript-рантайму, що планує стек викликів, черги задач, мікрозадачі та відмальовування.
@@ -945,8 +853,6 @@ Promise.resolve().then(() => console.log("microtask"));
 setTimeout(() => console.log("task"));
 console.log("B"); // A, B, microtask, task
 ```
-
----
 
 ### Microtasks
 
@@ -966,8 +872,6 @@ Promise.resolve()
 // microtask 1, microtask 2, task — the microtask queue drains fully before the task
 ```
 
----
-
 ### Macrotasks
 
 **Що це** — звичайна задача черги подій, що виконується після завершення поточного циклу.
@@ -977,8 +881,6 @@ Promise.resolve()
 **Як використовується / працює** — setTimeout, message events та I/O callbacks зазвичай створюють tasks, між якими браузер може рендерити.
 
 **Мінуси й обмеження** — timer не є точним розкладом; активний main thread затримує його виконання.
-
----
 
 ### Promise
 
@@ -997,8 +899,6 @@ loadProject(id)
   .finally(() => setLoading(false));
 ```
 
----
-
 ### async / await
 
 **Що це** — синтаксис JavaScript поверх Promise для очікування результату всередині асинхронної функції.
@@ -1016,8 +916,6 @@ const [project, comments] = await Promise.all([
 ]);
 ```
 
----
-
 ### AbortController
 
 **Що це** — об'єкт сигналу скасування для Fetch та інших API, що його підтримують.
@@ -1033,8 +931,6 @@ const controller = new AbortController();
 fetch(`/api/search?q=${query}`, { signal: controller.signal });
 return () => controller.abort();
 ```
-
----
 
 ### Hoisting
 
@@ -1053,8 +949,6 @@ var a = 1;
 console.log(b); // ReferenceError: let is in the temporal dead zone
 let b = 2;
 ```
-
----
 
 ### this
 
@@ -1075,8 +969,6 @@ print(); // strict mode: TypeError (this is undefined); sloppy mode: this is glo
 setTimeout(player.print.bind(player), 0); // "Demo" — receiver fixed by bind
 ```
 
----
-
 ### Prototype chain
 
 **Що це** — ланцюжок об'єктів-прототипів, яким JavaScript шукає відсутню властивість.
@@ -1095,8 +987,6 @@ child.greet(); // "hi" — not on child, found on the prototype
 Object.getPrototypeOf(child) === base; // true
 ```
 
----
-
 ### Equality: === vs ==
 
 **Що це** — два оператори порівняння: строгий без неявного перетворення і нестрогий з ним.
@@ -1112,8 +1002,6 @@ Object.getPrototypeOf(child) === base; // true
 0 === "";      // false
 value == null; // deliberate idiom: true for both null and undefined
 ```
-
----
 
 ### Shallow copy
 
@@ -1133,8 +1021,6 @@ copy.meta.views = 99;
 original.meta.views; // 99 — the nested object is still shared
 ```
 
----
-
 ### Deep copy
 
 **Що це** — копіювання всієї вкладеної структури без спільних посилань із вихідним об'єктом.
@@ -1151,8 +1037,6 @@ const copy = structuredClone(original); // Date, Map, cyclic references — ok
 copy.meta.views = 99;
 original.meta.views; // 10 — the structure is fully independent
 ```
-
----
 
 ### Immutability
 
@@ -1173,8 +1057,6 @@ const next = {
 };
 ```
 
----
-
 ### Debounce
 
 **Що це** — відкладений запуск функції після паузи в серії подій.
@@ -1193,8 +1075,6 @@ const searchLater = (query: string) => {
 };
 ```
 
----
-
 ### Throttle
 
 **Що це** — обмеження максимальної частоти виклику функції в безперервному потоці подій.
@@ -1212,8 +1092,6 @@ const reportScroll = throttle(() => {
 
 window.addEventListener("scroll", reportScroll, { passive: true });
 ```
-
----
 
 ### Generators and iterators
 
@@ -1242,8 +1120,6 @@ const playlist = {
 for (const track of playlist) console.log(track);
 ```
 
----
-
 ### Modules
 
 **Що це** — одиниця ізоляції JavaScript-коду з явними імпортами та експортами.
@@ -1266,8 +1142,6 @@ import multiply, { add } from "./math.js";
 const { renderChart } = await import("./chart.js");
 ```
 
----
-
 ### Memory leaks
 
 **Що це** — ситуація, коли пам'ять залишається досяжною після того, як дані більше не потрібні.
@@ -1289,11 +1163,7 @@ useEffect(() => {
 }, []);
 ```
 
----
-
 ## TypeScript
-
----
 
 ### any
 
@@ -1309,8 +1179,6 @@ useEffect(() => {
 // Bad: value.name compiles even when value is null.
 const value: any = JSON.parse(body);
 ```
-
----
 
 ### unknown
 
@@ -1328,8 +1196,6 @@ if (typeof value === "object" && value !== null && "name" in value) {
   console.log(value.name);
 }
 ```
-
----
 
 ### never
 
@@ -1351,8 +1217,6 @@ switch (result.status) {
 }
 ```
 
----
-
 ### Type narrowing
 
 **Що це** — уточнення широкого об’єднання до конкретного типу після перевірки під час виконання.
@@ -1368,8 +1232,6 @@ function format(value: string | Date) {
   return value instanceof Date ? value.toISOString() : value.trim();
 }
 ```
-
----
 
 ### Type guards
 
@@ -1388,8 +1250,6 @@ function isUser(value: unknown): value is User {
 }
 ```
 
----
-
 ### Generics
 
 **Що це** — параметр типу, що пов’язує типи входу, виходу та обмежень в одному узагальненому API.
@@ -1406,8 +1266,6 @@ function first<T>(items: readonly T[]): T | undefined {
 }
 const project = first([{ id: "p1", name: "Handbook" }]); // object type is preserved
 ```
-
----
 
 ### keyof
 
@@ -1426,8 +1284,6 @@ function get<T, K extends keyof T>(object: T, key: K): T[K] {
 get({ id: "p1", name: "Handbook" }, "name");
 ```
 
----
-
 ### typeof in type positions
 
 **Що це** — оператор у позиції типу, що витягує тип уже оголошеного значення.
@@ -1442,8 +1298,6 @@ get({ id: "p1", name: "Handbook" }, "name");
 const config = { retries: 3, region: "eu" } as const;
 type Config = typeof config;
 ```
-
----
 
 ### Mapped types
 
@@ -1460,8 +1314,6 @@ type User = { id: string; name: string; email: string };
 type EditableUser = { [K in "name" | "email"]?: User[K] };
 ```
 
----
-
 ### Conditional types
 
 **Що це** — конструкція типу виду T extends U ? X : Y, що обирає результат за відношенням типів.
@@ -1476,8 +1328,6 @@ type EditableUser = { [K in "name" | "email"]?: User[K] };
 type ApiResult<T> = T extends Promise<infer Value> ? Value : T;
 type Project = ApiResult<Promise<{ id: string }>>;
 ```
-
----
 
 ### infer
 
@@ -1494,8 +1344,6 @@ type ElementOf<T> = T extends readonly (infer Item)[] ? Item : never;
 type User = ElementOf<readonly [{ id: string }]>;
 ```
 
----
-
 ### Discriminated unions
 
 **Що це** — union типів зі спільним tag-полем, за яким компілятор розрізняє варіанти.
@@ -1510,8 +1358,6 @@ type User = ElementOf<readonly [{ id: string }]>;
 type Result = { status: "loading" } | { status: "error"; message: string } | { status: "success"; data: User };
 if (result.status === "success") console.log(result.data.name);
 ```
-
----
 
 ### type vs interface
 
@@ -1528,8 +1374,6 @@ interface Project { id: string; name: string }
 type LoadState = "idle" | "loading" | "error";
 ```
 
----
-
 ### Utility types
 
 **Що це** — вбудовані типи-помічники (Partial, Pick, Omit, Record, Required, Readonly) для похідних типів.
@@ -1545,8 +1389,6 @@ type User = { id: string; name: string; passwordHash: string };
 type PublicUser = Omit<User, "passwordHash">;
 const labels: Record<"draft" | "published", string> = { draft: "Draft", published: "Published" };
 ```
-
----
 
 ### readonly
 
@@ -1565,8 +1407,6 @@ function renderTags(tags: readonly string[]) {
 }
 ```
 
----
-
 ### as const
 
 **Що це** — assertion, що фіксує literal values і readonly структуру замість широких string/number типів.
@@ -1581,8 +1421,6 @@ function renderTags(tags: readonly string[]) {
 const statuses = ["draft", "published"] as const;
 type Status = (typeof statuses)[number];
 ```
-
----
 
 ### satisfies
 
@@ -1599,8 +1437,6 @@ type Route = "/" | "/projects";
 const labels = { "/": "Home", "/projects": "Projects" } satisfies Record<Route, string>;
 ```
 
----
-
 ### Enums
 
 **Що це** — конструкція TypeScript для іменованого набору констант; часто замінна string literal union.
@@ -1615,8 +1451,6 @@ const labels = { "/": "Home", "/projects": "Projects" } satisfies Record<Route, 
 const Role = { Admin: "admin", Member: "member" } as const;
 type Role = (typeof Role)[keyof typeof Role];
 ```
-
----
 
 ### Declaration files
 
@@ -1635,11 +1469,7 @@ declare module "legacy-analytics" {
 }
 ```
 
----
-
 ## Browser & Performance
-
----
 
 ### Critical rendering path
 
@@ -1662,8 +1492,6 @@ flowchart TD
   P --> K[Compositing]
 ```
 
----
-
 ### Reflow / layout
 
 **Що це** — етап рендерингу, на якому браузер перераховує геометрію елементів після зміни розмірів, тексту або CSS rules.
@@ -1683,8 +1511,6 @@ const heights = items.map((el) => el.offsetHeight);
 items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 ```
 
----
-
 ### Repaint
 
 **Що це** — етап рендерингу, що перемальовує пікселі без перерахунку layout, наприклад після зміни кольору.
@@ -1694,8 +1520,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 **Як використовується / працює** — анімую transform і opacity, коли можливо, і перевіряю paint flashing у DevTools.
 
 **Мінуси й обмеження** — навіть без layout великі paint area можуть бути дорогими.
-
----
 
 ### Compositing
 
@@ -1707,8 +1531,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 
 **Мінуси й обмеження** — забагато layers витрачає GPU memory і може погіршити performance.
 
----
-
 ### Core Web Vitals
 
 **Що це** — набір user-centric метрик Google: LCP (loading), CLS (visual stability) та INP (responsiveness).
@@ -1718,8 +1540,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 **Як використовується / працює** — дивлюся field data і lab trace, потім пов'язую LCP, CLS та INP із конкретним користувацьким шляхом.
 
 **Мінуси й обмеження** — score не замінює product judgment; synthetic результати не завжди збігаються з реальними пристроями.
-
----
 
 ### LCP — Largest Contentful Paint
 
@@ -1731,8 +1551,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 
 **Мінуси й обмеження** — «найбільший» елемент змінюється залежно від viewport; не варто preload-ити все поспіль.
 
----
-
 ### CLS — Cumulative Layout Shift
 
 **Що це** — метрика сумарного неочікуваного зсуву layout протягом життя сторінки.
@@ -1743,8 +1561,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 
 **Мінуси й обмеження** — припустимі user-initiated shifts не дорівнюють поганому CLS; треба перевіряти конкретний сценарій.
 
----
-
 ### INP — Interaction to Next Paint
 
 **Що це** — метрика затримки між користувацькою взаємодією та наступним відмальовуванням кадру.
@@ -1754,8 +1570,6 @@ items.forEach((el, i) => { el.style.height = heights[i] + 10 + "px"; });
 **Як використовується / працює** — розбиваю long tasks, зменшую handler work і показую immediate feedback для довгої mutation.
 
 **Мінуси й обмеження** — оптимізація лише одного click не гарантує хороший worst-case interaction.
-
----
 
 ### requestAnimationFrame
 
@@ -1785,8 +1599,6 @@ window.addEventListener("pointermove", (event) => {
 });
 ```
 
----
-
 ### IntersectionObserver
 
 **Що це** — browser API для спостереження перетину елемента із viewport або container без scroll polling.
@@ -1803,8 +1615,6 @@ const observer = new IntersectionObserver(([entry]) => {
 });
 observer.observe(sentinel);
 ```
-
----
 
 ### ResizeObserver
 
@@ -1825,8 +1635,6 @@ observer.observe(chartContainer);
 // On component removal: observer.disconnect().
 ```
 
----
-
 ### Web Workers
 
 **Що це** — механізм браузера для виконання JavaScript в окремому потоці без доступу до DOM.
@@ -1842,8 +1650,6 @@ const worker = new Worker(new URL("./search-worker.ts", import.meta.url));
 worker.postMessage({ type: "index", documents });
 worker.onmessage = ({ data }) => setResults(data);
 ```
-
----
 
 ### Web Vitals field monitoring
 
@@ -1864,8 +1670,6 @@ const report = (metric: Metric) =>
 onLCP(report); onCLS(report); onINP(report);
 ```
 
----
-
 ### Code splitting
 
 **Що це** — поділ JavaScript-бандла на chunks, які завантажуються за route або за потребою.
@@ -1883,8 +1687,6 @@ exportButton.addEventListener("click", async () => {
 });
 ```
 
----
-
 ### Tree shaking
 
 **Що це** — видалення недосяжного ESM-коду з production bundle під час збірки.
@@ -1900,8 +1702,6 @@ import { debounce } from "es-toolkit"; // named ESM import — unused code is dr
 import lodash from "lodash";           // antipattern: the whole package lands in the bundle
 ```
 
----
-
 ### Bundle analysis
 
 **Що це** — аналіз реального складу й розміру клієнтського JavaScript-бандла.
@@ -1911,8 +1711,6 @@ import lodash from "lodash";           // antipattern: the whole package lands i
 **Як використовується / працює** — запускаю analyzer до/після зміни і шукаю duplicate packages, важкі editor/media libraries і client leaks.
 
 **Мінуси й обмеження** — розмір не дорівнює runtime cost; підтверджую знахідку performance trace-ом і реальним UX.
-
----
 
 ### Virtualization
 
@@ -1944,8 +1742,6 @@ return <div ref={parentRef} style={{ height: 480, overflow: "auto" }}>
 </div>;
 ```
 
----
-
 ### Caching in the browser
 
 **Що це** — шари повторного використання даних і assets у браузері: HTTP cache, service worker, in-memory.
@@ -1964,8 +1760,6 @@ Cache-Control: public, max-age=31536000, immutable
 Cache-Control: no-cache
 ```
 
----
-
 ### localStorage
 
 **Що це** — синхронне key-value сховище браузера за origin, що переживає закриття вкладки й сесії.
@@ -1981,8 +1775,6 @@ const stored = localStorage.getItem("editor-preferences");
 const preferences = stored ? JSON.parse(stored) : { snapToGrid: true };
 localStorage.setItem("editor-preferences", JSON.stringify(preferences));
 ```
-
----
 
 ### sessionStorage
 
@@ -2000,8 +1792,6 @@ sessionStorage.setItem(draftKey, JSON.stringify({ title, script }));
 
 const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 ```
-
----
 
 ### Accessibility
 
@@ -2022,8 +1812,6 @@ const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 </section>
 ```
 
----
-
 ### Progressive enhancement
 
 **Що це** — підхід, за якого базовий сценарій працює без JavaScript, а можливості браузера його покращують.
@@ -2034,11 +1822,7 @@ const draft = JSON.parse(sessionStorage.getItem(draftKey) ?? "null");
 
 **Мінуси й обмеження** — не будь-який rich editor реалістично працює без JS; підхід потребує дисципліни в server contract.
 
----
-
 ## HTTP, Backend & Security
-
----
 
 ### REST — Representational State Transfer
 
@@ -2057,8 +1841,6 @@ GET    /api/projects/42     # single resource
 PATCH  /api/projects/42     # partial update
 DELETE /api/projects/42     # delete
 ```
-
----
 
 ### GraphQL
 
@@ -2080,8 +1862,6 @@ query ProjectCard($id: ID!) {
 }
 ```
 
----
-
 ### HTTP methods
 
 **Що це** — стандартні дієслова HTTP із закріпленою семантикою: GET читає, POST обробляє подання ресурсу, PUT створює або замінює representation за відомим URI, PATCH змінює частину, DELETE видаляє.
@@ -2100,8 +1880,6 @@ DELETE /api/projects/42   # idempotent: retry does not change the outcome
 POST   /api/projects      # processing/creation: retry may create a duplicate
 ```
 
----
-
 ### ETag and conditional requests
 
 **Що це** — HTTP-механізм версії representation (ETag) та умовних запитів If-None-Match/If-Match.
@@ -2118,8 +1896,6 @@ If-None-Match: "project-42-v7"
 
 HTTP/1.1 304 Not Modified
 ```
-
----
 
 ### Idempotency
 
@@ -2139,8 +1915,6 @@ HTTP/1.1 200 OK
 # A retry with the same key returns the stored result, not a second charge.
 ```
 
----
-
 ### Status codes
 
 **Що це** — стандартизований machine-readable результат HTTP-операції у відповіді сервера.
@@ -2151,8 +1925,6 @@ HTTP/1.1 200 OK
 
 **Мінуси й обмеження** — status без стабільного error body недостатній; не маскую domain validation під 500.
 
----
-
 ### Pagination
 
 **Що це** — видача великої колекції порціями обмеженого розміру.
@@ -2162,8 +1934,6 @@ HTTP/1.1 200 OK
 **Як використовується / працює** — API повертає items і next cursor/metadata; UI зберігає filters і показує loading/error стан.
 
 **Мінуси й обмеження** — pagination потребує deterministic sort; без нього з’являються пропуски й duplicates між сторінками.
-
----
 
 ### Cursor pagination
 
@@ -2182,8 +1952,6 @@ ORDER BY created_at DESC, id DESC
 LIMIT 25;
 ```
 
----
-
 ### Offset pagination
 
 **Що це** — пагінація через номер сторінки і зміщення (LIMIT/OFFSET).
@@ -2200,8 +1968,6 @@ ORDER BY created_at DESC, id DESC
 LIMIT 25 OFFSET 50; -- page 3; a deep OFFSET scans every skipped row
 ```
 
----
-
 ### Authentication
 
 **Що це** — процес встановлення того, хто виконує запит.
@@ -2217,8 +1983,6 @@ const token = request.headers.get("authorization")?.replace("Bearer ", "");
 const principal = await verifyAccessToken(token);
 if (!principal) return new Response("Unauthorized", { status: 401 });
 ```
-
----
 
 ### Authorization
 
@@ -2237,8 +2001,6 @@ if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
 }
 ```
 
----
-
 ### Sessions and cookies
 
 **Що це** — схема зберігання server-side login state з непрозорим ідентифікатором у cookie.
@@ -2253,8 +2015,6 @@ if (project.tenantId !== user.tenantId || !can(user, "project:edit", project)) {
 HTTP/1.1 200 OK
 Set-Cookie: session=opaque-id-7f3a; Secure; HttpOnly; SameSite=Lax; Max-Age=1209600; Path=/
 ```
-
----
 
 ### JWT — JSON Web Token
 
@@ -2272,8 +2032,6 @@ eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI0MiIsImF1ZCI6ImFwaSIsImV4cCI6MTc1MjU4NDAwMH0.MEU
 payload is signed but not encrypted: base64url is readable by anyone
 ```
 
----
-
 ### Access token
 
 **Що це** — короткоживучий credential, який доводить API, що caller authenticated, і несе його claims/scopes.
@@ -2283,8 +2041,6 @@ payload is signed but not encrypted: base64url is readable by anyone
 **Як використовується / працює** — API валідує token на кожному request і authorise-ить конкретну дію; обираю короткий expiry і мінімальні scopes.
 
 **Мінуси й обмеження** — token theft дає доступ до expiry; client-side storage має відповідати threat model, а token не замінює resource-level authorization.
-
----
 
 ### Refresh token
 
@@ -2308,8 +2064,6 @@ sequenceDiagram
   C->>API: retry with new access token
 ```
 
----
-
 ### CSRF — Cross-Site Request Forgery
 
 **Що це** — атака, за якої чужий сайт змушує browser надіслати authenticated cookie request.
@@ -2327,8 +2081,6 @@ Set-Cookie: session=opaque-id; Secure; HttpOnly; SameSite=Lax
 POST /api/projects/42/delete
 X-CSRF-Token: f3a91c0d…
 ```
-
----
 
 ### XSS — Cross-Site Scripting
 
@@ -2348,8 +2100,6 @@ element.innerHTML = comment.text;
 element.textContent = comment.text;
 ```
 
----
-
 ### CORS — Cross-Origin Resource Sharing
 
 **Що це** — політика браузера, яка визначає, який cross-origin JavaScript може читати response.
@@ -2364,8 +2114,6 @@ element.textContent = comment.text;
 Access-Control-Allow-Origin: https://app.example.com
 Access-Control-Allow-Credentials: true
 ```
-
----
 
 ### CORS preflight
 
@@ -2388,8 +2136,6 @@ Access-Control-Allow-Methods: POST
 Access-Control-Allow-Headers: Content-Type
 ```
 
----
-
 ### CSP — Content Security Policy
 
 **Що це** — HTTP-політика, яка обмежує допустимі джерела script, style, images і frames.
@@ -2407,8 +2153,6 @@ Content-Security-Policy: default-src 'self';
   frame-ancestors 'none'
 ```
 
----
-
 ### Rate limiting
 
 **Що це** — обмеження частоти запитів до endpoint за ключем (user, API key, IP).
@@ -2425,8 +2169,6 @@ const allowed = await limiter.consume(key, { limit: 5, windowMs: 60_000 });
 
 if (!allowed) return new Response("Too Many Requests", { status: 429 });
 ```
-
----
 
 ### Webhooks
 
@@ -2446,8 +2188,6 @@ await queue.enqueue({ eventId: payload.id, type: payload.type });
 return new Response(null, { status: 202 });
 ```
 
----
-
 ### File uploads
 
 **Що це** — приймання користувацьких файлів, зазвичай напряму в object storage за signed URL.
@@ -2464,8 +2204,6 @@ await fetch(uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": f
 await api.completeUpload({ fileKey });
 ```
 
----
-
 ### Observability
 
 **Що це** — властивість системи бути зрозумілою ззовні через logs, metrics і traces.
@@ -2476,11 +2214,7 @@ await api.completeUpload({ fileKey });
 
 **Мінуси й обмеження** — telemetry коштує грошей і може спричинити витік PII; сигнал має бути actionable, а не просто шумним.
 
----
-
 ## SQL & Databases
-
----
 
 ### Relational model
 
@@ -2491,8 +2225,6 @@ await api.completeUpload({ fileKey });
 **Як використовується / працює** — моделюю tables, primary/foreign keys і constraints навколо domain invariants, а не навколо екранів UI.
 
 **Мінуси й обмеження** — join-heavy schema вимагає розуміння access patterns; не кожне навантаження краще розв'язується реляційною БД.
-
----
 
 ### Normalization
 
@@ -2519,8 +2251,6 @@ CREATE TABLE order_items (
 );
 ```
 
----
-
 ### Primary and foreign keys
 
 **Що це** — primary key однозначно ідентифікує row, foreign key зберігає посилальну цілісність.
@@ -2539,8 +2269,6 @@ CREATE TABLE comments (
 );
 ```
 
----
-
 ### Index
 
 **Що це** — допоміжна структура даних БД для швидкого lookup, sorting або join.
@@ -2555,8 +2283,6 @@ CREATE TABLE comments (
 CREATE INDEX projects_workspace_created_at_idx
 ON projects (workspace_id, created_at DESC);
 ```
-
----
 
 ### Composite index
 
@@ -2574,8 +2300,6 @@ CREATE INDEX projects_workspace_updated_idx
 
 -- Speeds up: WHERE workspace_id = $1 ORDER BY updated_at DESC
 ```
-
----
 
 ### Query plan / EXPLAIN
 
@@ -2596,8 +2320,6 @@ ORDER BY updated_at DESC
 LIMIT 20;
 ```
 
----
-
 ### JOIN
 
 **Що це** — операція SQL, що об'єднує rows із таблиць за умовою зв'язку.
@@ -2613,8 +2335,6 @@ SELECT p.id, p.name, u.name AS owner_name
 FROM projects p
 LEFT JOIN users u ON u.id = p.owner_id;
 ```
-
----
 
 ### N+1 queries
 
@@ -2634,8 +2354,6 @@ JOIN users u ON u.id = p.author_id
 WHERE p.workspace_id = $1;
 ```
 
----
-
 ### Transactions
 
 **Що це** — одиниця роботи БД, у якій пов'язані writes фіксуються разом або відкочуються разом.
@@ -2652,8 +2370,6 @@ UPDATE accounts SET balance = balance - 10 WHERE id = $1;
 UPDATE accounts SET balance = balance + 10 WHERE id = $2;
 COMMIT;
 ```
-
----
 
 ### ACID — Atomicity, Consistency, Isolation, Durability
 
@@ -2672,8 +2388,6 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 2;
 COMMIT; -- atomic: both changes or neither, even on failure
 ```
 
----
-
 ### Isolation levels
 
 **Що це** — налаштування транзакції, що визначає, які concurrent changes вона бачить.
@@ -2691,8 +2405,6 @@ SELECT balance FROM accounts WHERE id = 1;
 COMMIT;
 ```
 
----
-
 ### Optimistic locking
 
 **Що це** — контроль конкурентних змін через версію запису замість утримання lock.
@@ -2708,8 +2420,6 @@ UPDATE documents
 SET body = $1, version = version + 1
 WHERE id = $2 AND version = $3;
 ```
-
----
 
 ### Pessimistic locking
 
@@ -2728,8 +2438,6 @@ UPDATE workshops SET seats_left = seats_left - 1 WHERE id = $1 AND seats_left > 
 COMMIT;
 ```
 
----
-
 ### Deadlocks
 
 **Що це** — взаємне блокування, за якого transactions циклічно чекають на locks одна одної.
@@ -2747,8 +2455,6 @@ COMMIT;
 -- Fix: acquire rows in one consistent order (for example, by id).
 ```
 
----
-
 ### Unique constraints
 
 **Що це** — обмеження БД, що гарантує унікальність значення або комбінації колонок.
@@ -2763,8 +2469,6 @@ COMMIT;
 ALTER TABLE users ADD CONSTRAINT users_email_unique UNIQUE (email);
 -- A race between two concurrent signups yields error 23505, not a duplicate.
 ```
-
----
 
 ### Migrations
 
@@ -2782,8 +2486,6 @@ ALTER TABLE projects ADD COLUMN slug text;
 -- Step 2: backfill; new code writes both fields.
 -- Step 3: add NOT NULL/UNIQUE only after rollout.
 ```
-
----
 
 ### Soft delete
 
@@ -2803,8 +2505,6 @@ CREATE UNIQUE INDEX projects_slug_alive_idx
   ON projects (slug) WHERE deleted_at IS NULL;
 ```
 
----
-
 ### JSON columns
 
 **Що це** — колонки типу JSON/JSONB для зберігання варіативного attribute set.
@@ -2822,11 +2522,7 @@ WHERE settings @> '{"autosave": true}'; -- JSONB containment
 CREATE INDEX projects_settings_idx ON projects USING gin (settings);
 ```
 
----
-
 ## Testing & DevOps
-
----
 
 ### Unit tests
 
@@ -2844,8 +2540,6 @@ test("rejects an expired token", () => {
 });
 ```
 
----
-
 ### Integration tests
 
 **Що це** — тести спільної роботи modules, HTTP layer, database або queue boundary.
@@ -2862,8 +2556,6 @@ test("POST /projects persists a project", async () => {
   expect(response.status).toBe(201);
 });
 ```
-
----
 
 ### End-to-end tests
 
@@ -2885,8 +2577,6 @@ test("user can create a project", async ({ page }) => {
 });
 ```
 
----
-
 ### Test pyramid
 
 **Що це** — евристика розподілу тестів: багато швидких unit, менше integration, одиниці E2E.
@@ -2902,8 +2592,6 @@ flowchart TB
   E[E2E: a few golden journeys] --> I[Integration: fewer, layer boundaries]
   I --> U[Unit: many, fast business rules]
 ```
-
----
 
 ### Mock vs fake vs stub
 
@@ -2924,8 +2612,6 @@ await chargeUser(user, { sendReceipt: mock });
 expect(mock).toHaveBeenCalledWith(user.email);
 ```
 
----
-
 ### Contract testing
 
 **Що це** — тести узгодженості producer і consumer за API/message contract.
@@ -2943,8 +2629,6 @@ expect(response).toMatchObject({
 });
 ```
 
----
-
 ### TDD — Test-Driven Development
 
 **Що це** — цикл розробки red → green → refactor: тест формулює behavior до реалізації.
@@ -2955,8 +2639,6 @@ expect(response).toMatchObject({
 
 **Мінуси й обмеження** — не перетворюю TDD на ритуал для CSS чи exploratory prototype; тест має бути meaningful.
 
----
-
 ### Test flakiness
 
 **Що це** — недетерміновані падіння тесту, що руйнують довіру до CI.
@@ -2966,8 +2648,6 @@ expect(response).toMatchObject({
 **Як використовується / працює** — прибираю real time, random, shared state, arbitrary sleeps і network dependency; retry — лише тимчасовий containment.
 
 **Мінуси й обмеження** — ігнорувати flaky test небезпечно: він приховує regression і сповільнює команду.
-
----
 
 ### CI — Continuous Integration
 
@@ -2984,8 +2664,6 @@ expect(response).toMatchObject({
 - run: bun run lint
 - run: bun test
 ```
-
----
 
 ### CD — Continuous Delivery / Continuous Deployment
 
@@ -3005,8 +2683,6 @@ flowchart TD
   G -->|Delivery: manual approval| M[Promote to prod]
   G -->|Deployment: automatic| P[Prod]
 ```
-
----
 
 ### Docker
 
@@ -3028,8 +2704,6 @@ COPY --from=build /app/dist ./dist
 CMD ["node", "dist/server.js"]
 ```
 
----
-
 ### Environment configuration
 
 **Що це** — винесення deploy-specific values і secrets із application code в оточення.
@@ -3049,8 +2723,6 @@ const config = {
 if (!config.databaseUrl) throw new Error("DATABASE_URL is required");
 ```
 
----
-
 ### Feature flags
 
 **Що це** — runtime-перемикачі функціональності, що розділяють deploy і release.
@@ -3067,8 +2739,6 @@ if (flags.isEnabled("new-timeline", { tenantId, userId })) {
 }
 return <LegacyTimeline />;
 ```
-
----
 
 ### Blue-green deployment
 
@@ -3087,8 +2757,6 @@ flowchart LR
   G[Green: new version] --> H[Health checks]
   H --> LB
 ```
-
----
 
 ### Canary deployment
 
@@ -3110,8 +2778,6 @@ flowchart LR
   M -->|failure| RB[Roll back]
 ```
 
----
-
 ### Rollback
 
 **Що це** — повернення сервісу до відомої working version після harmful release.
@@ -3129,8 +2795,6 @@ flowchart TD
   D -->|no| F[Fix forward or disable the feature flag]
 ```
 
----
-
 ### SLI, SLO, SLA — Service Level Indicator, Objective, Agreement
 
 **Що це** — SLI вимірює service behavior, SLO задає цільовий рівень, SLA — зовнішня обіцянка з наслідками.
@@ -3140,8 +2804,6 @@ flowchart TD
 **Як використовується / працює** — обираю user-facing indicator, наприклад successful video publish latency, і error budget для release decisions.
 
 **Мінуси й обмеження** — metric без user value стимулює хибну оптимізацію; SLA не варто обіцяти без operational capacity.
-
----
 
 ### Incident response
 
@@ -3153,11 +2815,7 @@ flowchart TD
 
 **Мінуси й обмеження** — postmortem без follow-up owners нічого не змінює; не треба в момент інциденту шукати винного.
 
----
-
 ## Architecture & System Design
-
----
 
 ### Monolith
 
@@ -3168,8 +2826,6 @@ flowchart TD
 **Як використовується / працює** — тримаю clear modules та internal boundaries всередині одного repo/process, виділяючи сервіс лише за доведеного тиску.
 
 **Мінуси й обмеження** — без modularity зростає coupling і deployment blast radius; один runtime не означає один величезний файл.
-
----
 
 ### Microservices
 
@@ -3193,8 +2849,6 @@ flowchart TD
   end
 ```
 
----
-
 ### Modular monolith
 
 **Що це** — моноліт із domain modules та enforced internal boundaries всередині одного deployable.
@@ -3204,8 +2858,6 @@ flowchart TD
 **Як використовується / працює** — модулі спілкуються через explicit interfaces/events, не імпортують private persistence деталі одне одного.
 
 **Мінуси й обмеження** — boundaries вимагають discipline/tooling; shared database усе ще допускає обхід архітектури.
-
----
 
 ### Bounded context
 
@@ -3228,8 +2880,6 @@ flowchart TD
   B -. shared id, different models .- E
 ```
 
----
-
 ### Clean architecture
 
 **Що це** — шарувата архітектура, де domain/use-case logic не залежить від framework, database і transport.
@@ -3248,8 +2898,6 @@ flowchart TD
   PG[Postgres adapter] -. implements .-> R
 ```
 
----
-
 ### Hexagonal architecture
 
 **Що це** — архітектура ports-and-adapters: domain спілкується з HTTP, DB, queue та зовнішніми API через інтерфейси.
@@ -3267,8 +2915,6 @@ flowchart TD
   CORE -->|driven port| DB[Postgres adapter]
   CORE -->|driven port| MAIL[Email adapter]
 ```
-
----
 
 ### CQRS — Command Query Responsibility Segregation
 
@@ -3289,8 +2935,6 @@ flowchart LR
   Q[Query: project list] --> R
 ```
 
----
-
 ### Event sourcing
 
 **Що це** — зберігання стану як immutable послідовності domain events.
@@ -3310,8 +2954,6 @@ flowchart TD
   P --> R[(Read models)]
 ```
 
----
-
 ### Event-driven architecture
 
 **Що це** — архітектура, де producer публікує події, а asynchronous consumers реагують на них.
@@ -3330,8 +2972,6 @@ flowchart TD
   B --> A[Consumer: analytics]
 ```
 
----
-
 ### WebSocket
 
 **Що це** — протокол двостороннього persistent connection між client і server поверх одного TCP-з’єднання.
@@ -3346,8 +2986,6 @@ flowchart TD
 const socket = new WebSocket("wss://api.example.com/live");
 socket.addEventListener("message", ({ data }) => updateProject(JSON.parse(data)));
 ```
-
----
 
 ### SSE — Server-Sent Events
 
@@ -3364,8 +3002,6 @@ const events = new EventSource("/api/jobs/42/events");
 events.addEventListener("progress", (event) => setProgress(JSON.parse(event.data)));
 ```
 
----
-
 ### Message queue
 
 **Що це** — буфер асинхронних задач між producer і worker-ами.
@@ -3380,8 +3016,6 @@ events.addEventListener("progress", (event) => setProgress(JSON.parse(event.data
 await queue.enqueue({ type: "render-video", jobId });
 queue.consume("render-video", async ({ jobId }) => await renderVideo(jobId));
 ```
-
----
 
 ### Idempotent consumer
 
@@ -3398,8 +3032,6 @@ INSERT INTO processed_events (event_id) VALUES ($1)
 ON CONFLICT DO NOTHING;
 -- Run the side effect only if a new row was inserted.
 ```
-
----
 
 ### Outbox pattern
 
@@ -3418,8 +3050,6 @@ INSERT INTO outbox (topic, payload) VALUES ('video.queued', json_build_object('i
 COMMIT;
 ```
 
----
-
 ### Cache-aside
 
 **Що це** — патерн кешування: застосунок сам читає cache, за miss іде в БД і заповнює cache.
@@ -3437,8 +3067,6 @@ if (!project) {
   await cache.set(`project:${id}`, project, { ttl: 60 });
 }
 ```
-
----
 
 ### Distributed lock
 
@@ -3465,8 +3093,6 @@ try {
 }
 ```
 
----
-
 ### Load balancing
 
 **Що це** — розподіл requests між healthy instances через виділений балансувальник.
@@ -3486,8 +3112,6 @@ flowchart TD
   LB -. health check .-> A
 ```
 
----
-
 ### Backpressure
 
 **Що це** — механізм стримування producer-а, коли робота надходить швидше, ніж consumer її обробляє.
@@ -3506,8 +3130,6 @@ flowchart TD
   S -.-> P
 ```
 
----
-
 ### Rate limiting vs backpressure
 
 **Що це** — rate limit захищає policy/abuse boundary, backpressure захищає downstream capacity.
@@ -3517,8 +3139,6 @@ flowchart TD
 **Як використовується / працює** — API limit ставлю на caller, а concurrency/queue limit — на service or worker capacity.
 
 **Мінуси й обмеження** — один механізм не замінює інший; limits без user messaging виглядають як випадкова поломка.
-
----
 
 ### System-design interview framing
 
@@ -3530,11 +3150,7 @@ flowchart TD
 
 **Мінуси й обмеження** — не можна передчасно малювати Kafka/мікросервіси; але й не можна мовчки робити небезпечні assumptions.
 
----
-
 ## AI, LLM & Product Engineering
-
----
 
 ### LLM — Large Language Model
 
@@ -3546,8 +3162,6 @@ flowchart TD
 
 **Мінуси й обмеження** — output може бути неправильним, нестабільним і дорогим; модель не є source of truth.
 
----
-
 ### Prompt engineering
 
 **Що це** — практика формулювання задачі для моделі: роль, обмеження, формат, приклади.
@@ -3558,8 +3172,6 @@ flowchart TD
 
 **Мінуси й обмеження** — довгий prompt підвищує latency/cost і не замінює retrieval, validation чи product design.
 
----
-
 ### System prompt
 
 **Що це** — службова інструкція зі сталими правилами поведінки моделі та product guardrails.
@@ -3569,8 +3181,6 @@ flowchart TD
 **Як використовується / працює** — відокремлюю system instructions від user content, версіоную їх і оцінюю зміни на representative eval set.
 
 **Мінуси й обмеження** — system prompt не є security boundary проти malicious input; потрібні least privilege у tools і validation output.
-
----
 
 ### Tokens and context window
 
@@ -3592,8 +3202,6 @@ A 200k-token window — input and output share one budget:
 Does not fit → summarize the history instead of silently dropping the tail.
 ```
 
----
-
 ### Embeddings
 
 **Що це** — векторне подання контенту для оцінки семантичної близькості, пошуку та кластеризації.
@@ -3608,8 +3216,6 @@ Does not fit → summarize the history instead of silently dropping the tail.
 const [a, b] = await embed(["how to trim a video", "clip cutting tool"]);
 cosineSimilarity(a, b); // ~0.8 — semantically close with no shared words
 ```
-
----
 
 ### Vector database
 
@@ -3629,8 +3235,6 @@ const matches = await vectorIndex.search({
 });
 ```
 
----
-
 ### RAG — Retrieval-Augmented Generation
 
 **Що це** — патерн генерації з попереднім пошуком: знайдені дозволені знання додаються в prompt.
@@ -3649,8 +3253,6 @@ const context = matches.map(({ text, sourceUrl }) => ({ text, sourceUrl }));
 const answer = await llm.generate({ question, context });
 ```
 
----
-
 ### Reranking
 
 **Що це** — другий етап пошуку, що переупорядковує initial retrieval results точнішою моделлю.
@@ -3661,8 +3263,6 @@ const answer = await llm.generate({ question, context });
 
 **Мінуси й обмеження** — додає latency/cost; погані chunks або filters залишаються поганою базою.
 
----
-
 ### Hallucination
 
 **Що це** — режим збою, за якого модель упевнено стверджує непідтверджений або вигаданий факт.
@@ -3672,8 +3272,6 @@ const answer = await llm.generate({ question, context });
 **Як використовується / працює** — обмежую answer наданими sources, вимагаю citations, валідую structured fields і даю abstain path.
 
 **Мінуси й обмеження** — prompt warning «не галюцинуй» недостатній; high-stakes output потребує human review або deterministic verification.
-
----
 
 ### Structured output
 
@@ -3696,8 +3294,6 @@ const answer = await llm.generate({
 const result = SummarySchema.parse(answer);
 ```
 
----
-
 ### Tool calling
 
 **Що це** — механізм, у якому модель запитує дію або дані через строго описаний application tool.
@@ -3712,8 +3308,6 @@ const result = SummarySchema.parse(answer);
 const tools = [{ name: "get_project", parameters: { type: "object", properties: { id: { type: "string" } } } }];
 if (call.name === "get_project") return getProjectForUser(userId, call.arguments.id);
 ```
-
----
 
 ### Prompt injection
 
@@ -3732,8 +3326,6 @@ if (!tool || !canUseTool(user, tool) || !tool.schema.safeParse(call.arguments).s
 }
 ```
 
----
-
 ### Evaluation (evals)
 
 **Що це** — вимірювані перевірки якості LLM feature на репрезентативному наборі прикладів.
@@ -3751,8 +3343,6 @@ for (const example of evalSet) {
 }
 ```
 
----
-
 ### AI — Artificial Intelligence: latency and cost
 
 **Що це** — інженерна дисципліна утримання LLM feature інтерактивною та економічно виправданою.
@@ -3762,8 +3352,6 @@ for (const example of evalSet) {
 **Як використовується / працює** — вибираю smallest capable model, скорочую context/output, cache-ю safe results, async-ю long generation і показую progress.
 
 **Мінуси й обмеження** — дешева модель може погіршити quality/support cost; cache не можна застосовувати до personal/fresh content без policy.
-
----
 
 ### Human-in-the-loop
 
@@ -3775,8 +3363,6 @@ for (const example of evalSet) {
 
 **Мінуси й обмеження** — ручний review створює чергу та latency; треба вибирати ризиковані decision points, а не все підряд.
 
----
-
 ### Product discovery
 
 **Що це** — процес перевірки, яку проблему користувача варто розв’язувати, до масштабної реалізації.
@@ -3786,8 +3372,6 @@ for (const example of evalSet) {
 **Як використовується / працює** — формулюю target user, job-to-be-done, current workaround, hypothesis і smallest experiment із success signal.
 
 **Мінуси й обмеження** — interviews не дорівнюють реальній поведінці; discovery не повинна ставати нескінченним відкладанням доставки.
-
----
 
 ### Product metrics
 
@@ -3799,8 +3383,6 @@ for (const example of evalSet) {
 
 **Мінуси й обмеження** — vanity metrics легко ростуть без value; metric не можна використовувати без privacy/ethics review.
 
----
-
 ### A/B testing
 
 **Що це** — контрольований експеримент із випадковим розподілом користувачів між варіантами.
@@ -3810,8 +3392,6 @@ for (const example of evalSet) {
 **Як використовується / працює** — заздалегідь задаю hypothesis, primary metric, guardrails, sample size і assignment unit, потім аналізую ефект.
 
 **Мінуси й обмеження** — погана randomization, peeking і multiple comparisons створюють хибні висновки; не кожен change вартий експерименту.
-
----
 
 ### Analytics events
 
@@ -3832,8 +3412,6 @@ track("project_exported", {
 });
 ```
 
----
-
 ### Optimistic UI
 
 **Що це** — патерн UI, що показує очікуваний результат mutation до network response.
@@ -3851,8 +3429,6 @@ try { await api.createProject(input); }
 catch { queryClient.setQueryData(["projects"], previous); }
 ```
 
----
-
 ### Design systems
 
 **Що це** — перевикористовуваний набір компонентів, tokens і accessibility patterns із документацією.
@@ -3863,48 +3439,32 @@ catch { queryClient.setQueryData(["projects"], previous); }
 
 **Мінуси й обмеження** — не роблю універсальний компонент на всі випадки; premature systemisation сповільнює product learning.
 
----
-
 ## Fast system-design practice prompts
 
 Перед інтерв'ю проговоріть уголос по 10–15 хвилин кожен сценарій: requirements → API/data model → happy path → failure/retry → scale/observability → trade-offs.
-
----
 
 ### 1. Создать AI-видео из текста
 
 **Українською:** починаю з POST /projects/:id/renders з idempotency key. В одній transaction створюю render job і outbox event; worker бере job із queue, отримує дозволені input assets, викликає generation/render stages і зберігає результат в object storage. У БД зберігаю state machine (queued → running → completed/failed/cancelled), а UI отримує status через polling або SSE. Retries лише для transient failure, cancel — ідемпотентний і перевіряється між stages. Спочатку це modular monolith з worker-ами; окремо масштабую CPU/GPU rendering лише за виміряної черги/навантаження.
 
----
-
 ### 2. Совместное редактирование учебного сценария
 
 **Українською:** спершу уточнюю, чи потрібне справжнє одночасне редагування тексту. Для autosave без real-time collaboration достатньо revision number і optimistic locking: client надсилає base revision, server повертає 409 Conflict за застарілої версії. Presence і live cursors ідуть через WebSocket як ephemeral data. Якщо потрібне одночасне редагування одного rich-text поля без конфліктів, обираю CRDT або OT, зберігаю snapshots і append-only operations, а permissions перевіряю на кожному connection і write.
-
----
 
 ### 3. Загрузка 5 GB видео
 
 **Українською:** browser не проксує 5 GB через application server. API авторизує upload і видає short-lived signed multipart URL; browser завантажує частини безпосередньо в storage, вміє resume і показує локальний progress. Після complete server перевіряє ownership/size/type, ставить scan/transcode job у чергу і лише потім позначає asset usable. Потрібні quota, expiry незавершених uploads, content validation по байтах, malware scan і lifecycle policy.
 
----
-
 ### 4. Поиск по проектам и сценариям
 
 **Українською:** починаю з Postgres full-text search і structured filters, а не з окремого search cluster. API приймає query/filters/cursor і повертає results з deterministic sort (rank, updated_at, id); authorization/tenant filter застосовуються до видачі. UI debounce-ить query, скасовує застарілий request і показує cursor pagination. Vector retrieval додаю, лише якщо keyword/full-text search не покриває semantic intent; його results все одно проходять metadata і permission filters.
-
----
 
 ### 5. Analytics для learning content
 
 **Українською:** спершу визначаю події та метрики: наприклад, lesson_started, scene_completed, assessment_submitted, а не розпливчастий «engagement». Client надсилає versioned, мінімальний за PII event з event id і timestamp; ingestion API валідує schema і кладе event у durable queue/storage. Асинхронний pipeline дедуплікує, обробляє late events і будує aggregates для dashboard. Зберігання і retention узгоджую з privacy/legal requirements, а metric definitions документую поряд із dashboard.
 
----
-
 ### 6. Notification system
 
 **Українською:** domain mutation записує notification intent і outbox event в одній transaction. Worker застосовує user preferences, dedupe key і channel policy, потім створює delivery record і надсилає email/in-app notification через provider. Provider webhooks оновлюють delivery state ідемпотентно; transient errors отримують exponential backoff і dead-letter visibility. Unsubscribe і quiet hours застосовуються до відправлення. In-app inbox зберігається в БД, а SSE/WebSocket — лише прискорює його оновлення в UI, не є source of truth.
-
----
 
 ## Final interview reminders
