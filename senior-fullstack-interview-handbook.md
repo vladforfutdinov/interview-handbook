@@ -1,6 +1,8 @@
 # Senior Fullstack Engineer Interview Handbook
 
-<p class="handbook-version" data-version="v1.2.9">Версия <code>v1.2.9</code></p>
+<p class="handbook-version" data-version="v1.3.0">Версия <code>v1.3.0</code></p>
+
+<!-- lang:rus -->
 
 Практический конспект для формата **tech roulette** и последующего system-design интервью. Он ориентирован на роль, где важны Next.js, React, TypeScript, простые REST-эндпоинты и SQL-запросы, производительность, тестируемый код и самостоятельное ведение фичи от UI до базы данных.
 
@@ -99,6 +101,92 @@
 - [AI, LLM & Product Engineering](#ai-llm--product-engineering)
 - [Fast system-design practice prompts](#fast-system-design-practice-prompts)
 - [Final interview reminders](#final-interview-reminders)
+
+<!-- lang:eng -->
+
+A practical playbook for the **tech roulette** format and the follow-up system-design interview. It targets a role where Next.js, React, TypeScript, simple REST endpoints and SQL queries, performance, testable code, and owning a feature end to end from the UI to the database all matter.
+
+## How to answer
+
+Answer each term in 20–40 seconds: name the problem, the solution, and the trade-off. Do not pass a definition off as experience: add “I would use it when…”, “The trade-off is…”, or one truthful example from your own practice. If you have not used a technology, say honestly how you would validate the solution and by which criteria you would choose it.
+
+## Abbreviations and acronyms
+
+Say the expansion out loud exactly as written — that is how it naturally sounds in an interview; the right column gives a short meaning. For the most likely terms the expansion is also added next to the acronym in section headings.
+
+| Acronym | Expansion | In short |
+|---|---|---|
+| ACID | Atomicity, Consistency, Isolation, Durability | Database transaction guarantees |
+| AI | Artificial Intelligence | Machine intelligence |
+| API | Application Programming Interface | Contract for program-to-program interaction |
+| ARIA | Accessible Rich Internet Applications | Accessibility attributes for rich UI |
+| CD | Continuous Delivery / Continuous Deployment | Continuous delivery / deployment |
+| CDN | Content Delivery Network | Network that serves content close to users |
+| CI | Continuous Integration | Continuous integration |
+| CLS | Cumulative Layout Shift | Total unexpected layout shift |
+| CORS | Cross-Origin Resource Sharing | Browser rules for cross-origin access |
+| CPU | Central Processing Unit | Central processor |
+| CRDT | Conflict-Free Replicated Data Type | Data structure for conflict-free collaborative editing |
+| CQRS | Command Query Responsibility Segregation | Separating command and read models |
+| CRUD | Create, Read, Update, Delete | Basic data operations |
+| CSP | Content Security Policy | Policy of allowed content sources |
+| CSR | Client-Side Rendering | Rendering on the client |
+| CSRF | Cross-Site Request Forgery | Forged request on behalf of the user |
+| CSS | Cascading Style Sheets | Cascading style sheets |
+| CSSOM | CSS Object Model | CSS object model |
+| DB | Database | Database |
+| DOM | Document Object Model | Document object model |
+| DTO | Data Transfer Object | Object for passing data between layers |
+| E2E | End-to-End | End-to-end test of a user scenario |
+| ETag | Entity Tag | Version of an HTTP resource representation for cache/concurrency |
+| ESM | ECMAScript Modules | Standard JavaScript module system |
+| FK | Foreign Key | Foreign key linking tables |
+| GB | Gigabyte | Gigabyte, unit of data volume |
+| GDPR | General Data Protection Regulation | EU personal data protection regulation |
+| GPU | Graphics Processing Unit | Graphics processor |
+| HTML | HyperText Markup Language | Web page markup language |
+| HTTP | HyperText Transfer Protocol | Protocol for transferring web data |
+| ID | Identifier | Unique identifier |
+| INP | Interaction to Next Paint | Delay until the next paint after an interaction |
+| IP | Internet Protocol | Internet protocol; usually a node address |
+| ISR | Incremental Static Regeneration | Incremental regeneration of a static page |
+| JS | JavaScript | JavaScript programming language |
+| JSON | JavaScript Object Notation | Text format for data interchange |
+| JWE | JSON Web Encryption | Encrypted JWT profile |
+| JWS | JSON Web Signature | Signed JWT profile |
+| JWT | JSON Web Token | Token format with claims; usually a signed JWS, not necessarily encrypted |
+| LCP | Largest Contentful Paint | Paint of the largest visible element |
+| LLM | Large Language Model | Large language model |
+| MIME | Multipurpose Internet Mail Extensions | Standard for content type/format |
+| NAT | Network Address Translation | Network address translation |
+| OT | Operational Transformation | Transformation of competing collaborative-editing operations |
+| ORM | Object-Relational Mapping | Mapping objects to relational tables |
+| PII | Personally Identifiable Information | Personally identifying data |
+| RAG | Retrieval-Augmented Generation | Generation with prior context retrieval |
+| REST | Representational State Transfer | Architectural style of HTTP APIs |
+| RTK | Redux Toolkit | Standard toolset for Redux |
+| RPC | Remote Procedure Call | Remote procedure call |
+| RSC | React Server Components | React Server Components |
+| SEO | Search Engine Optimization | Search engine optimization |
+| SLA | Service Level Agreement | External commitment to a service level |
+| SLI | Service Level Indicator | Measured indicator of service level |
+| SLO | Service Level Objective | Target value of a service indicator |
+| SQL | Structured Query Language | Query language for relational databases |
+| SSG | Static Site Generation | Static site generation at build time |
+| SSR | Server-Side Rendering | Rendering HTML on the server |
+| SSE | Server-Sent Events | One-way server-to-browser events over HTTP |
+| SWR | Stale-While-Revalidate | Serving cached data while revalidating in the background |
+| TDD | Test-Driven Development | Test-driven development |
+| TTFB | Time to First Byte | Time to the first byte of the response |
+| TTL | Time To Live | Lifetime of a cache entry/lease |
+| UI | User Interface | User interface |
+| URL | Uniform Resource Locator | Address of a resource on the internet |
+| UX | User Experience | User experience |
+| XSS | Cross-Site Scripting | Injection/execution of a malicious script |
+
+**Not acronyms:** GET, POST, PUT, PATCH, DELETE, SELECT, UPDATE, WHERE, JOIN, INNER JOIN, LEFT JOIN, ORDER BY, LIMIT, OFFSET, IN, FOR, and EXPLAIN are HTTP method names or SQL keywords. Their meaning is covered in the corresponding sections.
+
+<!-- lang:all -->
 
 ## React
 
@@ -4877,6 +4965,8 @@ catch { queryClient.setQueryData(["projects"], previous); }
 
 Перед интервью проговорите вслух по 10–15 минут каждый сценарий: requirements → API/data model → happy path → failure/retry → scale/observability → trade-offs.
 
+Before the interview, talk through each scenario out loud for 10–15 minutes: requirements → API/data model → happy path → failure/retry → scale/observability → trade-offs.
+
 ---
 ### 1. Создать AI-видео из текста
 
@@ -4926,3 +5016,11 @@ catch { queryClient.setQueryData(["projects"], previous); }
 - Для любой mutation проговорите validation, authorization, idempotency, error UX и observability.
 - Для AI отвечайте не только про модель: где данные, как устроены evaluation, безопасность, latency/cost и human fallback.
 - Не выдумывайте опыт. Честный ответ «I have not operated this in production, but I would validate it by…» сильнее уверенного неверного.
+
+<!-- lang:all -->
+
+- Start with the simple solution and name the condition under which you would make it more complex.
+- Separate fact from assumption: “At this scale I would start with…; if we observe…, I would add…”.
+- For any mutation, talk through validation, authorization, idempotency, error UX, and observability.
+- For AI, answer beyond the model itself: where the data lives, how evaluation works, safety, latency/cost, and the human fallback.
+- Do not invent experience. An honest “I have not operated this in production, but I would validate it by…” beats a confident wrong answer.

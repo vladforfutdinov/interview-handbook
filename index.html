@@ -16,6 +16,12 @@
       h1 { margin: 0; font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.08; letter-spacing: -.045em; }
       .handbook-version { display: inline-flex; align-items: center; gap: .4rem; margin: .75rem 0 1.75rem; padding: .3rem .65rem; border: 1px solid #b2ccff; border-radius: 999px; background: #eff4ff; color: #175cd3; font-size: .85rem; font-weight: 650; }
       .handbook-version code { background: transparent; padding: 0; color: inherit; }
+      #lang-switch { display: inline-flex; margin-top: 1.25rem; border: 1px solid #475467; border-radius: 999px; overflow: hidden; }
+      #lang-switch button { padding: .4rem .9rem; border: 0; background: transparent; color: #d0d5dd; font: inherit; font-size: .85rem; font-weight: 650; cursor: pointer; }
+      #lang-switch button[aria-pressed="true"] { background: #175cd3; color: white; }
+      body[data-mode="eng"] .lang-rus { display: none; }
+      body[data-mode="rus"] .lang-eng, body[data-mode="rus"] .lang-eng-only { display: none; }
+      body[data-mode="both"] .lang-eng-only { display: none; }
       main { background: white; margin-top: 2rem; margin-bottom: 4rem; padding: clamp(1.25rem, 4vw, 4rem); border-radius: 18px; box-shadow: 0 12px 30px rgb(16 24 40 / 8%); }
       h2 { margin-top: 3.5rem; padding-top: .6rem; border-top: 1px solid #e4e7ec; font-size: 1.7rem; }
       h3 { margin-top: 2.4rem; font-size: 1.3rem; }
@@ -61,6 +67,11 @@
       <div>
         <h1>Interview handbook</h1>
         <p>Senior Fullstack Engineer — bilingual technical interview preparation.</p>
+        <div id="lang-switch" role="group" aria-label="Язык / Language">
+          <button type="button" data-mode="rus" aria-pressed="false">RU</button>
+          <button type="button" data-mode="both" aria-pressed="false">RU+EN</button>
+          <button type="button" data-mode="eng" aria-pressed="false">EN</button>
+        </div>
       </div>
     </header>
     <aside id="toc" aria-label="Table of contents" hidden>
@@ -82,6 +93,47 @@
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
     <script>
       if (window.mermaid) mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral" });
+      const languageModeKey = "handbook-language-mode";
+      const languageModes = ["rus", "both", "eng"];
+
+      function applyLanguageMode(mode, { rebuild = true } = {}) {
+        if (!languageModes.includes(mode)) mode = "both";
+        document.body.dataset.mode = mode;
+        document.documentElement.lang = mode === "eng" ? "en" : "ru";
+        document.querySelectorAll("#lang-switch button").forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+        });
+        try {
+          localStorage.setItem(languageModeKey, mode);
+        } catch {
+          // Storage may be disabled; the mode still applies for this visit.
+        }
+        if (rebuild) {
+          buildToc();
+          updateReadingProgress();
+        }
+      }
+
+      function classifyLanguages() {
+        const hasCyrillic = (text) => /[\u0400-\u04FF]/.test(text);
+        let region = "all";
+        [...document.getElementById("content").childNodes].forEach((node) => {
+          if (node.nodeType === Node.COMMENT_NODE) {
+            const marker = node.textContent.trim().match(/^lang:(rus|eng|all)$/);
+            if (marker) region = marker[1];
+            return;
+          }
+          if (node.nodeType !== Node.ELEMENT_NODE || node.classList.contains("handbook-version")) return;
+          if (region === "rus") {
+            node.classList.add("lang-rus");
+          } else if (region === "eng") {
+            node.classList.add("lang-eng-only");
+          } else if (["P", "UL", "OL", "BLOCKQUOTE"].includes(node.tagName)) {
+            node.classList.add(hasCyrillic(node.textContent) ? "lang-rus" : "lang-eng");
+          }
+        });
+      }
+
       const scrollPositionKey = `handbook-scroll:${location.pathname}`;
       const navigationType = performance.getEntriesByType("navigation")[0]?.type;
       let loadedHandbookVersion;
@@ -162,6 +214,7 @@
         const list = toc.querySelector("ol");
         const headings = [...document.querySelectorAll("#content h2, #content h3")];
         const usedIds = new Map();
+        const visibleHeadings = [];
 
         list.replaceChildren();
         tocObserver?.disconnect();
@@ -172,6 +225,10 @@
           usedIds.set(base, count + 1);
           heading.id = count ? `${base}-${count + 1}` : base;
 
+          // Headings hidden by the current language mode keep their ids but stay out of the TOC.
+          if (!heading.getClientRects().length) return;
+          visibleHeadings.push(heading);
+
           const item = document.createElement("li");
           const link = document.createElement("a");
           link.href = `#${heading.id}`;
@@ -181,7 +238,7 @@
           list.append(item);
         });
 
-        if (!headings.length) return;
+        if (!visibleHeadings.length) return;
         toc.hidden = false;
         mobileActions.hidden = false;
         if (!tocHandlersBound) {
@@ -214,7 +271,7 @@
           activeLink?.setAttribute("aria-current", "true");
           activeLink?.scrollIntoView({ block: "nearest" });
         }, { rootMargin: "-18% 0px -70%" });
-        headings.forEach((heading) => tocObserver.observe(heading));
+        visibleHeadings.forEach((heading) => tocObserver.observe(heading));
       }
 
       function removeInlineToc() {
@@ -222,8 +279,9 @@
           .find((element) => element.textContent.trim() === "Содержание");
         if (!heading) return;
         let node = heading;
-        while (node && (node === heading || node.tagName !== "H2")) {
-          const next = node.nextElementSibling;
+        // Stop at the next H2 or at a language region marker comment.
+        while (node && (node === heading || (node.nodeType !== Node.COMMENT_NODE && node.tagName !== "H2"))) {
+          const next = node.nextSibling;
           node.remove();
           node = next;
         }
@@ -260,7 +318,7 @@
         if (title) {
           const badge = document.createElement("p");
           badge.className = "handbook-version";
-          badge.textContent = `Версия ${version}`;
+          badge.textContent = version;
           title.after(badge);
         }
         document.getElementById("toc-version").textContent = version;
@@ -286,6 +344,7 @@
         removeInlineToc();
         makeTablesScrollable();
         await renderMermaidDiagrams();
+        classifyLanguages();
         if (window.hljs) {
           const aliases = { ts: "typescript", tsx: "typescript", yml: "yaml", dockerfile: "dockerfile", sh: "bash" };
           document.querySelectorAll("#content pre code").forEach((block) => {
@@ -331,6 +390,18 @@
         refreshHandbook().catch(() => {
           // Keep the update button visible so the reader can retry.
         });
+      });
+      (() => {
+        let savedMode;
+        try {
+          savedMode = localStorage.getItem(languageModeKey);
+        } catch {
+          // Storage may be disabled; fall back to the default mode.
+        }
+        applyLanguageMode(savedMode, { rebuild: false });
+      })();
+      document.querySelectorAll("#lang-switch button").forEach((button) => {
+        button.addEventListener("click", () => applyLanguageMode(button.dataset.mode));
       });
       setInterval(checkForUpdate, 60_000);
       document.addEventListener("visibilitychange", () => {
