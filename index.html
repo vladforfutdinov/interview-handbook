@@ -16,9 +16,12 @@
       h1 { margin: 0; font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.08; letter-spacing: -.045em; }
       .handbook-version { display: inline-flex; align-items: center; gap: .4rem; margin: .75rem 0 1.75rem; padding: .3rem .65rem; border: 1px solid #b2ccff; border-radius: 999px; background: #eff4ff; color: #175cd3; font-size: .85rem; font-weight: 650; }
       .handbook-version code { background: transparent; padding: 0; color: inherit; }
-      #lang-switch { display: inline-flex; margin-top: 1.25rem; border: 1px solid #475467; border-radius: 999px; overflow: hidden; }
-      #lang-switch button { padding: .4rem .9rem; border: 0; background: transparent; color: #d0d5dd; font: inherit; font-size: .85rem; font-weight: 650; cursor: pointer; }
-      #lang-switch button[aria-pressed="true"] { background: #175cd3; color: white; }
+      #language-controls { display: flex; flex-wrap: wrap; gap: .9rem 1.25rem; margin-top: 1.25rem; }
+      #language-controls fieldset { display: flex; gap: .35rem; margin: 0; padding: 0; border: 0; }
+      #language-controls legend { margin-bottom: .35rem; color: #d0d5dd; font-size: .75rem; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+      #language-controls label { display: inline-flex; align-items: center; gap: .3rem; color: #f2f4f7; font-size: .85rem; cursor: pointer; }
+      #language-controls input { accent-color: #2e90fa; }
+      #language-controls input:disabled + span { color: #98a2b3; cursor: not-allowed; }
       main { background: white; margin-top: 2rem; margin-bottom: 4rem; padding: clamp(1.25rem, 4vw, 4rem); border-radius: 18px; box-shadow: 0 12px 30px rgb(16 24 40 / 8%); }
       h2 { margin-top: 3.5rem; padding-top: .6rem; border-top: 1px solid #e4e7ec; font-size: 1.7rem; }
       h3 { margin-top: 2.4rem; font-size: 1.3rem; }
@@ -63,13 +66,20 @@
     <header>
       <div>
         <h1>Interview handbook</h1>
-        <p>Senior Fullstack Engineer — bilingual technical interview preparation.</p>
-        <div id="lang-switch" role="group" aria-label="Язык / Мова / Language">
-          <button type="button" data-mode="rus" aria-pressed="false">RU</button>
-          <button type="button" data-mode="ukr" aria-pressed="false">UA</button>
-          <button type="button" data-mode="rueng" aria-pressed="false">RU+EN</button>
-          <button type="button" data-mode="ukreng" aria-pressed="false">UA+EN</button>
-          <button type="button" data-mode="eng" aria-pressed="false">EN</button>
+        <p>Senior Fullstack Engineer — multilingual technical interview preparation.</p>
+        <div id="language-controls" aria-label="Язык / Мова / Language">
+          <fieldset id="base-language">
+            <legend>Base language</legend>
+            <label><input type="radio" name="base-language" value="ukr" /><span>UA</span></label>
+            <label><input type="radio" name="base-language" value="eng" /><span>EN</span></label>
+            <label><input type="radio" name="base-language" value="rus" /><span>RU</span></label>
+          </fieldset>
+          <fieldset id="additional-languages">
+            <legend>Also show</legend>
+            <label><input type="checkbox" value="ukr" /><span>UA</span></label>
+            <label><input type="checkbox" value="eng" /><span>EN</span></label>
+            <label><input type="checkbox" value="rus" /><span>RU</span></label>
+          </fieldset>
         </div>
       </div>
     </header>
@@ -92,24 +102,47 @@
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
     <script>
       if (window.mermaid) mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "neutral" });
-      const languageModeKey = "handbook-language-mode";
-      const languageModes = ["eng", "ukr", "rus", "ukreng", "rueng"];
-      const sourceLanguages = new Set(["rus", "ukr", "eng"]);
-      let activeLanguageMode = "rueng";
+      const languageSelectionKey = "handbook-language-selection";
+      const legacyLanguageModeKey = "handbook-language-mode";
+      const languageOrder = ["ukr", "eng", "rus"];
+      const sourceLanguages = new Set(languageOrder);
+      let activeLanguageSelection = { base: "rus", additional: ["eng"] };
 
-      function applyLanguageMode(mode) {
-        if (!languageModes.includes(mode)) mode = "rueng";
-        activeLanguageMode = mode;
-        document.body.dataset.mode = mode;
-        const isUkrainian = mode === "ukr" || mode === "ukreng";
-        document.documentElement.lang = mode === "eng" ? "en" : isUkrainian ? "uk" : "ru";
+      function normalizeLanguageSelection(selection) {
+        const base = sourceLanguages.has(selection?.base) ? selection.base : "rus";
+        const additional = [...new Set(selection?.additional ?? [])]
+          .filter((language) => sourceLanguages.has(language) && language !== base)
+          .sort((left, right) => languageOrder.indexOf(left) - languageOrder.indexOf(right));
+        return { base, additional };
+      }
+
+      function legacySelection(mode) {
+        const selections = {
+          rus: { base: "rus", additional: [] },
+          ukr: { base: "ukr", additional: [] },
+          eng: { base: "eng", additional: [] },
+          rueng: { base: "rus", additional: ["eng"] },
+          ukreng: { base: "ukr", additional: ["eng"] },
+        };
+        return selections[mode];
+      }
+
+      function applyLanguageSelection(selection) {
+        activeLanguageSelection = normalizeLanguageSelection(selection);
+        const { base, additional } = activeLanguageSelection;
+        document.body.dataset.baseLanguage = base;
+        document.documentElement.lang = base === "eng" ? "en" : base === "ukr" ? "uk" : "ru";
         document.getElementById("toc-toggle").textContent =
-          mode === "eng" ? "Contents" : isUkrainian ? "Зміст" : "Содержание";
-        document.querySelectorAll("#lang-switch button").forEach((button) => {
-          button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+          base === "eng" ? "Contents" : base === "ukr" ? "Зміст" : "Содержание";
+        document.querySelectorAll("#base-language input").forEach((input) => {
+          input.checked = input.value === base;
+        });
+        document.querySelectorAll("#additional-languages input").forEach((input) => {
+          input.disabled = input.value === base;
+          input.checked = input.value !== base && additional.includes(input.value);
         });
         try {
-          localStorage.setItem(languageModeKey, mode);
+          localStorage.setItem(languageSelectionKey, JSON.stringify(activeLanguageSelection));
         } catch {
           // Storage may be disabled; the mode still applies for this visit.
         }
@@ -341,55 +374,52 @@
         return body.match(/```[\s\S]*?```/g) ?? [];
       }
 
-      function mergeTerm(nativeTerm, englishTerm) {
-        const native = splitTerm(nativeTerm);
-        const english = englishTerm ? splitTerm(englishTerm) : null;
-        const code = codeBlocks(native.body);
+      function mergeTerm(baseTerm, additionalTerms) {
+        const base = splitTerm(baseTerm);
+        const translations = additionalTerms.map(splitTerm);
+        const code = codeBlocks(base.body);
         return [
-          native.heading,
-          withoutCode(native.body),
+          base.heading,
+          withoutCode(base.body),
           ...code,
-          english && withoutCode(english.body),
+          ...translations.map((translation) => withoutCode(translation.body)),
         ].filter(Boolean).join("\n\n");
       }
 
-      function combineHandbooks(nativeMarkdown, englishMarkdown) {
-        const native = splitHandbook(nativeMarkdown);
-        const english = splitHandbook(englishMarkdown);
-        const englishSections = new Map(english.sections.map((section) => [section.title, section]));
-        const result = [native.intro.trim()];
+      function combineHandbooks(baseMarkdown, additionalMarkdowns) {
+        const base = splitHandbook(baseMarkdown);
+        const additional = additionalMarkdowns.map(splitHandbook);
+        const additionalSections = additional.map((handbook) =>
+          new Map(handbook.sections.map((section) => [section.title, section])),
+        );
+        const result = [base.intro.trim()];
 
-        native.sections.forEach((section) => {
-          const matchingSection = englishSections.get(section.title);
-          const englishTerms = new Map((matchingSection?.terms ?? []).map((term) => {
-            const parsed = splitTerm(term);
-            return [parsed.heading.slice(4), term];
-          }));
+        base.sections.forEach((section) => {
+          const additionalTerms = additionalSections.map((sections) => new Map(
+            (sections.get(section.title)?.terms ?? []).map((term) => [splitTerm(term).heading.slice(4), term]),
+          ));
           result.push(section.preamble.trim());
           section.terms.forEach((term) => {
             const key = splitTerm(term).heading.slice(4);
-            result.push(mergeTerm(term, englishTerms.get(key)));
+            result.push(mergeTerm(term, additionalTerms.map((terms) => terms.get(key)).filter(Boolean)));
           });
         });
         return result.filter(Boolean).join("\n\n");
       }
 
-      async function markdownForMode(mode, { fresh = false } = {}) {
-        if (mode === "rueng" || mode === "ukreng") {
-          const nativeLanguage = mode === "rueng" ? "rus" : "ukr";
-          const [native, english] = await Promise.all([
-            fetchSource(nativeLanguage, { fresh }),
-            fetchSource("eng", { fresh }),
-          ]);
-          return combineHandbooks(native, english);
-        }
-        return fetchSource(mode, { fresh });
+      async function markdownForSelection(selection, { fresh = false } = {}) {
+        const normalized = normalizeLanguageSelection(selection);
+        const handbooks = await Promise.all([
+          fetchSource(normalized.base, { fresh }),
+          ...normalized.additional.map((language) => fetchSource(language, { fresh })),
+        ]);
+        return normalized.additional.length ? combineHandbooks(handbooks[0], handbooks.slice(1)) : handbooks[0];
       }
 
       async function checkForUpdate() {
         if (!loadedHandbookVersion) return;
         try {
-          const markdown = await markdownForMode(activeLanguageMode, { fresh: true });
+          const markdown = await markdownForSelection(activeLanguageSelection, { fresh: true });
           const availableVersion = markdown.match(/data-version="([^"]+)"/)?.[1];
           if (availableVersion && availableVersion !== loadedHandbookVersion) {
             document.getElementById("refresh").hidden = false;
@@ -437,7 +467,7 @@
         const button = document.getElementById("refresh");
         button.disabled = true;
         try {
-          await renderHandbook(await markdownForMode(activeLanguageMode, { fresh: true }), { preservePosition: true });
+          await renderHandbook(await markdownForSelection(activeLanguageSelection, { fresh: true }), { preservePosition: true });
           button.hidden = true;
         } finally {
           button.disabled = false;
@@ -450,26 +480,45 @@
         });
       });
       (() => {
-        let savedMode;
+        let savedSelection;
         try {
-          savedMode = localStorage.getItem(languageModeKey);
+          const stored = localStorage.getItem(languageSelectionKey);
+          savedSelection = stored && JSON.parse(stored);
+          if (!savedSelection) savedSelection = legacySelection(localStorage.getItem(legacyLanguageModeKey));
         } catch {
           // Storage may be disabled; fall back to the default mode.
         }
-        applyLanguageMode(savedMode);
+        applyLanguageSelection(savedSelection);
       })();
-      document.querySelectorAll("#lang-switch button").forEach((button) => {
-        button.addEventListener("click", async () => {
-          const nextMode = button.dataset.mode;
-          if (nextMode === activeLanguageMode) return;
-          applyLanguageMode(nextMode);
-          try {
-            await renderHandbook(await markdownForMode(nextMode), { preservePosition: true });
-            document.getElementById("refresh").hidden = true;
-            checkForUpdate();
-          } catch (error) {
-            document.getElementById("status").textContent = `Unable to load handbook: ${error.message}`;
-          }
+
+      async function changeLanguageSelection(nextSelection) {
+        const next = normalizeLanguageSelection(nextSelection);
+        if (JSON.stringify(next) === JSON.stringify(activeLanguageSelection)) return;
+        applyLanguageSelection(next);
+        try {
+          await renderHandbook(await markdownForSelection(next), { preservePosition: true });
+          document.getElementById("refresh").hidden = true;
+          checkForUpdate();
+        } catch (error) {
+          document.getElementById("status").textContent = `Unable to load handbook: ${error.message}`;
+        }
+      }
+
+      document.querySelectorAll("#base-language input").forEach((input) => {
+        input.addEventListener("change", () => {
+          if (!input.checked) return;
+          changeLanguageSelection({
+            base: input.value,
+            additional: activeLanguageSelection.additional,
+          });
+        });
+      });
+      document.querySelectorAll("#additional-languages input").forEach((input) => {
+        input.addEventListener("change", () => {
+          const additional = new Set(activeLanguageSelection.additional);
+          if (input.checked) additional.add(input.value);
+          else additional.delete(input.value);
+          changeLanguageSelection({ base: activeLanguageSelection.base, additional: [...additional] });
         });
       });
       setInterval(checkForUpdate, 60_000);
@@ -477,7 +526,7 @@
         if (document.visibilityState === "visible") checkForUpdate();
       });
 
-      markdownForMode(activeLanguageMode)
+      markdownForSelection(activeLanguageSelection)
         .then(async (markdown) => {
           saveScrollPosition();
           await renderHandbook(markdown);
